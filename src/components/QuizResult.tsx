@@ -16,8 +16,8 @@ import {
   Sparkles,
   Languages,
 } from 'lucide-react';
-import { AttemptRecord, LanguageMode, OptionKey, Question } from '../types';
-import { CHAPTER_SHORT_NAMES, formatTime, questionById } from '../utils/quizHelper';
+import { AttemptRecord, KLevel, LanguageMode, OptionKey, Question } from '../types';
+import { CHAPTER_SHORT_NAMES, formatTime, K_LEVEL_INFO, questionById } from '../utils/quizHelper';
 
 interface QuizResultProps {
   attempt: AttemptRecord;
@@ -32,7 +32,15 @@ interface QuizResultProps {
 
 const OPTION_KEYS: OptionKey[] = ['a', 'b', 'c', 'd'];
 
-type FilterMode = 'all' | 'wrong' | 'unanswered' | 'correct' | 'flagged';
+type FilterMode =
+  | 'all'
+  | 'wrong'
+  | 'unanswered'
+  | 'correct'
+  | 'flagged'
+  | 'k1'
+  | 'k2'
+  | 'k3';
 
 export const QuizResult: React.FC<QuizResultProps> = ({
   attempt,
@@ -65,6 +73,24 @@ export const QuizResult: React.FC<QuizResultProps> = ({
 
   const unansweredCount = questions.filter((q) => !attempt.userAnswers[q.id]).length;
 
+  // K-Level breakdown
+  const kLevels: KLevel[] = ['K1', 'K2', 'K3'];
+  const kLevelStats = kLevels
+    .map((lvl) => {
+      const lvlQs = questions.filter((q) => q.kLevel === lvl);
+      const lvlCorrect = lvlQs.filter(
+        (q) => attempt.userAnswers[q.id] === q.correctAnswer
+      ).length;
+      return {
+        level: lvl,
+        info: K_LEVEL_INFO[lvl],
+        total: lvlQs.length,
+        correct: lvlCorrect,
+        pct: lvlQs.length > 0 ? Math.round((lvlCorrect / lvlQs.length) * 100) : 0,
+      };
+    })
+    .filter((s) => s.total > 0);
+
   // Chapter breakdown
   const chapterStats = [1, 2, 3, 4, 5, 6]
     .map((ch) => {
@@ -88,6 +114,9 @@ export const QuizResult: React.FC<QuizResultProps> = ({
     if (filter === 'unanswered') return !ans;
     if (filter === 'correct') return ans === q.correctAnswer;
     if (filter === 'flagged') return flaggedSet.has(q.id);
+    if (filter === 'k1') return q.kLevel === 'K1';
+    if (filter === 'k2') return q.kLevel === 'K2';
+    if (filter === 'k3') return q.kLevel === 'K3';
     return true;
   });
 
@@ -160,6 +189,79 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                 <div className="text-2xl font-bold text-slate-900 mt-1 font-mono">
                   {formatTime(attempt.durationSeconds)}
                 </div>
+              </div>
+            </div>
+
+            {/* Cognitive Level (K-Level) Assessment */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <span>Phân tích theo Cấp độ nhận thức (K-Levels CTFL v4.0)</span>
+                </h3>
+                <span className="text-xs text-slate-500 font-medium hidden sm:inline">
+                  Tỷ trọng chuẩn: K1 (20%) • K2 (60%) • K3 (20%)
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                {kLevelStats.map((st) => {
+                  const isPassed = st.pct >= 65;
+                  return (
+                    <div
+                      key={st.level}
+                      className="p-4 rounded-2xl border border-slate-200 bg-white shadow-2xs space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`px-2 py-0.5 rounded-md font-bold text-xs border ${st.info.badgeBg} ${st.info.badgeText} ${st.info.badgeBorder}`}
+                            >
+                              {st.level}
+                            </span>
+                            <span className="font-bold text-sm text-slate-900">
+                              {st.info.vietnameseName}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                            {st.info.description}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xl font-black shrink-0 ${
+                            isPassed ? 'text-emerald-700' : 'text-rose-600'
+                          }`}
+                        >
+                          {st.pct}%
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+                          <span>
+                            Đúng {st.correct} / {st.total} câu
+                          </span>
+                          <span
+                            className={
+                              isPassed
+                                ? 'text-emerald-700 font-bold'
+                                : 'text-amber-700 font-bold'
+                            }
+                          >
+                            {isPassed ? 'Đạt chuẩn (≥65%)' : 'Cần củng cố thêm'}
+                          </span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              isPassed ? 'bg-emerald-500' : 'bg-amber-500'
+                            }`}
+                            style={{ width: `${st.pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -271,6 +373,18 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                 { id: 'unanswered', label: `Chưa làm (${unansweredCount})` },
                 { id: 'correct', label: `Câu đúng (${attempt.correctCount})` },
                 { id: 'flagged', label: `Gắn cờ (${flaggedSet.size})` },
+                {
+                  id: 'k1',
+                  label: `K1 - Nhớ (${questions.filter((q) => q.kLevel === 'K1').length})`,
+                },
+                {
+                  id: 'k2',
+                  label: `K2 - Hiểu (${questions.filter((q) => q.kLevel === 'K2').length})`,
+                },
+                {
+                  id: 'k3',
+                  label: `K3 - Vận dụng (${questions.filter((q) => q.kLevel === 'K3').length})`,
+                },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -315,6 +429,14 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                     <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-medium text-xs">
                       {CHAPTER_SHORT_NAMES[q.chapter]}
                     </span>
+                    {q.kLevel && K_LEVEL_INFO[q.kLevel] && (
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-lg font-bold text-xs border ${K_LEVEL_INFO[q.kLevel].badgeBg} ${K_LEVEL_INFO[q.kLevel].badgeText} ${K_LEVEL_INFO[q.kLevel].badgeBorder}`}
+                        title={K_LEVEL_INFO[q.kLevel].description}
+                      >
+                        {K_LEVEL_INFO[q.kLevel].shortName} • {K_LEVEL_INFO[q.kLevel].vietnameseName}
+                      </span>
+                    )}
                     {isCorrect ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Đúng

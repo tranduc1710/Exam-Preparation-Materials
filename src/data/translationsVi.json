@@ -1521,21 +1521,21 @@
     }
   },
   "e5_q9": {
-    "questionVi": "Một công ty phần mềm áp dụng mô hình chữ V (V-model) làm vòng đời phát triển. Phương án nào sau đây chứa vai trò của một KIỂM THỬ VIÊN (TESTER) trong công ty này? (A) Review các kế hoạch kiểm thử (test plans) và thiết lập môi trường kiểm thử (test environments); (B) Đưa ra các số đo (metrics) phù hợp để đo lường tiến độ kiểm thử; (C) Điều phối chiến lược kiểm thử (test strategy) với các quản lý dự án (project managers); (D) Quyết định những gì nên được tự động hóa, ở mức độ nào và bằng cách nào.",
+    "questionVi": "Một công ty phần mềm dùng mô hình chữ V (V-model) làm vòng đời phát triển. Lựa chọn nào chứa vai trò của KIỂM THỬ VIÊN (tester) trong công ty này?",
     "optionsVi": {
-      "a": "A",
-      "b": "B",
-      "c": "C",
-      "d": "D"
+      "a": "Rà soát kế hoạch kiểm thử (test plan) và thiết lập môi trường kiểm thử",
+      "b": "Đưa ra số đo phù hợp để đo tiến độ kiểm thử",
+      "c": "Điều phối chiến lược kiểm thử (test strategy) với quản lý dự án",
+      "d": "Quyết định cái gì cần tự động hóa, ở mức nào và bằng cách nào"
     }
   },
   "e5_q10": {
-    "questionVi": "Lỗi nào sau đây KHÔNG THỂ được tìm thấy bằng các kỹ thuật kiểm thử dựa trên cấu trúc (structure-based / white-box)? (A) Rò rỉ bộ nhớ (Memory is leaking); (B) Các cấu trúc dữ liệu được sử dụng trước khi khởi tạo; (C) Các tính năng chỉ mới được hiện thực một phần; (D) Chia cho 0 (Division by zero).",
+    "questionVi": "Lỗi nào sau đây KHÔNG THỂ tìm thấy bằng kỹ thuật kiểm thử dựa trên cấu trúc (hộp trắng – white-box)?",
     "optionsVi": {
-      "a": "A",
-      "b": "B",
-      "c": "C",
-      "d": "D"
+      "a": "Rò rỉ bộ nhớ",
+      "b": "Cấu trúc dữ liệu được dùng trước khi khởi tạo",
+      "c": "Tính năng chỉ được hiện thực một phần",
+      "d": "Chia cho 0"
     }
   },
   "e5_q11": {
@@ -1638,12 +1638,12 @@
     }
   },
   "e5_q22": {
-    "questionVi": "Phát biểu nào về walkthrough là KHÔNG đúng? (A) Việc chuẩn bị trước cuộc họp, lập tài liệu và phân phối kết quả là tùy chọn đối với walkthrough; (B) Một buổi walkthrough được dẫn dắt bởi người điều phối (moderator) và bắt buộc phải chuẩn bị trước cuộc họp cũng như theo dõi sau cuộc họp (post-meeting follow-up); (C) Một buổi walkthrough có thể diễn ra dưới hình thức các kịch bản (scenarios), chạy thử (dry runs) và sự tham gia của nhóm đồng nghiệp (peer-group); (D) Mục đích của walkthrough là thiết lập sự hiểu biết chung về một tài liệu và tìm các defect có thể có trong đó.",
+    "questionVi": "Phát biểu nào về rà soát có hướng dẫn (walkthrough) là KHÔNG đúng?",
     "optionsVi": {
-      "a": "A",
-      "b": "B",
-      "c": "C",
-      "d": "D"
+      "a": "Chuẩn bị trước cuộc họp, lập tài liệu và phân phối kết quả là tùy chọn với rà soát có hướng dẫn",
+      "b": "Rà soát có hướng dẫn do điều phối viên (moderator) dẫn dắt, đòi hỏi chuẩn bị trước cuộc họp và theo dõi sau cuộc họp",
+      "c": "Rà soát có hướng dẫn có thể ở dạng kịch bản, chạy thử “khan” (dry run) và có sự tham gia của nhóm đồng nghiệp",
+      "d": "Mục đích của rà soát có hướng dẫn là tạo hiểu biết chung về tài liệu và tìm các lỗi có thể có trong đó"
     }
   },
   "e5_q23": {

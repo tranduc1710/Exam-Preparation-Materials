@@ -23,6 +23,7 @@ import {
 import {
   AttemptRecord,
   Exam,
+  KLevel,
   LanguageMode,
   OptionKey,
   Question,
@@ -37,6 +38,8 @@ import {
   examsDataset,
   formatTime,
   generateOfficialMock40,
+  generateFresherMock40,
+  K_LEVEL_INFO,
   ISTQB_CHAPTER_WEIGHTS,
   loadAttempts,
   loadBookmarks,
@@ -124,12 +127,26 @@ export function App() {
     const qs = generateOfficialMock40();
     setViewingAttempt(null);
     setActiveQuiz({
-      title: 'Đề thi thử ISTQB CTFL Ngẫu Nhiên (Chuẩn 40 câu)',
-      subtitle: 'Phân bổ đúng tỷ lệ 6 chương của ISTQB Foundation Level',
+      title: 'Đề Thi Thử ISTQB CTFL v4.0 (Chuẩn K1-K3 & 6 Chương)',
+      subtitle: 'Chuẩn quốc tế 40 câu: K1 (8 câu) • K2 (24 câu) • K3 (8 câu) phân bổ chuẩn 6 chương',
       mode: modeToUse,
       durationMinutes,
       questions: qs,
       sourceType: 'mock40',
+    });
+  };
+
+  const startFresherMock40 = (forcedMode?: QuizMode) => {
+    const modeToUse = forcedMode || quizMode;
+    const qs = generateFresherMock40();
+    setViewingAttempt(null);
+    setActiveQuiz({
+      title: 'Đề Đánh Giá Tester Fresher/Junior (Chuẩn K-Level & 6 Chương)',
+      subtitle: '40 câu phân loại năng lực: K1 (8 câu) • K2 (23 câu) • K3 (9 câu vận dụng thực tế Ch.4 & Ch.5)',
+      mode: modeToUse,
+      durationMinutes,
+      questions: qs,
+      sourceType: 'fresher40',
     });
   };
 
@@ -159,6 +176,21 @@ export function App() {
       durationMinutes: forcedMode === 'exam' ? durationMinutes : 0,
       questions: qs,
       sourceType: 'v4',
+    });
+  };
+
+  const startKLevelPractice = (level: KLevel, forcedMode: QuizMode = 'practice') => {
+    const pool = allQuestions.filter((q) => q.kLevel === level);
+    const qs = shuffleQuestions ? shuffleArray(pool) : pool;
+    const info = K_LEVEL_INFO[level];
+    setViewingAttempt(null);
+    setActiveQuiz({
+      title: `Chuyên đề ${info.label}`,
+      subtitle: `${pool.length} câu hỏi • ${info.description}`,
+      mode: forcedMode,
+      durationMinutes: forcedMode === 'exam' ? durationMinutes : 0,
+      questions: qs,
+      sourceType: 'chapter',
     });
   };
 
@@ -530,41 +562,79 @@ export function App() {
           </section>
         )}
 
-        {/* TAB 1: 10 EXAMS + RANDOM MOCK 40 */}
+        {/* TAB 1: 10 EXAMS + RANDOM MOCK 40 + FRESHER ASSESSMENT */}
         {activeTab === 'exams' && (
           <div className="space-y-8">
-            {/* Random Official 40-Question Generator Banner */}
-            <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="space-y-1.5">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-bold">
-                  <Sparkles className="w-3.5 h-3.5" /> Đề thi mô phỏng chuẩn cấu trúc ISTQB
+            {/* Simulation & Assessment Banners */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {/* Card 1: Official ISTQB CTFL v4.0 Mock */}
+              <div className="bg-gradient-to-br from-indigo-700 via-indigo-800 to-slate-900 rounded-3xl p-6 text-white shadow-sm flex flex-col justify-between space-y-4 border border-indigo-500/20">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-xs text-xs font-bold">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Chuẩn Quốc Tế ISTQB CTFL v4.0</span>
+                  </div>
+                  <h3 className="text-xl font-extrabold">
+                    Đề Thi Thử Mô Phỏng Chuẩn Cấu Trúc
+                  </h3>
+                  <p className="text-indigo-100 text-xs sm:text-sm leading-relaxed">
+                    Tự động rút 40 câu hỏi cân bằng đồng thời cả <strong>6 chương</strong> (8/6/4/11/9/2) và <strong>3 cấp độ nhận thức</strong>: K1 Nhớ (8 câu), K2 Hiểu (24 câu), K3 Áp dụng (8 câu).
+                  </p>
                 </div>
-                <h3 className="text-xl font-extrabold">
-                  Sinh Đề Thi Thử 40 Câu Ngẫu Nhiên Theo Tỷ Lệ Chương Chuẩn
-                </h3>
-                <p className="text-indigo-100 text-xs sm:text-sm max-w-2xl">
-                  Tự động rút 40 câu hỏi từ ngân hàng 344 câu theo đúng phân bổ đề thi thật của ISTQB:
-                  Chương 1 (8 câu), Chương 2 (6 câu), Chương 3 (4 câu), Chương 4 (11 câu), Chương 5 (9 câu), Chương 6 (2 câu).
-                </p>
+
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => startRandomMock40('exam')}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-xs sm:text-sm shadow-xs transition cursor-pointer"
+                  >
+                    <Play className="w-4 h-4 fill-indigo-700" />
+                    <span>Thi thử 40 câu ({durationMinutes || '∞'} phút)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => startRandomMock40('practice')}
+                    className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-semibold text-xs sm:text-sm transition cursor-pointer"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span>Luyện tập</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => startRandomMock40('exam')}
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-sm shadow-xs transition cursor-pointer"
-                >
-                  <Play className="w-4 h-4 fill-indigo-700" />
-                  <span>Thi thử 40 câu ({durationMinutes || '∞'} phút)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => startRandomMock40('practice')}
-                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-indigo-500/40 hover:bg-indigo-500/60 border border-white/25 text-white font-semibold text-sm transition cursor-pointer"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  <span>Luyện tập 40 câu</span>
-                </button>
+              {/* Card 2: Fresher / Junior Assessment Mock */}
+              <div className="bg-gradient-to-br from-emerald-700 via-teal-800 to-slate-900 rounded-3xl p-6 text-white shadow-sm flex flex-col justify-between space-y-4 border border-emerald-500/20">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-xs text-xs font-bold">
+                    <GraduationCap className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Đánh Giá Năng Lực Fresher / Junior</span>
+                  </div>
+                  <h3 className="text-xl font-extrabold">
+                    Bộ Đề Đánh Giá Toàn Diện Fresher
+                  </h3>
+                  <p className="text-emerald-100 text-xs sm:text-sm leading-relaxed">
+                    Khung đề chuẩn hóa: K1 (8 câu lý thuyết), K2 (23 câu phân tích tình huống) và <strong>K3 (9 câu vận dụng thực tế)</strong> tập trung sâu vào kỹ thuật thiết kế ca kiểm thử Chương 4 & quản lý Chương 5.
+                  </p>
+                </div>
+
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => startFresherMock40('exam')}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-emerald-950 font-bold text-xs sm:text-sm shadow-xs transition cursor-pointer"
+                  >
+                    <Play className="w-4 h-4 fill-emerald-950" />
+                    <span>Đánh giá Fresher ({durationMinutes || '∞'} phút)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => startFresherMock40('practice')}
+                    className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-semibold text-xs sm:text-sm transition cursor-pointer"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span>Luyện tập Fresher</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -797,6 +867,67 @@ export function App() {
                     Thi tính giờ
                   </button>
                 </div>
+              </div>
+            </div>
+
+            {/* K-Level Specialized Practice Decks */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span>Luyện Tập Chuyên Sâu Theo Cấp Độ Nhận Thức (K-Levels CTFL v4.0)</span>
+                </h2>
+                <span className="text-xs text-slate-500">
+                  Phân loại chuẩn hóa theo mục tiêu học tập của ISTQB
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {(['K1', 'K2', 'K3'] as KLevel[]).map((lvl) => {
+                  const info = K_LEVEL_INFO[lvl];
+                  const pool = allQuestions.filter((q) => q.kLevel === lvl);
+                  return (
+                    <div
+                      key={lvl}
+                      className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span
+                            className={`px-2.5 py-1 rounded-lg font-bold text-xs border ${info.badgeBg} ${info.badgeText} ${info.badgeBorder}`}
+                          >
+                            {lvl} • {info.vietnameseName}
+                          </span>
+                          <span className="text-xs font-semibold text-slate-500">
+                            {pool.length} câu hỏi
+                          </span>
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 leading-snug">
+                          {info.label}
+                        </h3>
+                        <p className="text-xs text-slate-500 leading-relaxed">
+                          {info.description}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => startKLevelPractice(lvl, 'practice')}
+                          className="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm transition cursor-pointer"
+                        >
+                          Luyện tập ({pool.length} câu)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => startKLevelPractice(lvl, 'exam')}
+                          className="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm transition cursor-pointer"
+                        >
+                          Thi thử
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

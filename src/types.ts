@@ -2,6 +2,8 @@ export type OptionKey = 'a' | 'b' | 'c' | 'd';
 
 export type LanguageMode = 'en' | 'vi' | 'bilingual';
 
+export type KLevel = 'K1' | 'K2' | 'K3';
+
 export interface Question {
   id: string;
   examId: number;
@@ -11,6 +13,7 @@ export interface Question {
   originalLabel: string;
   isSupplementary: boolean;
   isV4: boolean;
+  kLevel?: KLevel;
   question: string;
   questionVi?: string;
   images: string[];
@@ -73,7 +76,7 @@ export interface QuizConfig {
   mode: QuizMode;
   durationMinutes: number; // 60 | 75 | 90 | 0 (untimed)
   questions: Question[];
-  sourceType: 'exam' | 'mock40' | 'chapter' | 'wrong' | 'bookmarked' | 'v4';
+  sourceType: 'exam' | 'mock40' | 'fresher40' | 'chapter' | 'wrong' | 'bookmarked' | 'v4';
   examId?: number;
 }
 

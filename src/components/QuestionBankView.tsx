@@ -10,8 +10,8 @@ import {
   X,
   Languages,
 } from 'lucide-react';
-import { LanguageMode, OptionKey, Question } from '../types';
-import { allQuestions, CHAPTER_SHORT_NAMES, examsDataset } from '../utils/quizHelper';
+import { KLevel, LanguageMode, OptionKey, Question } from '../types';
+import { allQuestions, CHAPTER_SHORT_NAMES, examsDataset, K_LEVEL_INFO } from '../utils/quizHelper';
 
 interface QuestionBankViewProps {
   languageMode: LanguageMode;
@@ -33,6 +33,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedExam, setSelectedExam] = useState<number | 'all'>('all');
   const [selectedChapter, setSelectedChapter] = useState<number | 'all'>('all');
+  const [selectedKLevel, setSelectedKLevel] = useState<KLevel | 'all'>('all');
   const [specialFilter, setSpecialFilter] = useState<'all' | 'v4' | 'bookmarked' | 'wrong'>(
     'all'
   );
@@ -45,6 +46,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
     return allQuestions.filter((q) => {
       if (selectedExam !== 'all' && q.examId !== selectedExam) return false;
       if (selectedChapter !== 'all' && q.chapter !== selectedChapter) return false;
+      if (selectedKLevel !== 'all' && q.kLevel !== selectedKLevel) return false;
       if (specialFilter === 'v4' && !q.isV4) return false;
       if (specialFilter === 'bookmarked' && !bookmarks.includes(q.id)) return false;
       if (specialFilter === 'wrong' && !wrongIds.includes(q.id)) return false;
@@ -59,7 +61,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
       }
       return true;
     });
-  }, [searchQuery, selectedExam, selectedChapter, specialFilter, bookmarks, wrongIds]);
+  }, [searchQuery, selectedExam, selectedChapter, selectedKLevel, specialFilter, bookmarks, wrongIds]);
 
   const toggleRevealOne = (id: string) => {
     setRevealedIds((prev) => {
@@ -76,7 +78,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           {/* Search Input */}
-          <div className="md:col-span-5 relative">
+          <div className="md:col-span-4 relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -106,7 +108,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
           </div>
 
           {/* Chapter Select */}
-          <div className="md:col-span-4">
+          <div className="md:col-span-3">
             <select
               value={selectedChapter}
               onChange={(e) =>
@@ -120,6 +122,22 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                   {CHAPTER_SHORT_NAMES[ch.chapter]} ({ch.questionCount} câu)
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* K-Level Select */}
+          <div className="md:col-span-2">
+            <select
+              value={selectedKLevel}
+              onChange={(e) =>
+                setSelectedKLevel(e.target.value as KLevel | 'all')
+              }
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="all">Tất cả K-Level</option>
+              <option value="K1">K1 – Nhớ (70 câu)</option>
+              <option value="K2">K2 – Hiểu (201 câu)</option>
+              <option value="K3">K3 – Vận dụng (73 câu)</option>
             </select>
           </div>
         </div>
@@ -217,6 +235,14 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                     <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-medium text-xs">
                       {CHAPTER_SHORT_NAMES[q.chapter]}
                     </span>
+                    {q.kLevel && K_LEVEL_INFO[q.kLevel] && (
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-lg font-bold text-xs border ${K_LEVEL_INFO[q.kLevel].badgeBg} ${K_LEVEL_INFO[q.kLevel].badgeText} ${K_LEVEL_INFO[q.kLevel].badgeBorder}`}
+                        title={K_LEVEL_INFO[q.kLevel].description}
+                      >
+                        {K_LEVEL_INFO[q.kLevel].shortName} • {K_LEVEL_INFO[q.kLevel].vietnameseName}
+                      </span>
+                    )}
                     {q.isV4 && (
                       <span className="px-2.5 py-1 rounded-lg bg-violet-50 text-violet-700 border border-violet-200 font-semibold text-xs">
                         CTFL v4.0

@@ -20,7 +20,7 @@ import {
   Languages,
 } from 'lucide-react';
 import { LanguageMode, OptionKey, Question, QuizConfig } from '../types';
-import { CHAPTER_SHORT_NAMES, formatTime } from '../utils/quizHelper';
+import { CHAPTER_SHORT_NAMES, formatTime, K_LEVEL_INFO } from '../utils/quizHelper';
 
 interface QuizRunnerProps {
   config: QuizConfig;
@@ -289,6 +289,14 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                   <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-medium text-xs">
                     {CHAPTER_SHORT_NAMES[currentQ.chapter] || `Chương ${currentQ.chapter}`}
                   </span>
+                  {currentQ.kLevel && K_LEVEL_INFO[currentQ.kLevel] && (
+                    <span
+                      className={`inline-flex items-center px-2.5 py-1 rounded-lg font-bold text-xs border ${K_LEVEL_INFO[currentQ.kLevel].badgeBg} ${K_LEVEL_INFO[currentQ.kLevel].badgeText} ${K_LEVEL_INFO[currentQ.kLevel].badgeBorder}`}
+                      title={K_LEVEL_INFO[currentQ.kLevel].description}
+                    >
+                      {K_LEVEL_INFO[currentQ.kLevel].shortName} • {K_LEVEL_INFO[currentQ.kLevel].vietnameseName}
+                    </span>
+                  )}
                   {currentQ.isV4 && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-violet-50 text-violet-700 border border-violet-200 font-semibold text-xs">
                       CTFL v4.0
