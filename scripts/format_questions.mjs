@@ -71,44 +71,56 @@ Which of the following properly classifies these outcomes as project and product
 
   // Exam 5 Câu 12
   e5_q9: {
-    vi: `Một công ty phần mềm dùng mô hình chữ V (V-model) làm vòng đời phát triển. Lựa chọn nào chứa vai trò của KIỂM THỬ VIÊN (tester) trong công ty này?
-(A) Rà soát kế hoạch kiểm thử (test plan) và thiết lập môi trường kiểm thử;
-(B) Đưa ra số đo phù hợp để đo tiến độ kiểm thử;
-(C) Điều phối chiến lược kiểm thử (test strategy) với quản lý dự án;
-(D) Quyết định cái gì cần tự động hóa, ở mức nào và bằng cách nào.`,
-    en: `A software company adopts the V-model as their development lifecycle. Which of the following contains roles of a TESTER in this company?
-(A) Review test plans and set up test environments;
-(B) Introduce suitable metrics to measure the testing progress;
-(C) Coordinate the test strategy with the project managers;
-(D) Decide what should be automated, to what degree, and how.`
+    vi: `Một công ty phần mềm dùng mô hình chữ V (V-model) làm vòng đời phát triển. Lựa chọn nào chứa vai trò của KIỂM THỬ VIÊN (tester) trong công ty này?`,
+    en: `A software company adopts the V-model as their development lifecycle. Which of the following contains roles of a TESTER in this company?`,
+    options: {
+      a: 'Review test plans and set up test environments',
+      b: 'Introduce suitable metrics to measure the testing progress',
+      c: 'Coordinate the test strategy with the project managers',
+      d: 'Decide what should be automated, to what degree, and how'
+    },
+    optionsVi: {
+      a: 'Rà soát kế hoạch kiểm thử (test plan) và thiết lập môi trường kiểm thử',
+      b: 'Đưa ra số đo phù hợp để đo tiến độ kiểm thử',
+      c: 'Điều phối chiến lược kiểm thử (test strategy) với quản lý dự án',
+      d: 'Quyết định cái gì cần tự động hóa, ở mức nào và bằng cách nào'
+    }
   },
 
   // Exam 5 Câu 13
   e5_q10: {
-    vi: `Lỗi nào sau đây KHÔNG THỂ tìm thấy bằng kỹ thuật kiểm thử dựa trên cấu trúc (hộp trắng – white-box)?
-(A) Rò rỉ bộ nhớ;
-(B) Cấu trúc dữ liệu được dùng trước khi khởi tạo;
-(C) Tính năng chỉ được hiện thực một phần;
-(D) Chia cho 0.`,
-    en: `Which of the following errors CANNOT be found with structure-based (white-box) testing techniques?
-(A) Memory is leaking;
-(B) Data structures that are used before initialization;
-(C) Features that are only partially implemented;
-(D) Division by zero.`
+    vi: `Lỗi nào sau đây KHÔNG THỂ tìm thấy bằng kỹ thuật kiểm thử dựa trên cấu trúc (hộp trắng – white-box)?`,
+    en: `Which of the following errors CANNOT be found with structure-based (white-box) testing techniques?`,
+    options: {
+      a: 'Memory is leaking',
+      b: 'Data structures that are used before initialization',
+      c: 'Features that are only partially implemented',
+      d: 'Division by zero'
+    },
+    optionsVi: {
+      a: 'Rò rỉ bộ nhớ',
+      b: 'Cấu trúc dữ liệu được dùng trước khi khởi tạo',
+      c: 'Tính năng chỉ được hiện thực một phần',
+      d: 'Chia cho 0'
+    }
   },
 
   // Exam 5 Câu 30
   e5_q22: {
-    vi: `Phát biểu nào về rà soát có hướng dẫn (walkthrough) là KHÔNG đúng?
-(A) Chuẩn bị trước cuộc họp, lập tài liệu và phân phối kết quả là tùy chọn với rà soát có hướng dẫn;
-(B) Rà soát có hướng dẫn do điều phối viên (moderator) dẫn dắt, đòi hỏi chuẩn bị trước cuộc họp và theo dõi sau cuộc họp;
-(C) Rà soát có hướng dẫn có thể ở dạng kịch bản, chạy thử “khan” (dry run) và có sự tham gia của nhóm đồng nghiệp;
-(D) Mục đích của rà soát có hướng dẫn là tạo hiểu biết chung về tài liệu và tìm các lỗi có thể có trong đó.`,
-    en: `Which of the statements about walkthroughs is NOT true?
-(A) Pre-meeting preparation, documentation and distribution of results are optional for a walkthrough;
-(B) A walkthrough is led by a moderator and requires pre-meeting preparation and post-meeting follow-up;
-(C) A walkthrough may take the form of scenarios, dry runs and peer-group participation;
-(D) The purpose of a walkthrough is to establish a common understanding of a document and to find possible defects in it.`
+    vi: `Phát biểu nào về rà soát có hướng dẫn (walkthrough) là KHÔNG đúng?`,
+    en: `Which of the statements about walkthroughs is NOT true?`,
+    options: {
+      a: 'Pre-meeting preparation, documentation and distribution of results are optional for a walkthrough',
+      b: 'A walkthrough is led by a moderator and requires pre-meeting preparation and post-meeting follow-up',
+      c: 'A walkthrough may take the form of scenarios, dry runs and peer-group participation',
+      d: 'The purpose of a walkthrough is to establish a common understanding of a document and to find possible defects in it'
+    },
+    optionsVi: {
+      a: 'Chuẩn bị trước cuộc họp, lập tài liệu và phân phối kết quả là tùy chọn với rà soát có hướng dẫn',
+      b: 'Rà soát có hướng dẫn do điều phối viên (moderator) dẫn dắt, đòi hỏi chuẩn bị trước cuộc họp và theo dõi sau cuộc họp',
+      c: 'Rà soát có hướng dẫn có thể ở dạng kịch bản, chạy thử “khan” (dry run) và có sự tham gia của nhóm đồng nghiệp',
+      d: 'Mục đích của rà soát có hướng dẫn là tạo hiểu biết chung về tài liệu và tìm các lỗi có thể có trong đó'
+    }
   },
 
   // Exam 5 Câu 32
@@ -520,6 +532,18 @@ export function applyFormatting() {
         }
         if (patch.en) {
           q.question = patch.en;
+        }
+        if (patch.options) {
+          q.options = { ...q.options, ...patch.options };
+        }
+        if (patch.optionsVi) {
+          q.optionsVi = { ...q.optionsVi, ...patch.optionsVi };
+          if (translationsVi[q.id]) {
+            translationsVi[q.id].optionsVi = {
+              ...(translationsVi[q.id].optionsVi || {}),
+              ...patch.optionsVi,
+            };
+          }
         }
         updatedCount++;
       }

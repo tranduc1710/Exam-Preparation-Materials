@@ -5686,21 +5686,21 @@
           "originalLabel": "Câu 12",
           "isSupplementary": false,
           "isV4": false,
-          "question": "A software company adopts the V-model as their development lifecycle. Which of the following contains roles of a TESTER in this company?\n(A) Review test plans and set up test environments;\n(B) Introduce suitable metrics to measure the testing progress;\n(C) Coordinate the test strategy with the project managers;\n(D) Decide what should be automated, to what degree, and how.",
-          "questionVi": "Một công ty phần mềm dùng mô hình chữ V (V-model) làm vòng đời phát triển. Lựa chọn nào chứa vai trò của KIỂM THỬ VIÊN (tester) trong công ty này?\n(A) Rà soát kế hoạch kiểm thử (test plan) và thiết lập môi trường kiểm thử;\n(B) Đưa ra số đo phù hợp để đo tiến độ kiểm thử;\n(C) Điều phối chiến lược kiểm thử (test strategy) với quản lý dự án;\n(D) Quyết định cái gì cần tự động hóa, ở mức nào và bằng cách nào.",
+          "question": "A software company adopts the V-model as their development lifecycle. Which of the following contains roles of a TESTER in this company?",
+          "questionVi": "Một công ty phần mềm dùng mô hình chữ V (V-model) làm vòng đời phát triển. Lựa chọn nào chứa vai trò của KIỂM THỬ VIÊN (tester) trong công ty này?",
           "images": [],
           "imagesVi": [],
           "options": {
-            "a": "A",
-            "b": "B",
-            "c": "C",
-            "d": "D"
+            "a": "Review test plans and set up test environments",
+            "b": "Introduce suitable metrics to measure the testing progress",
+            "c": "Coordinate the test strategy with the project managers",
+            "d": "Decide what should be automated, to what degree, and how"
           },
           "optionsVi": {
-            "a": "A",
-            "b": "B",
-            "c": "C",
-            "d": "D"
+            "a": "Rà soát kế hoạch kiểm thử (test plan) và thiết lập môi trường kiểm thử",
+            "b": "Đưa ra số đo phù hợp để đo tiến độ kiểm thử",
+            "c": "Điều phối chiến lược kiểm thử (test strategy) với quản lý dự án",
+            "d": "Quyết định cái gì cần tự động hóa, ở mức nào và bằng cách nào"
           },
           "correctAnswer": "a",
           "explanation": "Nhiệm vụ của TESTER: tham gia REVIEW test plan (góp ý kế hoạch), THIẾT LẬP MÔI TRƯỜNG kiểm thử (thường phối hợp với quản trị hệ thống/mạng), review test case, thực thi test, ghi log, báo cáo defect… — đúng nội dung (A) ⇒ (a). Các mục còn lại là nhiệm vụ của TEST MANAGER/test leader: (B) đưa ra số đo phù hợp để đo tiến độ kiểm thử; (C) điều phối chiến lược và kế hoạch kiểm thử với project manager; (D) quyết định cái gì cần tự động hóa, ở mức độ nào và bằng cách nào.",
@@ -5718,21 +5718,21 @@
           "originalLabel": "Câu 13",
           "isSupplementary": false,
           "isV4": false,
-          "question": "Which of the following errors CANNOT be found with structure-based (white-box) testing techniques?\n(A) Memory is leaking;\n(B) Data structures that are used before initialization;\n(C) Features that are only partially implemented;\n(D) Division by zero.",
-          "questionVi": "Lỗi nào sau đây KHÔNG THỂ tìm thấy bằng kỹ thuật kiểm thử dựa trên cấu trúc (hộp trắng – white-box)?\n(A) Rò rỉ bộ nhớ;\n(B) Cấu trúc dữ liệu được dùng trước khi khởi tạo;\n(C) Tính năng chỉ được hiện thực một phần;\n(D) Chia cho 0.",
+          "question": "Which of the following errors CANNOT be found with structure-based (white-box) testing techniques?",
+          "questionVi": "Lỗi nào sau đây KHÔNG THỂ tìm thấy bằng kỹ thuật kiểm thử dựa trên cấu trúc (hộp trắng – white-box)?",
           "images": [],
           "imagesVi": [],
           "options": {
-            "a": "A",
-            "b": "B",
-            "c": "C",
-            "d": "D"
+            "a": "Memory is leaking",
+            "b": "Data structures that are used before initialization",
+            "c": "Features that are only partially implemented",
+            "d": "Division by zero"
           },
           "optionsVi": {
-            "a": "A",
-            "b": "B",
-            "c": "C",
-            "d": "D"
+            "a": "Rò rỉ bộ nhớ",
+            "b": "Cấu trúc dữ liệu được dùng trước khi khởi tạo",
+            "c": "Tính năng chỉ được hiện thực một phần",
+            "d": "Chia cho 0"
           },
           "correctAnswer": "c",
           "explanation": "Kỹ thuật structure-based suy dẫn test từ MÃ ĐÃ CÓ — chúng chỉ kiểm được những gì ĐÃ ĐƯỢC HIỆN THỰC. Tính năng mới hiện thực MỘT PHẦN nghĩa là phần còn thiếu KHÔNG TỒN TẠI trong mã: không có câu lệnh/nhánh nào để phủ, nên độ phủ cấu trúc dù đạt 100% cũng không phát hiện được sự THIẾU HỤT so với đặc tả — loại defect “omission” này chỉ lộ ra khi so với test basis (kỹ thuật black-box) ⇒ (c). Ngược lại, (A) rò rỉ bộ nhớ, (B) dùng cấu trúc dữ liệu trước khi khởi tạo, (D) chia cho 0 đều nằm TRONG mã hiện có — các test white-box thực thi đủ đường đi có thể kích hoạt/phát hiện chúng (kết hợp công cụ phân tích).",
@@ -6106,21 +6106,21 @@
           "originalLabel": "Câu 30",
           "isSupplementary": false,
           "isV4": false,
-          "question": "Which of the statements about walkthroughs is NOT true?\n(A) Pre-meeting preparation, documentation and distribution of results are optional for a walkthrough;\n(B) A walkthrough is led by a moderator and requires pre-meeting preparation and post-meeting follow-up;\n(C) A walkthrough may take the form of scenarios, dry runs and peer-group participation;\n(D) The purpose of a walkthrough is to establish a common understanding of a document and to find possible defects in it.",
-          "questionVi": "Phát biểu nào về rà soát có hướng dẫn (walkthrough) là KHÔNG đúng?\n(A) Chuẩn bị trước cuộc họp, lập tài liệu và phân phối kết quả là tùy chọn với rà soát có hướng dẫn;\n(B) Rà soát có hướng dẫn do điều phối viên (moderator) dẫn dắt, đòi hỏi chuẩn bị trước cuộc họp và theo dõi sau cuộc họp;\n(C) Rà soát có hướng dẫn có thể ở dạng kịch bản, chạy thử “khan” (dry run) và có sự tham gia của nhóm đồng nghiệp;\n(D) Mục đích của rà soát có hướng dẫn là tạo hiểu biết chung về tài liệu và tìm các lỗi có thể có trong đó.",
+          "question": "Which of the statements about walkthroughs is NOT true?",
+          "questionVi": "Phát biểu nào về rà soát có hướng dẫn (walkthrough) là KHÔNG đúng?",
           "images": [],
           "imagesVi": [],
           "options": {
-            "a": "A",
-            "b": "B",
-            "c": "C",
-            "d": "D"
+            "a": "Pre-meeting preparation, documentation and distribution of results are optional for a walkthrough",
+            "b": "A walkthrough is led by a moderator and requires pre-meeting preparation and post-meeting follow-up",
+            "c": "A walkthrough may take the form of scenarios, dry runs and peer-group participation",
+            "d": "The purpose of a walkthrough is to establish a common understanding of a document and to find possible defects in it"
           },
           "optionsVi": {
-            "a": "A",
-            "b": "B",
-            "c": "C",
-            "d": "D"
+            "a": "Chuẩn bị trước cuộc họp, lập tài liệu và phân phối kết quả là tùy chọn với rà soát có hướng dẫn",
+            "b": "Rà soát có hướng dẫn do điều phối viên (moderator) dẫn dắt, đòi hỏi chuẩn bị trước cuộc họp và theo dõi sau cuộc họp",
+            "c": "Rà soát có hướng dẫn có thể ở dạng kịch bản, chạy thử “khan” (dry run) và có sự tham gia của nhóm đồng nghiệp",
+            "d": "Mục đích của rà soát có hướng dẫn là tạo hiểu biết chung về tài liệu và tìm các lỗi có thể có trong đó"
           },
           "correctAnswer": "b",
           "explanation": "Phát biểu SAI là (B): walkthrough do chính TÁC GIẢ (author) dẫn dắt — không phải moderator — và việc CHUẨN BỊ TRƯỚC của người tham gia là TÙY CHỌN, không bắt buộc; follow-up cũng không phải yêu cầu cố định ⇒ (b). Các phát biểu còn lại đúng với đặc điểm walkthrough: (A) chuẩn bị trước cuộc họp, việc lập biên bản (do scribe ghi) và phân phối kết quả đều optional; (C) hình thức có thể là trình bày theo kịch bản (scenarios), chạy thử “khan” (dry runs), có sự tham gia của đồng nghiệp (peer group); (D) mục đích gồm tìm defect, cải thiện sản phẩm, cân nhắc cách hiện thực khác và TẠO HIỂU BIẾT CHUNG về tài liệu. (Tham khảo Câu 35 – Đề 2 về nhận diện walkthrough.)",
