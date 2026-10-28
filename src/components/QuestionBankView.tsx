@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   BookOpen,
@@ -11,7 +11,7 @@ import {
   Languages,
 } from 'lucide-react';
 import { LanguageMode, OptionKey, Question } from '../types';
-import { allQuestions, CHAPTER_SHORT_NAMES, examsDataset } from '../utils/quizHelper';
+import { CHAPTER_SHORT_NAMES, getAllQuestions, getExamsDataset } from '../utils/quizHelper';
 
 interface QuestionBankViewProps {
   languageMode: LanguageMode;
@@ -22,6 +22,11 @@ interface QuestionBankViewProps {
 }
 
 const OPTION_KEYS: OptionKey[] = ['a', 'b', 'c', 'd'];
+
+// Render the bank in pages instead of all questions at once: with hundreds of
+// questions (each with options, explanations and images) a full render makes
+// the page extremely heavy. "Load more" appends the next page.
+const PAGE_SIZE = 20;
 
 export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
   languageMode,
@@ -36,13 +41,14 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
   const [specialFilter, setSpecialFilter] = useState<'all' | 'v4' | 'bookmarked' | 'wrong'>(
     'all'
   );
-  const [showAllAnswers, setShowAllAnswers] = useState(true);
+  const [showAllAnswers, setShowAllAnswers] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const filtered = useMemo(() => {
     const qLower = searchQuery.trim().toLowerCase();
-    return allQuestions.filter((q) => {
+    return getAllQuestions().filter((q) => {
       if (selectedExam !== 'all' && q.examId !== selectedExam) return false;
       if (selectedChapter !== 'all' && q.chapter !== selectedChapter) return false;
       if (specialFilter === 'v4' && !q.isV4) return false;
@@ -60,6 +66,11 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
       return true;
     });
   }, [searchQuery, selectedExam, selectedChapter, specialFilter, bookmarks, wrongIds]);
+
+  // Any filter change restarts pagination from the first page.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchQuery, selectedExam, selectedChapter, specialFilter]);
 
   const toggleRevealOne = (id: string) => {
     setRevealedIds((prev) => {
@@ -96,8 +107,8 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
               }
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="all">Tất cả 10 Đề ({allQuestions.length} câu)</option>
-              {examsDataset.exams.map((ex) => (
+              <option value="all">Tất cả 10 Đề ({getAllQuestions().length} câu)</option>
+              {getExamsDataset().exams.map((ex) => (
                 <option key={ex.id} value={ex.id}>
                   {ex.shortTitle} ({ex.questionCount} câu)
                 </option>
@@ -115,7 +126,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="all">Tất cả 6 Chương Syllabus</option>
-              {examsDataset.metadata.chapters.map((ch) => (
+              {getExamsDataset().metadata.chapters.map((ch) => (
                 <option key={ch.chapter} value={ch.chapter}>
                   {CHAPTER_SHORT_NAMES[ch.chapter]} ({ch.questionCount} câu)
                 </option>
@@ -172,7 +183,11 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
             </div>
 
             <span className="text-xs font-semibold text-slate-500">
-              Hiển thị: <strong className="text-slate-900">{filtered.length}</strong> câu
+              Hiển thị:{' '}
+              <strong className="text-slate-900">
+                {Math.min(visibleCount, filtered.length)}
+              </strong>{' '}
+              / {filtered.length} câu
             </span>
             <button
               type="button"
@@ -200,7 +215,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
             Không tìm thấy câu hỏi nào khớp với bộ lọc hiện tại.
           </div>
         ) : (
-          filtered.map((q: Question) => {
+          filtered.slice(0, visibleCount).map((q: Question) => {
             const isShown = showAllAnswers || revealedIds.has(q.id);
             const isBookmarked = bookmarks.includes(q.id);
 
@@ -288,6 +303,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                             )}
                             <img
                               src={imgSrc}
+                              loading="lazy"
                               alt={`${q.label} (EN)`}
                               onClick={() => setZoomedImage(imgSrc)}
                               className="max-h-80 w-auto object-contain rounded-lg cursor-zoom-in"
@@ -320,6 +336,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                             )}
                             <img
                               src={imgSrc}
+                              loading="lazy"
                               alt={`${q.label} (VI)`}
                               onClick={() => setZoomedImage(imgSrc)}
                               className="max-h-80 w-auto object-contain rounded-lg cursor-zoom-in"
@@ -412,6 +429,20 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
           })
         )}
       </div>
+
+      {/* Load more (pagination) */}
+      {visibleCount < filtered.length && (
+        <div className="text-center pt-1">
+          <button
+            type="button"
+            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition shadow-xs cursor-pointer"
+          >
+            Tải thêm {Math.min(PAGE_SIZE, filtered.length - visibleCount)} câu (đang hiển
+            thị {visibleCount} / {filtered.length})
+          </button>
+        </div>
+      )}
 
       {/* Image Lightbox */}
       {zoomedImage && (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import {
   BookOpen,
   Clock,
@@ -33,18 +33,19 @@ import {
   QuizMode,
 } from './types';
 import {
-  allQuestions,
   buildExamQuestionSet,
   clearAttempts,
-  examsDataset,
   formatTime,
   generateOfficialMock40,
+  getAllQuestions,
+  getExamsDataset,
   getExposureStats,
+  getQuestionById,
+  initDataset,
   ISTQB_CHAPTER_WEIGHTS,
   loadAttempts,
   loadBookmarks,
   loadWrongIds,
-  questionById,
   recordQuestionsExposure,
   resetQuestionsExposure,
   saveAttempt,
@@ -52,10 +53,27 @@ import {
   shuffleArray,
   updateWrongIdsAfterQuiz,
 } from './utils/quizHelper';
-import { QuizRunner } from './components/QuizRunner';
-import { QuizResult } from './components/QuizResult';
-import { QuestionBankView } from './components/QuestionBankView';
-import { GlossaryView } from './components/GlossaryView';
+import type { ExamsDataset } from './types';
+
+// Heavy views are code-split: their code loads only when first opened.
+const QuizRunner = lazy(() =>
+  import('./components/QuizRunner').then((m) => ({ default: m.QuizRunner }))
+);
+const QuizResult = lazy(() =>
+  import('./components/QuizResult').then((m) => ({ default: m.QuizResult }))
+);
+const QuestionBankView = lazy(() =>
+  import('./components/QuestionBankView').then((m) => ({ default: m.QuestionBankView }))
+);
+const GlossaryView = lazy(() =>
+  import('./components/GlossaryView').then((m) => ({ default: m.GlossaryView }))
+);
+
+const ViewLoading: React.FC = () => (
+  <div className="flex items-center justify-center py-16 text-slate-500 text-sm font-medium">
+    Đang tải…
+  </div>
+);
 
 type ActiveTab = 'exams' | 'chapters' | 'bank' | 'glossary' | 'history';
 
@@ -99,6 +117,36 @@ export function App() {
   const [exposureStats, setExposureStats] = useState<QuestionExposureStats>(() =>
     getExposureStats()
   );
+
+  // Exam dataset is fetched at runtime from /data/examsData.json (public/data),
+  // it is no longer inlined into the JS bundle (see utils/quizHelper.ts).
+  const [dataReady, setDataReady] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/data/examsData.json')
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data: ExamsDataset) => {
+        if (cancelled) return;
+        initDataset(data);
+        setExposureStats(getExposureStats());
+        setDataReady(true);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('Failed to load exams dataset', err);
+        setDataError(
+          'Không tải được dữ liệu đề thi. Vui lòng kiểm tra kết nối rồi tải lại trang.'
+        );
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleResetExposure = () => {
     if (
@@ -157,11 +205,11 @@ export function App() {
   };
 
   const startChapterPractice = (chapterNum: number, forcedMode: QuizMode = 'practice') => {
-    const pool = allQuestions.filter((q) => q.chapter === chapterNum);
+    const pool = getAllQuestions().filter((q) => q.chapter === chapterNum);
     const qs = shuffleQuestions ? shuffleArray(pool) : pool;
     recordQuestionsExposure(qs.map((q) => q.id));
     setExposureStats(getExposureStats());
-    const chMeta = examsDataset.metadata.chapters.find((c) => c.chapter === chapterNum);
+    const chMeta = getExamsDataset().metadata.chapters.find((c) => c.chapter === chapterNum);
     setViewingAttempt(null);
     setActiveQuiz({
       title: chMeta ? chMeta.title : `Chương ${chapterNum}`,
@@ -174,7 +222,7 @@ export function App() {
   };
 
   const startV4Practice = (forcedMode: QuizMode = 'practice') => {
-    const pool = allQuestions.filter((q) => q.isV4);
+    const pool = getAllQuestions().filter((q) => q.isV4);
     const qs = shuffleQuestions ? shuffleArray(pool) : pool;
     recordQuestionsExposure(qs.map((q) => q.id));
     setExposureStats(getExposureStats());
@@ -265,30 +313,58 @@ export function App() {
     setViewingAttempt(record);
   };
 
+  // Loading / error gate for the runtime-fetched dataset
+  if (!dataReady) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="text-center space-y-3">
+          <GraduationCap className="w-10 h-10 text-indigo-600 mx-auto" />
+          {dataError ? (
+            <>
+              <p className="text-slate-800 font-semibold max-w-md">{dataError}</p>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition cursor-pointer"
+              >
+                Tải lại trang
+              </button>
+            </>
+          ) : (
+            <p className="text-slate-500 font-medium">Đang tải dữ liệu đề thi…</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // Active Quiz View
   if (activeQuiz) {
     return (
-      <QuizRunner
+      <Suspense fallback={<ViewLoading />}>
+        <QuizRunner
         config={activeQuiz}
         languageMode={languageMode}
         onChangeLanguageMode={setLanguageMode}
         bookmarks={bookmarks}
         onToggleBookmark={handleToggleBookmark}
         onFinish={handleFinishQuiz}
-        onExit={() => setActiveQuiz(null)}
-      />
+          onExit={() => setActiveQuiz(null)}
+        />
+      </Suspense>
     );
   }
 
   // Result Review View
   if (viewingAttempt) {
     const retryQuestions = viewingAttempt.questionIds
-      .map((id) => questionById[id])
+      .map((id) => getQuestionById(id))
       .filter(Boolean);
 
     return (
-      <QuizResult
-        attempt={viewingAttempt}
+      <Suspense fallback={<ViewLoading />}>
+        <QuizResult
+          attempt={viewingAttempt}
         languageMode={languageMode}
         onChangeLanguageMode={setLanguageMode}
         bookmarks={bookmarks}
@@ -316,14 +392,15 @@ export function App() {
           });
           setViewingAttempt(null);
         }}
-        onBackHome={() => setViewingAttempt(null)}
-      />
+          onBackHome={() => setViewingAttempt(null)}
+        />
+      </Suspense>
     );
   }
 
-  const v4QuestionsCount = allQuestions.filter((q) => q.isV4).length;
-  const bookmarkedQuestions = bookmarks.map((id) => questionById[id]).filter(Boolean);
-  const wrongQuestionsPool = wrongIds.map((id) => questionById[id]).filter(Boolean);
+  const v4QuestionsCount = getAllQuestions().filter((q) => q.isV4).length;
+  const bookmarkedQuestions = bookmarks.map((id) => getQuestionById(id)).filter(Boolean);
+  const wrongQuestionsPool = wrongIds.map((id) => getQuestionById(id)).filter(Boolean);
   const passedAttemptsCount = attempts.filter((a) => a.passed).length;
 
   return (
@@ -380,7 +457,7 @@ export function App() {
                 },
                 {
                   id: 'bank',
-                  label: `Tra Cứu Kho ${allQuestions.length} Câu Hỏi`,
+                  label: `Tra Cứu Kho ${getAllQuestions().length} Câu Hỏi`,
                   icon: Search,
                 },
                 {
@@ -647,7 +724,7 @@ export function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {examsDataset.exams.map((exam) => {
+                {getExamsDataset().exams.map((exam) => {
                   const examAttempts = attempts.filter((a) => a.examId === exam.id);
                   const bestAttempt =
                     examAttempts.length > 0
@@ -873,7 +950,7 @@ export function App() {
                 Luyện Tập Theo Từng Chương Chuẩn ISTQB Syllabus (Chương 1 → Chương 6)
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {examsDataset.metadata.chapters.map((ch) => (
+                {getExamsDataset().metadata.chapters.map((ch) => (
                   <div
                     key={ch.chapter}
                     className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4"
@@ -921,17 +998,23 @@ export function App() {
 
         {/* TAB 3: QUESTION BANK SEARCH */}
         {activeTab === 'bank' && (
-          <QuestionBankView
-            languageMode={languageMode}
-            onChangeLanguageMode={setLanguageMode}
-            bookmarks={bookmarks}
-            wrongIds={wrongIds}
-            onToggleBookmark={handleToggleBookmark}
-          />
+          <Suspense fallback={<ViewLoading />}>
+            <QuestionBankView
+              languageMode={languageMode}
+              onChangeLanguageMode={setLanguageMode}
+              bookmarks={bookmarks}
+              wrongIds={wrongIds}
+              onToggleBookmark={handleToggleBookmark}
+            />
+          </Suspense>
         )}
 
         {/* TAB 4: ISTQB GLOSSARY */}
-        {activeTab === 'glossary' && <GlossaryView />}
+        {activeTab === 'glossary' && (
+          <Suspense fallback={<ViewLoading />}>
+            <GlossaryView />
+          </Suspense>
+        )}
 
         {/* TAB 5: ATTEMPT HISTORY */}
         {activeTab === 'history' && (

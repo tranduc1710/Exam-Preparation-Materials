@@ -3,6 +3,7 @@ import https from 'node:https';
 import net from 'node:net';
 import fs from 'node:fs';
 import path from 'node:path';
+import { createGzip } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,11 +40,29 @@ function handleRequest(req, res) {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-    res.writeHead(200, {
+    // HTML and the runtime-fetched exams dataset (.json) must never be served
+    // stale; hashed JS/CSS and images can cache for a day.
+    const cacheControl =
+      ext === '.html' || ext === '.json' ? 'no-cache' : 'public, max-age=86400';
+
+    // Gzip text-based responses when the client supports it: the JS bundle and
+    // the ~1 MB exams dataset JSON shrink by roughly 70% on the wire.
+    const compressible = ['.html', '.js', '.css', '.json', '.svg'].includes(ext);
+    const acceptEncoding = String(req.headers['accept-encoding'] || '');
+    const useGzip = compressible && /\bgzip\b/.test(acceptEncoding);
+
+    const headers = {
       'Content-Type': contentType,
-      'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=86400',
-    });
-    fs.createReadStream(filePath).pipe(res);
+      'Cache-Control': cacheControl,
+    };
+    let stream = fs.createReadStream(filePath);
+    if (useGzip) {
+      headers['Content-Encoding'] = 'gzip';
+      headers['Vary'] = 'Accept-Encoding';
+      stream = stream.pipe(createGzip());
+    }
+    res.writeHead(200, headers);
+    stream.pipe(res);
   } catch (err) {
     res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Internal Server Error');

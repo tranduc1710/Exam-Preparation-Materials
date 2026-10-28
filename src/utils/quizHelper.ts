@@ -5,15 +5,34 @@ import {
   Question,
   QuestionExposureStats,
 } from '../types';
-import rawData from '../data/examsData.json';
+// Dataset is NOT bundled into the JS anymore: App fetches it at runtime from
+// /data/examsData.json (public/data/examsData.json) and calls initDataset()
+// before rendering any data-dependent UI. Keeping it out of the bundle keeps
+// the initial JS small and lets the web server gzip + cache the JSON on its own.
+let _examsDataset: ExamsDataset | null = null;
+let _allQuestions: Question[] = [];
+let _questionById: Record<string, Question> = {};
 
-export const examsDataset = rawData as unknown as ExamsDataset;
+export function initDataset(data: ExamsDataset): void {
+  _examsDataset = data;
+  _allQuestions = data.exams.flatMap((e) => e.questions);
+  _questionById = Object.fromEntries(_allQuestions.map((q) => [q.id, q]));
+}
 
-export const allQuestions: Question[] = examsDataset.exams.flatMap((e) => e.questions);
+export function getExamsDataset(): ExamsDataset {
+  if (!_examsDataset) {
+    throw new Error('Exams dataset has not been loaded yet (initDataset not called).');
+  }
+  return _examsDataset;
+}
 
-export const questionById: Record<string, Question> = Object.fromEntries(
-  allQuestions.map((q) => [q.id, q])
-);
+export function getAllQuestions(): Question[] {
+  return _allQuestions;
+}
+
+export function getQuestionById(id: string): Question {
+  return _questionById[id];
+}
 
 const ATTEMPTS_KEY = 'istqb_ctfl_attempts_v1';
 const BOOKMARKS_KEY = 'istqb_ctfl_bookmarks_v1';
@@ -76,8 +95,8 @@ export function resetQuestionsExposure(): void {
 
 export function getExposureStats(): QuestionExposureStats {
   const map = loadQuestionExposureMap();
-  const totalQuestions = allQuestions.length;
-  const counts = allQuestions.map((q) => map[q.id] || 0);
+  const totalQuestions = _allQuestions.length;
+  const counts = _allQuestions.map((q) => map[q.id] || 0);
 
   const minSeen = counts.length > 0 ? Math.min(...counts) : 0;
   const maxSeen = counts.length > 0 ? Math.max(...counts) : 0;
@@ -143,7 +162,7 @@ export function buildExamQuestionSet(
     } else if (result.length < 40) {
       const needed = 40 - result.length;
       const existingIds = new Set(result.map((q) => q.id));
-      const pool = allQuestions.filter((q) => !existingIds.has(q.id));
+      const pool = _allQuestions.filter((q) => !existingIds.has(q.id));
       const additional = fairSelectQuestions(pool, needed);
       result = [...result, ...additional];
     }
@@ -156,7 +175,7 @@ export function generateOfficialMock40(autoRecord: boolean = true): Question[] {
   const selected: Question[] = [];
   for (const [chStr, count] of Object.entries(ISTQB_CHAPTER_WEIGHTS)) {
     const ch = Number(chStr);
-    const chPool = allQuestions.filter((q) => q.chapter === ch);
+    const chPool = _allQuestions.filter((q) => q.chapter === ch);
     const chSelected = fairSelectQuestions(chPool, count);
     selected.push(...chSelected);
   }

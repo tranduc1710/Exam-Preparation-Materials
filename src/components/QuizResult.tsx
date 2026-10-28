@@ -17,7 +17,7 @@ import {
   Languages,
 } from 'lucide-react';
 import { AttemptRecord, LanguageMode, OptionKey, Question } from '../types';
-import { CHAPTER_SHORT_NAMES, formatTime, questionById } from '../utils/quizHelper';
+import { CHAPTER_SHORT_NAMES, formatTime, getQuestionById } from '../utils/quizHelper';
 
 interface QuizResultProps {
   attempt: AttemptRecord;
@@ -48,7 +48,7 @@ export const QuizResult: React.FC<QuizResultProps> = ({
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   const questions: Question[] = attempt.questionIds
-    .map((id) => questionById[id])
+    .map((id) => getQuestionById(id))
     .filter(Boolean);
 
   const flaggedSet = new Set(attempt.flaggedIds);
