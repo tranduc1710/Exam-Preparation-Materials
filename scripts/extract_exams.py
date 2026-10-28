@@ -135,7 +135,7 @@ def main():
     img_out_dir = os.path.join(base_dir, "public", "images", "questions")
     img_vi_out_dir = os.path.join(base_dir, "public", "images", "questions-vi")
     pdf_out_dir = os.path.join(base_dir, "public", "pdfs")
-    data_out_dir = os.path.join(base_dir, "src", "data")
+    data_out_dir = os.path.join(base_dir, "public", "data")
     os.makedirs(img_out_dir, exist_ok=True)
     os.makedirs(img_vi_out_dir, exist_ok=True)
     os.makedirs(pdf_out_dir, exist_ok=True)

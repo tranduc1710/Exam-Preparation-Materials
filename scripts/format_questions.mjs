@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const baseDir = path.dirname(__dirname);
 
-const examsDataPath = path.join(baseDir, 'src', 'data', 'examsData.json');
+const examsDataPath = path.join(baseDir, 'public', 'data', 'examsData.json');
 const translationsViPath = path.join(baseDir, 'src', 'data', 'translationsVi.json');
 
 const examsData = JSON.parse(fs.readFileSync(examsDataPath, 'utf8'));
