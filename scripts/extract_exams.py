@@ -343,5 +343,11 @@ def main():
         f"{total_images} EN images, {total_vi_images} VI images to {out_file}"
     )
 
+    fmt_script = os.path.join(base_dir, "scripts", "format_questions.mjs")
+    if os.path.exists(fmt_script):
+        import subprocess
+        subprocess.run(["node", fmt_script], check=False)
+
 if __name__ == "__main__":
     main()
+

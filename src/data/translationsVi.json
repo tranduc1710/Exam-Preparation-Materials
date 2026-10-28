@@ -855,7 +855,7 @@
     }
   },
   "e3_q14": {
-    "questionVi": "Xét các loại khiếm khuyết (defect) mà một mức kiểm thử (test level) có thể tập trung vào: (a) các defect trong các module hoặc đối tượng có thể kiểm thử riêng lẻ; (b) không đặt trọng tâm vào việc xác định defect; (c) các defect ở giao diện và tương tác; (d) các defect trong toàn bộ đối tượng kiểm thử (test object). Phương án nào sau đây ghép nối đúng các mức kiểm thử trong đề cương Foundation với các trọng tâm defect nêu trên (tương ứng a→1, b→2, c→3, d→4)?",
+    "questionVi": "Xét các loại lỗi mà một mức kiểm thử (test level) có thể tập trung vào:\n(1) Lỗi trong các module hoặc đối tượng có thể kiểm thử riêng;\n(2) Không tập trung vào việc tìm lỗi;\n(3) Lỗi trong giao diện và tương tác;\n(4) Lỗi trong toàn bộ đối tượng kiểm thử.\n\nLựa chọn nào ghép đúng các mức kiểm thử với các trọng tâm trên?",
     "optionsVi": {
       "a": "1 = kiểm thử hiệu năng (performance test); 2 = kiểm thử thành phần (component test); 3 = kiểm thử hệ thống (system test); 4 = kiểm thử chấp nhận (acceptance test)",
       "b": "1 = kiểm thử thành phần (component test); 2 = kiểm thử chấp nhận (acceptance test); 3 = kiểm thử hệ thống (system test); 4 = kiểm thử tích hợp (integration test)",
@@ -945,7 +945,7 @@
     }
   },
   "e3_q24": {
-    "questionVi": "Xét danh sách các kết cục không mong muốn có thể xảy ra trong một dự án phát triển ứng dụng di động sau đây: (A) tính tổng sai trên các màn hình; (B) thay đổi tiêu chí chấp nhận (acceptance criteria) trong quá trình kiểm thử chấp nhận (acceptance testing); (C) người dùng thấy bàn phím ảo quá khó sử dụng với ứng dụng; (D) hệ thống phản hồi quá chậm với thao tác nhập của người dùng khi gõ chuỗi tìm kiếm; (E) các tester không được phép báo cáo kết quả kiểm thử trong các cuộc họp daily standup. Phương án nào sau đây phân loại đúng các kết cục này thành rủi ro dự án (project risks) và rủi ro sản phẩm (product risks)?",
+    "questionVi": "Xét danh sách các kết quả không mong muốn có thể xảy ra trong một dự án phát triển ứng dụng di động:\n(A) Tổng số hiển thị sai trên màn hình;\n(B) Tiêu chí chấp nhận bị thay đổi trong lúc kiểm thử chấp nhận (acceptance testing);\n(C) Người dùng thấy bàn phím ảo quá khó dùng với ứng dụng;\n(D) Hệ thống phản hồi quá chậm khi người dùng nhập chuỗi tìm kiếm;\n(E) Kiểm thử viên không được phép báo cáo kết quả kiểm thử trong các buổi họp standup hằng ngày.\n\nLựa chọn nào phân loại đúng các kết quả này thành rủi ro dự án (project risk) và rủi ro sản phẩm (product risk)?",
     "optionsVi": {
       "a": "Rủi ro sản phẩm (Product risks): B, E — Rủi ro dự án (Project risks): A, C, D",
       "b": "Rủi ro sản phẩm (Product risks): A, C, D — Rủi ro dự án (Project risks): B, E",
@@ -1521,7 +1521,7 @@
     }
   },
   "e5_q9": {
-    "questionVi": "Một công ty phần mềm áp dụng mô hình chữ V (V-model) làm vòng đời phát triển. Phương án nào sau đây chứa vai trò của một KIỂM THỬ VIÊN (TESTER) trong công ty này? (A) Review các kế hoạch kiểm thử (test plans) và thiết lập môi trường kiểm thử (test environments); (B) Đưa ra các số đo (metrics) phù hợp để đo lường tiến độ kiểm thử; (C) Điều phối chiến lược kiểm thử (test strategy) với các quản lý dự án (project managers); (D) Quyết định những gì nên được tự động hóa, ở mức độ nào và bằng cách nào.",
+    "questionVi": "Một công ty phần mềm dùng mô hình chữ V (V-model) làm vòng đời phát triển. Lựa chọn nào chứa vai trò của KIỂM THỬ VIÊN (tester) trong công ty này?\n(A) Rà soát kế hoạch kiểm thử (test plan) và thiết lập môi trường kiểm thử;\n(B) Đưa ra số đo phù hợp để đo tiến độ kiểm thử;\n(C) Điều phối chiến lược kiểm thử (test strategy) với quản lý dự án;\n(D) Quyết định cái gì cần tự động hóa, ở mức nào và bằng cách nào.",
     "optionsVi": {
       "a": "A",
       "b": "B",
@@ -1530,7 +1530,7 @@
     }
   },
   "e5_q10": {
-    "questionVi": "Lỗi nào sau đây KHÔNG THỂ được tìm thấy bằng các kỹ thuật kiểm thử dựa trên cấu trúc (structure-based / white-box)? (A) Rò rỉ bộ nhớ (Memory is leaking); (B) Các cấu trúc dữ liệu được sử dụng trước khi khởi tạo; (C) Các tính năng chỉ mới được hiện thực một phần; (D) Chia cho 0 (Division by zero).",
+    "questionVi": "Lỗi nào sau đây KHÔNG THỂ tìm thấy bằng kỹ thuật kiểm thử dựa trên cấu trúc (hộp trắng – white-box)?\n(A) Rò rỉ bộ nhớ;\n(B) Cấu trúc dữ liệu được dùng trước khi khởi tạo;\n(C) Tính năng chỉ được hiện thực một phần;\n(D) Chia cho 0.",
     "optionsVi": {
       "a": "A",
       "b": "B",
@@ -1638,7 +1638,7 @@
     }
   },
   "e5_q22": {
-    "questionVi": "Phát biểu nào về walkthrough là KHÔNG đúng? (A) Việc chuẩn bị trước cuộc họp, lập tài liệu và phân phối kết quả là tùy chọn đối với walkthrough; (B) Một buổi walkthrough được dẫn dắt bởi người điều phối (moderator) và bắt buộc phải chuẩn bị trước cuộc họp cũng như theo dõi sau cuộc họp (post-meeting follow-up); (C) Một buổi walkthrough có thể diễn ra dưới hình thức các kịch bản (scenarios), chạy thử (dry runs) và sự tham gia của nhóm đồng nghiệp (peer-group); (D) Mục đích của walkthrough là thiết lập sự hiểu biết chung về một tài liệu và tìm các defect có thể có trong đó.",
+    "questionVi": "Phát biểu nào về rà soát có hướng dẫn (walkthrough) là KHÔNG đúng?\n(A) Chuẩn bị trước cuộc họp, lập tài liệu và phân phối kết quả là tùy chọn với rà soát có hướng dẫn;\n(B) Rà soát có hướng dẫn do điều phối viên (moderator) dẫn dắt, đòi hỏi chuẩn bị trước cuộc họp và theo dõi sau cuộc họp;\n(C) Rà soát có hướng dẫn có thể ở dạng kịch bản, chạy thử “khan” (dry run) và có sự tham gia của nhóm đồng nghiệp;\n(D) Mục đích của rà soát có hướng dẫn là tạo hiểu biết chung về tài liệu và tìm các lỗi có thể có trong đó.",
     "optionsVi": {
       "a": "A",
       "b": "B",
@@ -1656,7 +1656,7 @@
     }
   },
   "e5_q24": {
-    "questionVi": "Bảng quyết định (decision table) trong hình minh họa phản ánh cơ cấu giá của một câu lạc bộ golf cho phí sân (green fees) và phí thuê xe điện (buggy/cart hire). Kết quả mong đợi cho hai test case sau đây là gì? TC1 – Paul không phải là hội viên đầy đủ (full member), có thẻ khách hàng thân thiết (Loyalty Card), và yêu cầu chơi 18 hố có thuê xe buggy/cart. TC2 – Cheryl không phải là hội viên đầy đủ, không có thẻ Loyalty Card, và yêu cầu chơi 9 hố có thuê xe buggy/cart.",
+    "questionVi": "Bảng quyết định (decision table) dưới đây thể hiện cách tính giá của một câu lạc bộ golf cho phí sân (green fee) và thuê xe điện (buggy/cart). Kết quả mong đợi của hai test case sau là gì?\n• TC1 – Paul không phải hội viên đầy đủ, có thẻ khách hàng thân thiết (Loyalty Card), muốn chơi 18 lỗ và thuê xe.\n• TC2 – Cheryl không phải hội viên đầy đủ, không có thẻ khách hàng thân thiết, muốn chơi 9 lỗ và thuê xe.",
     "optionsVi": {
       "a": "TC1 – Tổng phí £18 đã bao gồm thuê xe buggy; TC2 – Tổng phí £16 nhưng không được phép thuê xe buggy",
       "b": "TC1 – Tổng phí £17 nhưng không được phép thuê xe buggy; TC2 – Tổng phí £21 đã bao gồm thuê xe buggy",
@@ -1746,7 +1746,7 @@
     }
   },
   "e6_q1": {
-    "questionVi": "Những chi tiết nào sau đây có khả năng cao nhất được đưa vào một báo cáo sự cố (incident report)? I. Định danh của hạng mục kiểm thử (configuration item) và môi trường; II. Các đặc điểm của quy trình phát triển như sự ổn định của tổ chức và quy trình kiểm thử được sử dụng; III. Việc review cơ sở kiểm thử (test basis), chẳng hạn như yêu cầu, thiết kế, giao diện; IV. Phạm vi hoặc mức độ tác động đến lợi ích của các bên liên quan (stakeholders).",
+    "questionVi": "Những chi tiết nào sau đây nhiều khả năng có trong một báo cáo sự cố (incident report)?\nI. Định danh hạng mục kiểm thử (test item – configuration item) và môi trường;\nII. Đặc điểm quy trình phát triển như độ ổn định của tổ chức và quy trình kiểm thử đang dùng;\nIII. Một lần rà soát (review) cơ sở kiểm thử (test basis) như yêu cầu, thiết kế, giao diện;\nIV. Phạm vi hoặc mức độ tác động đến lợi ích của các bên liên quan.",
     "optionsVi": {
       "a": "I, II và III",
       "b": "II và III",
@@ -1791,7 +1791,7 @@
     }
   },
   "e6_q6": {
-    "questionVi": "Cho các loại kiểm thử (a. Kiểm thử hồi quy – Regression testing; b. Kiểm thử xác nhận – Confirmation testing) và các kịch bản kiểm thử sau: 1. Kiểm thử để đảm bảo phiên bản mới của hệ điều hành không gây ra bất kỳ tác dụng phụ ngoài ý muốn nào lên hệ thống; 2. Kiểm thử do việc áp dụng một bản vá bảo mật (security patch); 3. Kiểm thử do việc áp dụng phiên bản mới của hệ quản trị cơ sở dữ liệu (DBMS); 4. Kiểm thử để đảm bảo bản sửa lỗi cho hệ thống tính lương thực sự hoạt động đúng. Phương án nào ghép nối đúng chúng với nhau?",
+    "questionVi": "Cho các loại kiểm thử:\na. Kiểm thử hồi quy – regression testing\nb. Kiểm thử xác nhận – confirmation testing\n\nVà các tình huống kiểm thử:\n1. Kiểm thử để bảo đảm phiên bản hệ điều hành mới không gây tác dụng phụ ngoài ý muốn lên hệ thống;\n2. Kiểm thử do áp dụng một bản vá bảo mật;\n3. Kiểm thử do áp dụng phiên bản mới của hệ quản trị cơ sở dữ liệu;\n4. Kiểm thử để bảo đảm bản sửa của hệ thống tính lương thực sự hoạt động.\n\nLựa chọn nào ghép đúng?",
     "optionsVi": {
       "a": "1 – a, 2 – a, 3 – b, 4 – b",
       "b": "1 – b, 2 – b, 3 – a, 4 – a",
@@ -2025,7 +2025,7 @@
     }
   },
   "e7_q2": {
-    "questionVi": "Cho sơ đồ chuyển trạng thái (state transition diagram) trong hình (các trạng thái S1–S4; các phép chuyển: X: S1→S2, Z: S2→S3, V: S3→S4, Y: S2→S4, W: S4→S2, U: S4→S4), hãy ghép các test case dưới đây với chuỗi chuyển trạng thái tương ứng: (i) X-Z-V-W; (ii) W-Y-U-U.",
+    "questionVi": "Cho sơ đồ chuyển đổi trạng thái (state transition diagram) dưới đây. Ghép các test case sau với chuỗi trạng thái tương ứng:\n(i) X-Z-V-W;\n(ii) W-Y-U-U.",
     "optionsVi": {
       "a": "(i) = S1 – S2 – S3 – S4 – S2 và (ii) = S4 – S2 – S4 – S4 – S4",
       "b": "(i) = S1 – S2 – S3 – S4 – S4 và (ii) = S2 – S4 – S4 – S4 – S2",
@@ -2088,7 +2088,7 @@
     }
   },
   "e7_q9": {
-    "questionVi": "Cho bảng quyết định (decision table) nâng hạng vé máy bay trong hình (Rule 1: Gold + Business → nâng hạng miễn phí lên First, nâng hạng có giảm giá: N/A; Rule 2: Gold + Economy → nâng hạng miễn phí lên Business, nâng hạng có giảm giá lên First; Rule 3: Silver + Business → không nâng hạng miễn phí, nâng hạng có giảm giá lên First; Rule 4: Silver + Economy → nâng hạng miễn phí lên Business, nâng hạng có giảm giá: không), kết quả mong đợi cho từng test case sau đây là gì? P) Khách hàng thường xuyên hạng Gold, bay hạng Economy; Q) Khách hàng thường xuyên hạng Silver, bay hạng Business.",
+    "questionVi": "Cho bảng quyết định (decision table) nâng hạng vé máy bay dưới đây. Kết quả mong đợi cho các test case sau là gì?\n• P) Khách hạng Gold đi hạng Economy;\n• Q) Khách hạng Silver đi hạng Business.",
     "optionsVi": {
       "a": "P: Đề nghị nâng hạng miễn phí lên Business và nâng hạng có giảm giá lên First. Q: Đề nghị nâng hạng có giảm giá lên First",
       "b": "P: Đề nghị nâng hạng miễn phí lên Business nhưng không thể nâng hạng lên First. Q: Đề nghị nâng hạng có giảm giá lên First",
@@ -2241,7 +2241,7 @@
     }
   },
   "e7_q26": {
-    "questionVi": "Bảng quyết định (decision table) trong hình thể hiện cơ cấu chi phí nhiên liệu của một công ty (Rule 1: không lái ô tô cũng không đi mô tô → không được thanh toán; Rule 2: ô tô + diesel + động cơ < 1600cc → mức A (band A); Rule 3: ô tô + diesel + động cơ > 1600cc → band B; Rule 4: ô tô + xăng (petrol) + động cơ < 1600cc → band C; Rule 5: ô tô + xăng + động cơ > 1600cc → band D; Rule 6: mô tô → band A). Những test case nào dưới đây dựa trên bảng quyết định là HỢP LỆ? TC1: nhân viên không lái ô tô cũng không đi mô tô yêu cầu thanh toán chi phí nhiên liệu — mong đợi: yêu cầu không được phép. TC2: nhân viên lái ô tô diesel 1700cc yêu cầu thanh toán — mong đợi: yêu cầu được chấp nhận ở band C. TC3: nhân viên đi mô tô yêu cầu thanh toán — mong đợi: yêu cầu được chấp nhận ở band A.",
+    "questionVi": "Bảng quyết định (decision table) dưới đây thể hiện cơ chế thanh toán chi phí nhiên liệu của một công ty. Những test case nào HỢP LỆ?\n• TC1: nhân viên không lái ô tô cũng không lái xe máy xin thanh toán nhiên liệu — mong đợi: không được thanh toán.\n• TC2: nhân viên lái ô tô diesel 1700cc xin thanh toán — mong đợi: được thanh toán mức C.\n• TC3: nhân viên đi xe máy xin thanh toán — mong đợi: được thanh toán mức A.",
     "optionsVi": {
       "a": "Test case 1 và 3 hợp lệ; test case 2 không hợp lệ",
       "b": "Test case 2 và 3 hợp lệ; test case 1 không hợp lệ",
@@ -2367,7 +2367,7 @@
     }
   },
   "e8_q3": {
-    "questionVi": "Những phát biểu nào sau đây nhấn mạnh đúng quan điểm của developer và tester xét về tâm lý học kiểm thử (testing psychology)? (I) Nếu developer hiện thực một lỗi thiết kế nền tảng (ví dụ: hiểu sai khái niệm), khả năng RẤT CAO là họ sẽ không tìm ra lỗi đó bằng các bài test của chính mình; (II) Tester có thể quan sát đối tượng kiểm thử một cách không định kiến — đó không phải là sản phẩm do họ tạo ra, và các giả định cũng như hiểu lầm của developer nhìn chung không giống với của tester; (III) Một tester độc lập phải tìm hiểu kiến thức về đối tượng kiểm thử để tạo test case, trong khi developer đã nắm rõ về nó nên tiết kiệm được thời gian — do đó nên giao các hoạt động kiểm thử cho developer; (IV) Điểm yếu của việc kiểm thử do developer thực hiện là developer có xu hướng lạc quan về phần mềm của chính mình; rủi ro là các test case hợp lý bị bỏ quên vì developer quan tâm đến việc phát triển hơn là kiểm thử.",
+    "questionVi": "Những phát biểu nào nhấn mạnh đúng quan điểm của lập trình viên và kiểm thử viên về tâm lý học kiểm thử?\n(I) Nếu lập trình viên mắc lỗi thiết kế nền tảng (ví dụ hiểu sai khái niệm), RẤT có khả năng họ sẽ không tìm ra lỗi đó bằng chính các test case của mình;\n(II) Kiểm thử viên có thể quan sát đối tượng kiểm thử (test object) mà không định kiến — đó không phải sản phẩm của họ, và giả định, hiểu lầm của lập trình viên nhìn chung không giống của kiểm thử viên;\n(III) Kiểm thử viên độc lập phải tìm hiểu về đối tượng kiểm thử để tạo test case, trong khi lập trình viên đã hiểu rõ nó, giúp tiết kiệm thời gian — vì vậy nên giao hoạt động kiểm thử cho lập trình viên;\n(IV) Điểm yếu của test case do lập trình viên làm là họ thường lạc quan về phần mềm của mình; rủi ro là các test case hợp lý bị bỏ quên vì lập trình viên quan tâm phát triển hơn kiểm thử.",
     "optionsVi": {
       "a": "I, II và III",
       "b": "I, II và IV",
@@ -2376,7 +2376,7 @@
     }
   },
   "e8_q4": {
-    "questionVi": "Những điều nào sau đây áp dụng cho kiểm thử hệ thống (system testing)? (a) Nó có thể đáp ứng các yêu cầu pháp lý; (b) Nó có thể sử dụng đặc tả hệ thống làm cơ sở kiểm thử (test basis); (c) Nó thường là trách nhiệm của người dùng nghiệp vụ; (d) Mục tiêu chính của nó là xây dựng niềm tin (confidence); (e) Nó nên tập trung vào giao tiếp giữa các hệ thống.",
+    "questionVi": "Những điều nào sau đây áp dụng cho kiểm thử hệ thống (system testing)?\n(a) Có thể đáp ứng yêu cầu pháp lý;\n(b) Có thể dùng đặc tả hệ thống làm cơ sở kiểm thử (test basis);\n(c) Thường thuộc trách nhiệm của người dùng nghiệp vụ;\n(d) Mục tiêu chính là tạo niềm tin;\n(e) Nên tập trung vào giao tiếp giữa các hệ thống.",
     "optionsVi": {
       "a": "a và c",
       "b": "b và d",
@@ -2385,7 +2385,7 @@
     }
   },
   "e8_q5": {
-    "questionVi": "Những yếu tố nào sau đây là tác nhân kích hoạt (triggers) cho kiểm thử bảo trì (maintenance testing)? (a) Di trú hệ thống (system migration) từ nền tảng này sang nền tảng khác; (b) Loại bỏ/ngừng sử dụng (retirement) một hệ thống; (c) Chuẩn bị cho một cuộc kiểm toán (audit) hệ thống; (d) Các sửa đổi (modifications) đối với hệ thống; (e) Phát triển một hệ thống hoàn toàn mới.",
+    "questionVi": "Những điều nào sau đây là tác nhân kích hoạt kiểm thử bảo trì (maintenance testing)?\n(a) Di chuyển (migration) hệ thống từ nền tảng này sang nền tảng khác;\n(b) Ngừng sử dụng (retirement) một hệ thống;\n(c) Chuẩn bị cho một cuộc kiểm toán (audit) hệ thống;\n(d) Sửa đổi hệ thống;\n(e) Phát triển một hệ thống hoàn toàn mới.",
     "optionsVi": {
       "a": "a, c và d",
       "b": "b, c và e",
@@ -2412,7 +2412,7 @@
     }
   },
   "e8_q8": {
-    "questionVi": "Bạn đang thực hiện review các test case của đồng nghiệp dựa trên tài liệu test basis trong hình (màn hình User Login với hai trường 'User Name' và 'Password', cùng bảng xác thực: V1 – User Name bắt buộc nhập, lỗi 12; V2 – User Name phải tồn tại sẵn trong cơ sở dữ liệu, lỗi 23; V3 – Password bắt buộc nhập, lỗi 13; V4 – Password phải khớp với mật khẩu của người dùng trong cơ sở dữ liệu, lỗi 24). Các test case gồm: TC1. Thành công – 'User Name' và 'Password' hợp lệ; màn hình 'Customer Menu' hiển thị. TC2. Thất bại – trường 'User Name' để trống; hiển thị lỗi 12. TC3. Thất bại – 'User Id' nhập vào không tồn tại trong cơ sở dữ liệu; hiển thị lỗi 23. TC4. Thất bại – 'Password' không khớp với mật khẩu của người dùng trong cơ sở dữ liệu; hiển thị lỗi 24. Bạn sử dụng checklist hướng dẫn sau: C1 – phải có một test case bao phủ trường hợp thành công; C2 – phải có một test case cho mỗi đường lỗi (error path); C3 – mỗi test case phải sử dụng thuật ngữ nhất quán với tài liệu test basis (tên trường, mã số lỗi, v.v.). Hãy ghi nhận một defect riêng cho mỗi test case bị thiếu (C1, C2) và cho mỗi test case không đáp ứng C3. Bạn cần ghi nhận bao nhiêu defect?",
+    "questionVi": "Bạn đang rà soát (review) các test case của đồng nghiệp dựa trên tài liệu cơ sở kiểm thử (test basis) dưới đây.\n\nCác test case gồm:\n• TC1. Thành công – ‘User Name’ và ‘Password’ hợp lệ; hiển thị ‘Customer Menu’.\n• TC2. Sự cố – trường ‘User Name’ để trống; hiển thị lỗi 12.\n• TC3. Sự cố – ‘User Id’ nhập vào không tồn tại trong cơ sở dữ liệu; hiển thị lỗi 23.\n• TC4. Sự cố – ‘Password’ không khớp mật khẩu của người dùng trong cơ sở dữ liệu; hiển thị lỗi 24.\n\nBạn dùng checklist sau:\n• C1 – phải có một test case cho trường hợp thành công;\n• C2 – phải có một test case cho mỗi đường lỗi;\n• C3 – mỗi test case phải dùng thuật ngữ nhất quán với tài liệu cơ sở kiểm thử (tên trường, số hiệu lỗi…).\n\nGhi một lỗi riêng cho mỗi test case bị thiếu (C1, C2) và cho mỗi test case không đạt C3. Bạn nên ghi bao nhiêu lỗi?",
     "optionsVi": {
       "a": "1",
       "b": "2",
@@ -2430,7 +2430,7 @@
     }
   },
   "e8_q10": {
-    "questionVi": "Một hệ thống tưới tiêu sân vườn cho phép người dùng chỉ định hai đầu vào: (1) Frequency (Tần suất) — số lần hệ thống tự động bật mỗi ngày, tối thiểu 1 lần, tối đa 5 lần; (2) Duration (Thời lượng) — thời gian hoạt động tính theo số PHÚT NGUYÊN mỗi lần bật, từ 1 đến 60. Áp dụng phân tích giá trị biên 2 giá trị (2-value boundary value analysis), phương án nào sau đây là tập kiểm thử đúng gồm các giá trị biên hợp lệ và không hợp lệ?",
+    "questionVi": "Một hệ thống tưới vườn cho phép người dùng nhập hai giá trị:\n(1) Tần suất — số lần hệ thống tự bật mỗi ngày, tối thiểu 1 lần, tối đa 5 lần;\n(2) Thời lượng — thời gian hoạt động mỗi lần bật, tính theo PHÚT NGUYÊN, từ 1 đến 60.\n\nÁp dụng phân tích giá trị biên (boundary value analysis) 2 điểm, lựa chọn nào là tập giá trị biên hợp lệ và không hợp lệ đúng?",
     "optionsVi": {
       "a": "Frequency: 1, 5; Duration: 1, 60",
       "b": "Frequency: 0, 1, 5, 6; Duration: 59 giây, 1 phút, 60 phút, 60 phút 1 giây",
@@ -2448,7 +2448,7 @@
     }
   },
   "e8_q12": {
-    "questionVi": "Các test case sau đây có sẵn để kiểm thử các thay đổi được thực hiện đối với các chức năng liên quan đến độc giả mượn sách (borrower) trong Hệ thống Quản lý Thư viện: 1 – Thêm độc giả mới; 2 – Cập nhật dữ liệu độc giả; 3 – Xóa độc giả; 4 – Cho độc giả mượn sách; 5 – Nhận trả sách từ độc giả; 6 – Đặt trước sách cho độc giả; 7 – Gửi thông báo \"sách đặt trước đã sẵn sàng\" cho độc giả. Trình tự kiểm thử nào sau đây biểu diễn một use case khả dĩ? (Mỗi trình tự đều bắt đầu bằng test 1.)",
+    "questionVi": "Có các test case sau để kiểm thử những thay đổi đối với các chức năng liên quan đến độc giả trong một Hệ thống quản lý thư viện:\n• 1 – Thêm độc giả mới;\n• 2 – Cập nhật thông tin độc giả;\n• 3 – Xóa độc giả;\n• 4 – Cho độc giả mượn sách;\n• 5 – Độc giả trả sách;\n• 6 – Đặt trước sách cho độc giả;\n• 7 – Gửi thông báo “sách đặt trước đã sẵn sàng” cho độc giả.\n\nChuỗi kiểm thử nào thể hiện một use case khả dĩ? (Mỗi chuỗi bắt đầu bằng ca 1.)",
     "optionsVi": {
       "a": "1 – 4 – 2 – 7 – 5 – 6 – 3",
       "b": "1 – 6 – 2 – 5 – 7 – 4 – 3",
@@ -2502,7 +2502,7 @@
     }
   },
   "e8_q18": {
-    "questionVi": "Một đợt đánh giá rủi ro (risk assessment) đã xác định các rủi ro sản phẩm (product risks) sau: R1 — khả năng xảy ra (likelihood): cao, mức độ tác động (impact): thấp; R2 — khả năng xảy ra: cao, mức độ tác động: cao; R3 — khả năng xảy ra: thấp, mức độ tác động: thấp; R4 — khả năng xảy ra: thấp, mức độ tác động: cao. Theo chiến lược kiểm thử dựa trên rủi ro (risk-based testing), vùng rủi ro nào cần được kiểm thử ĐẦU TIÊN và kỹ lưỡng nhất?",
+    "questionVi": "Một đánh giá rủi ro cho ra các rủi ro sản phẩm (product risk) sau:\n• R1 — khả năng xảy ra: cao, tác động: thấp;\n• R2 — khả năng: cao, tác động: cao;\n• R3 — khả năng: thấp, tác động: thấp;\n• R4 — khả năng: thấp, tác động: cao.\n\nTheo chiến lược kiểm thử dựa vào rủi ro (risk-based testing), vùng rủi ro nào nên được kiểm thử ĐẦU TIÊN và kỹ lưỡng nhất?",
     "optionsVi": {
       "a": "R1",
       "b": "R2",
@@ -2556,7 +2556,7 @@
     }
   },
   "e9_q5": {
-    "questionVi": "Báo cáo sự cố (incident report) sau đây được tạo trong quá trình kiểm thử hệ thống (system test) của một ứng dụng web: “Phát hiện defect: 15.8.2010, bởi Joe Smith. Cấp độ kiểm thử: system test. Test case: Area 5 / TC 98. Phiên bản build: 2011-16.2. Mô tả: sau khi điền đầy đủ tất cả các trường bắt buộc ở màn hình 1, tôi nhấn ENTER để tiếp tục sang màn hình 2. Không có gì xảy ra — hệ thống hoàn toàn không phản hồi.” Bạn sẽ đề xuất điều gì làm cải tiến QUAN TRỌNG NHẤT cho báo cáo này?",
+    "questionVi": "Báo cáo sự cố (incident report) sau được tạo ra trong kiểm thử hệ thống (system test) một ứng dụng web:\n“Phát hiện lỗi: 15.8.2010, bởi Joe Smith.\nMức kiểm thử: kiểm thử hệ thống.\nTest case: Area 5 / TC 98.\nPhiên bản build: 2011-16.2.\nMô tả: sau khi điền đủ các trường bắt buộc ở màn hình 1, tôi bấm ENTER để sang màn hình 2. Không có gì xảy ra — hệ thống hoàn toàn không phản hồi.”\n\nBạn đề xuất cải thiện QUAN TRỌNG NHẤT nào cho báo cáo này?",
     "optionsVi": {
       "a": "Bổ sung phân tích tác động (impact analysis)",
       "b": "Bổ sung thông tin về việc developer nào nên sửa lỗi này",
@@ -2664,7 +2664,7 @@
     }
   },
   "e9_q17": {
-    "questionVi": "Một nhóm Agile sử dụng mô hình TỨ GIÁC KIỂM THỬ (TESTING QUADRANTS) để trao đổi về các bài kiểm thử của mình. Hãy phân loại hai hoạt động sau: (1) các unit test và component integration test tự động hỗ trợ nhóm và hướng công nghệ (technology-facing); (2) kiểm thử khả dụng (usability testing) và các phiên kiểm thử khám phá (exploratory testing) phê phán sản phẩm từ góc nhìn nghiệp vụ/người dùng. Cách phân loại nào là đúng?",
+    "questionVi": "Một nhóm Agile dùng mô hình BỐN GÓC PHẦN TƯ KIỂM THỬ (testing quadrants) để trao đổi về các test case của mình. Phân loại hai hoạt động sau:\n(1) Kiểm thử đơn vị và kiểm thử tích hợp thành phần tự động, hỗ trợ nhóm và hướng công nghệ;\n(2) Kiểm thử tính khả dụng (usability testing) và các phiên kiểm thử khám phá (exploratory testing) phản biện sản phẩm từ góc nhìn nghiệp vụ/người dùng.\n\nPhân loại nào đúng?",
     "optionsVi": {
       "a": "(1) thuộc góc phần tư Q1 (hướng công nghệ, hỗ trợ nhóm); (2) thuộc góc phần tư Q3 (hướng nghiệp vụ, phê phán sản phẩm)",
       "b": "(1) thuộc góc phần tư Q4; (2) thuộc góc phần tư Q2",
@@ -2709,7 +2709,7 @@
     }
   },
   "e9_q22": {
-    "questionVi": "Hãy phân loại bốn hoạt động sau đây thành đảm bảo chất lượng (QA) hoặc kiểm soát chất lượng (QC) theo CTFL v4.0: (1) định nghĩa và kiểm toán (audit) quy trình phát triển của tổ chức; (2) thực thi kiểm thử hệ thống (system tests) trên bản ứng viên phát hành (release candidate); (3) phân tích các chỉ số đo quy trình để phòng ngừa defect trong tương lai; (4) review tài liệu thiết kế để phát hiện defect trong đó.",
+    "questionVi": "Phân loại bốn hoạt động sau là đảm bảo chất lượng (quality assurance – QA) hay kiểm soát chất lượng (quality control – QC) theo CTFL v4.0:\n(1) Định nghĩa và kiểm toán (audit) quy trình phát triển của tổ chức;\n(2) Thực thi kiểm thử hệ thống trên một bản ứng viên phát hành (release candidate);\n(3) Phân tích số đo quy trình để phòng ngừa lỗi trong tương lai;\n(4) Rà soát một tài liệu thiết kế để phát hiện lỗi trong đó.",
     "optionsVi": {
       "a": "QA: 1 và 3; QC: 2 và 4",
       "b": "QA: 2 và 4; QC: 1 và 3",
@@ -3069,7 +3069,7 @@
     }
   },
   "e10_q38": {
-    "questionVi": "Hãy phân loại bốn hoạt động sau đây thành đảm bảo chất lượng (QA) hoặc kiểm soát chất lượng (QC) theo CTFL v4.0: (1) định nghĩa và kiểm toán (audit) quy trình phát triển của tổ chức; (2) thực thi kiểm thử hệ thống (system tests) trên bản ứng viên phát hành (release candidate); (3) phân tích các chỉ số đo quy trình để phòng ngừa defect trong tương lai; (4) review tài liệu thiết kế để phát hiện defect trong đó.",
+    "questionVi": "Phân loại bốn hoạt động sau là đảm bảo chất lượng (quality assurance – QA) hay kiểm soát chất lượng (quality control – QC) theo CTFL v4.0:\n(1) Định nghĩa và kiểm toán (audit) quy trình phát triển của tổ chức;\n(2) Thực thi kiểm thử hệ thống (system test) trên một bản ứng viên phát hành (release candidate);\n(3) Phân tích số đo quy trình để phòng ngừa lỗi trong tương lai;\n(4) Rà soát (review) một tài liệu thiết kế để phát hiện lỗi trong đó.",
     "optionsVi": {
       "a": "QA: 1 và 3; QC: 2 và 4",
       "b": "QA: 2 và 4; QC: 1 và 3",

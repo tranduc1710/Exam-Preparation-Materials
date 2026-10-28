@@ -256,7 +256,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                 <div className="p-5 space-y-4">
                   <div className="space-y-2">
                     {(languageMode === 'en' || languageMode === 'bilingual') && (
-                      <div className="text-slate-900 font-medium text-base leading-relaxed">
+                      <div className="text-slate-900 font-medium text-base leading-relaxed whitespace-pre-line">
                         {q.question}
                       </div>
                     )}
@@ -264,8 +264,8 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                       <div
                         className={
                           languageMode === 'bilingual'
-                            ? 'text-indigo-950 bg-indigo-50/60 border-l-4 border-indigo-500 pl-3.5 py-2 rounded-r-xl text-sm sm:text-base font-medium leading-relaxed'
-                            : 'text-slate-900 font-medium text-base leading-relaxed'
+                            ? 'text-indigo-950 bg-indigo-50/60 border-l-4 border-indigo-500 pl-3.5 py-2 rounded-r-xl text-sm sm:text-base font-medium leading-relaxed whitespace-pre-line'
+                            : 'text-slate-900 font-medium text-base leading-relaxed whitespace-pre-line'
                         }
                       >
                         {q.questionVi}
@@ -362,14 +362,14 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                           </span>
                           <div className="flex-1 space-y-1">
                             {(languageMode === 'en' || languageMode === 'bilingual') && (
-                              <div className="leading-relaxed">{optEn}</div>
+                              <div className="leading-relaxed whitespace-pre-line">{optEn}</div>
                             )}
                             {(languageMode === 'vi' || languageMode === 'bilingual') && optVi && (
                               <div
                                 className={
                                   languageMode === 'bilingual'
-                                    ? 'text-xs sm:text-sm text-indigo-900/85 italic leading-relaxed'
-                                    : 'leading-relaxed'
+                                    ? 'text-xs sm:text-sm text-indigo-900/85 italic leading-relaxed whitespace-pre-line'
+                                    : 'leading-relaxed whitespace-pre-line'
                                 }
                               >
                                 {optVi}
@@ -385,14 +385,14 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                   </div>
 
                   {isShown && (
-                    <div className="rounded-xl bg-indigo-50/60 border border-indigo-200 p-4 space-y-2 text-sm text-slate-800 leading-relaxed">
+                    <div className="rounded-xl bg-indigo-50/60 border border-indigo-200 p-4 space-y-2 text-sm text-slate-800 leading-relaxed whitespace-pre-line">
                       {q.explanationShort && (
-                        <div className="bg-white/80 border border-indigo-200/80 rounded-lg px-3 py-2 text-indigo-950">
+                        <div className="bg-white/80 border border-indigo-200/80 rounded-lg px-3 py-2 text-indigo-950 whitespace-pre-line">
                           <strong className="text-indigo-700">Tóm tắt nhanh: </strong>
                           {q.explanationShort}
                         </div>
                       )}
-                      <div>
+                      <div className="whitespace-pre-line">
                         <strong className="text-indigo-950">Giải thích chi tiết: </strong>
                         {q.explanation}
                       </div>

@@ -19,6 +19,7 @@ import {
   GraduationCap,
   Languages,
   BookMarked,
+  RotateCcw,
 } from 'lucide-react';
 import {
   AttemptRecord,
@@ -26,6 +27,7 @@ import {
   LanguageMode,
   OptionKey,
   Question,
+  QuestionExposureStats,
   QuestionSetMode,
   QuizConfig,
   QuizMode,
@@ -37,11 +39,14 @@ import {
   examsDataset,
   formatTime,
   generateOfficialMock40,
+  getExposureStats,
   ISTQB_CHAPTER_WEIGHTS,
   loadAttempts,
   loadBookmarks,
   loadWrongIds,
   questionById,
+  recordQuestionsExposure,
+  resetQuestionsExposure,
   saveAttempt,
   saveBookmarks,
   shuffleArray,
@@ -91,6 +96,20 @@ export function App() {
   const [attempts, setAttempts] = useState<AttemptRecord[]>(() => loadAttempts());
   const [bookmarks, setBookmarks] = useState<string[]>(() => loadBookmarks());
   const [wrongIds, setWrongIds] = useState<string[]>(() => loadWrongIds());
+  const [exposureStats, setExposureStats] = useState<QuestionExposureStats>(() =>
+    getExposureStats()
+  );
+
+  const handleResetExposure = () => {
+    if (
+      window.confirm(
+        'Đặt lại vòng quay ngẫu nhiên? Tất cả 344 câu hỏi sẽ bắt đầu lại từ Vòng 1 với tần suất đồng đều nhau.'
+      )
+    ) {
+      resetQuestionsExposure();
+      setExposureStats(getExposureStats());
+    }
+  };
 
   const handleToggleBookmark = (qId: string) => {
     setBookmarks((prev) => {
@@ -104,6 +123,8 @@ export function App() {
   const startExam = (exam: Exam, forcedMode?: QuizMode) => {
     const modeToUse = forcedMode || quizMode;
     const qs = buildExamQuestionSet(exam, questionSetMode, shuffleQuestions);
+    recordQuestionsExposure(qs.map((q) => q.id));
+    setExposureStats(getExposureStats());
     setViewingAttempt(null);
     setActiveQuiz({
       title: exam.title,
@@ -121,11 +142,13 @@ export function App() {
 
   const startRandomMock40 = (forcedMode?: QuizMode) => {
     const modeToUse = forcedMode || quizMode;
-    const qs = generateOfficialMock40();
+    const qs = generateOfficialMock40(true);
+    const updatedStats = getExposureStats();
+    setExposureStats(updatedStats);
     setViewingAttempt(null);
     setActiveQuiz({
       title: 'Đề thi thử ISTQB CTFL Ngẫu Nhiên (Chuẩn 40 câu)',
-      subtitle: 'Phân bổ đúng tỷ lệ 6 chương của ISTQB Foundation Level',
+      subtitle: `Phân bổ chuẩn 6 chương (Fair Shuffle-Bag • Vòng ${updatedStats.currentRound})`,
       mode: modeToUse,
       durationMinutes,
       questions: qs,
@@ -136,6 +159,8 @@ export function App() {
   const startChapterPractice = (chapterNum: number, forcedMode: QuizMode = 'practice') => {
     const pool = allQuestions.filter((q) => q.chapter === chapterNum);
     const qs = shuffleQuestions ? shuffleArray(pool) : pool;
+    recordQuestionsExposure(qs.map((q) => q.id));
+    setExposureStats(getExposureStats());
     const chMeta = examsDataset.metadata.chapters.find((c) => c.chapter === chapterNum);
     setViewingAttempt(null);
     setActiveQuiz({
@@ -151,6 +176,8 @@ export function App() {
   const startV4Practice = (forcedMode: QuizMode = 'practice') => {
     const pool = allQuestions.filter((q) => q.isV4);
     const qs = shuffleQuestions ? shuffleArray(pool) : pool;
+    recordQuestionsExposure(qs.map((q) => q.id));
+    setExposureStats(getExposureStats());
     setViewingAttempt(null);
     setActiveQuiz({
       title: 'Bộ câu hỏi tình huống mới CTFL v4.0',
@@ -534,37 +561,77 @@ export function App() {
         {activeTab === 'exams' && (
           <div className="space-y-8">
             {/* Random Official 40-Question Generator Banner */}
-            <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="space-y-1.5">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-bold">
-                  <Sparkles className="w-3.5 h-3.5" /> Đề thi mô phỏng chuẩn cấu trúc ISTQB
+            <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white shadow-sm flex flex-col gap-5">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="space-y-1.5">
+                  <div className="inline-flex items-center gap-2 flex-wrap">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-bold">
+                      <Sparkles className="w-3.5 h-3.5" /> Đề thi mô phỏng chuẩn cấu trúc ISTQB
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-400/25 border border-emerald-300/40 text-emerald-100 text-xs font-semibold">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-300" /> Thuật toán Fair Shuffle-Bag (Đều 100%)
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-extrabold">
+                    Sinh Đề Thi Thử 40 Câu Ngẫu Nhiên Theo Tỷ Lệ Chương Chuẩn
+                  </h3>
+                  <p className="text-indigo-100 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                    Tự động rút 40 câu hỏi từ ngân hàng 344 câu theo đúng phân bổ đề thi thật của ISTQB:
+                    Chương 1 (8 câu), Chương 2 (6 câu), Chương 3 (4 câu), Chương 4 (11 câu), Chương 5 (9 câu), Chương 6 (2 câu).
+                    Cơ chế <strong>xoay tua đều 100%</strong> bảo đảm mọi câu hỏi đều được xuất hiện như nhau, tuyệt đối không bị bỏ sót câu nào.
+                  </p>
                 </div>
-                <h3 className="text-xl font-extrabold">
-                  Sinh Đề Thi Thử 40 Câu Ngẫu Nhiên Theo Tỷ Lệ Chương Chuẩn
-                </h3>
-                <p className="text-indigo-100 text-xs sm:text-sm max-w-2xl">
-                  Tự động rút 40 câu hỏi từ ngân hàng 344 câu theo đúng phân bổ đề thi thật của ISTQB:
-                  Chương 1 (8 câu), Chương 2 (6 câu), Chương 3 (4 câu), Chương 4 (11 câu), Chương 5 (9 câu), Chương 6 (2 câu).
-                </p>
+
+                <div className="flex flex-wrap items-center gap-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => startRandomMock40('exam')}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-sm shadow-xs transition cursor-pointer"
+                  >
+                    <Play className="w-4 h-4 fill-indigo-700" />
+                    <span>Thi thử 40 câu ({durationMinutes || '∞'} phút)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => startRandomMock40('practice')}
+                    className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-indigo-500/40 hover:bg-indigo-500/60 border border-white/25 text-white font-semibold text-sm transition cursor-pointer"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span>Luyện tập 40 câu</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => startRandomMock40('exam')}
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-sm shadow-xs transition cursor-pointer"
-                >
-                  <Play className="w-4 h-4 fill-indigo-700" />
-                  <span>Thi thử 40 câu ({durationMinutes || '∞'} phút)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => startRandomMock40('practice')}
-                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-indigo-500/40 hover:bg-indigo-500/60 border border-white/25 text-white font-semibold text-sm transition cursor-pointer"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  <span>Luyện tập 40 câu</span>
-                </button>
+              {/* Fair Randomness Progress & Round Indicator */}
+              <div className="pt-4 border-t border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+                <div className="flex-1 w-full max-w-xl space-y-1.5">
+                  <div className="flex items-center justify-between text-indigo-100 font-medium">
+                    <span>
+                      Độ phủ câu hỏi: <strong>{exposureStats.coveredCount}/{exposureStats.totalQuestions} câu</strong> ({exposureStats.coveragePercentage}%)
+                    </span>
+                    <span className="font-semibold text-white">
+                      Vòng quay {exposureStats.currentRound} ({exposureStats.minSeen} - {exposureStats.maxSeen} lần xuất hiện)
+                    </span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-black/25 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-emerald-400 transition-all duration-500"
+                      style={{ width: `${Math.max(3, exposureStats.coveragePercentage)}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-indigo-200 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleResetExposure}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition text-xs font-medium cursor-pointer"
+                    title="Đặt lại thống kê xuất hiện của các câu hỏi về 0 để bắt đầu chu kỳ quay mới"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Đặt lại vòng quay</span>
+                  </button>
+                </div>
               </div>
             </div>
 

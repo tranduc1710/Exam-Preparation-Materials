@@ -97,3 +97,13 @@ export interface AttemptRecord {
   flaggedIds: string[];
   questionIds: string[];
 }
+
+export interface QuestionExposureStats {
+  totalQuestions: number;
+  coveredCount: number;
+  coveragePercentage: number;
+  minSeen: number;
+  maxSeen: number;
+  currentRound: number;
+}
+

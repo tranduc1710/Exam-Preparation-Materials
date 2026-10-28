@@ -340,7 +340,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                 {/* Question Stem according to LanguageMode */}
                 <div className="space-y-2.5">
                   {(languageMode === 'en' || languageMode === 'bilingual') && (
-                    <div className="text-slate-900 text-base sm:text-lg font-medium leading-relaxed">
+                    <div className="text-slate-900 text-base sm:text-lg font-medium leading-relaxed whitespace-pre-line">
                       {currentQ.question}
                     </div>
                   )}
@@ -349,8 +349,8 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                       <div
                         className={
                           languageMode === 'bilingual'
-                            ? 'text-indigo-950 bg-indigo-50/60 border-l-4 border-indigo-500 pl-3.5 py-2 rounded-r-xl text-sm sm:text-base font-medium leading-relaxed'
-                            : 'text-slate-900 text-base sm:text-lg font-medium leading-relaxed'
+                            ? 'text-indigo-950 bg-indigo-50/60 border-l-4 border-indigo-500 pl-3.5 py-2 rounded-r-xl text-sm sm:text-base font-medium leading-relaxed whitespace-pre-line'
+                            : 'text-slate-900 text-base sm:text-lg font-medium leading-relaxed whitespace-pre-line'
                         }
                       >
                         {languageMode === 'bilingual' && (
@@ -469,14 +469,14 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                         </span>
                         <div className="flex-1 space-y-1">
                           {(languageMode === 'en' || languageMode === 'bilingual') && (
-                            <div className="text-sm sm:text-base leading-relaxed">{optEn}</div>
+                            <div className="text-sm sm:text-base leading-relaxed whitespace-pre-line">{optEn}</div>
                           )}
                           {(languageMode === 'vi' || languageMode === 'bilingual') && optVi && (
                             <div
                               className={
                                 languageMode === 'bilingual'
-                                  ? 'text-xs sm:text-sm text-indigo-900/85 italic leading-relaxed'
-                                  : 'text-sm sm:text-base leading-relaxed'
+                                  ? 'text-xs sm:text-sm text-indigo-900/85 italic leading-relaxed whitespace-pre-line'
+                                  : 'text-sm sm:text-base leading-relaxed whitespace-pre-line'
                               }
                             >
                               {optVi}
@@ -534,13 +534,13 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                     </div>
 
                     {currentQ.explanationShort && (
-                      <div className="text-sm sm:text-base text-indigo-950 bg-white/80 border border-indigo-200/80 rounded-xl px-3.5 py-2.5 leading-relaxed">
+                      <div className="text-sm sm:text-base text-indigo-950 bg-white/80 border border-indigo-200/80 rounded-xl px-3.5 py-2.5 leading-relaxed whitespace-pre-line">
                         <span className="font-bold text-indigo-700">Tóm tắt nhanh: </span>
                         {currentQ.explanationShort}
                       </div>
                     )}
 
-                    <div className="text-sm sm:text-base text-slate-800 leading-relaxed">
+                    <div className="text-sm sm:text-base text-slate-800 leading-relaxed whitespace-pre-line">
                       <span className="font-bold text-indigo-950">Giải thích chi tiết: </span>
                       {currentQ.explanation}
                     </div>

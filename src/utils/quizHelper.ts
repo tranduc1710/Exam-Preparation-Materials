@@ -1,4 +1,10 @@
-import { AttemptRecord, Exam, ExamsDataset, Question } from '../types';
+import {
+  AttemptRecord,
+  Exam,
+  ExamsDataset,
+  Question,
+  QuestionExposureStats,
+} from '../types';
 import rawData from '../data/examsData.json';
 
 export const examsDataset = rawData as unknown as ExamsDataset;
@@ -12,6 +18,7 @@ export const questionById: Record<string, Question> = Object.fromEntries(
 const ATTEMPTS_KEY = 'istqb_ctfl_attempts_v1';
 const BOOKMARKS_KEY = 'istqb_ctfl_bookmarks_v1';
 const WRONG_IDS_KEY = 'istqb_ctfl_wrong_ids_v1';
+const QUESTION_EXPOSURE_KEY = 'istqb_ctfl_question_exposure_v1';
 
 // Official ISTQB CTFL 40-question distribution across 6 chapters
 export const ISTQB_CHAPTER_WEIGHTS: Record<number, number> = {
@@ -41,6 +48,87 @@ export function shuffleArray<T>(arr: T[]): T[] {
   return copy;
 }
 
+export function loadQuestionExposureMap(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(QUESTION_EXPOSURE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveQuestionExposureMap(map: Record<string, number>): void {
+  localStorage.setItem(QUESTION_EXPOSURE_KEY, JSON.stringify(map));
+}
+
+export function recordQuestionsExposure(qIds: string[]): void {
+  if (!qIds || qIds.length === 0) return;
+  const current = loadQuestionExposureMap();
+  for (const id of qIds) {
+    current[id] = (current[id] || 0) + 1;
+  }
+  saveQuestionExposureMap(current);
+}
+
+export function resetQuestionsExposure(): void {
+  localStorage.removeItem(QUESTION_EXPOSURE_KEY);
+}
+
+export function getExposureStats(): QuestionExposureStats {
+  const map = loadQuestionExposureMap();
+  const totalQuestions = allQuestions.length;
+  const counts = allQuestions.map((q) => map[q.id] || 0);
+
+  const minSeen = counts.length > 0 ? Math.min(...counts) : 0;
+  const maxSeen = counts.length > 0 ? Math.max(...counts) : 0;
+  const currentRound = minSeen + 1;
+
+  const coveredCount = counts.filter((c) => c > 0).length;
+  const coveragePercentage =
+    totalQuestions > 0 ? Math.round((coveredCount / totalQuestions) * 100) : 0;
+
+  return {
+    totalQuestions,
+    coveredCount,
+    coveragePercentage,
+    minSeen,
+    maxSeen,
+    currentRound,
+  };
+}
+
+/**
+ * Fair Random Selection (Shuffle-Bag / Starvation-Free Algorithm):
+ * Đảm bảo 100% tất cả các câu hỏi trong ngân hàng đều được rút ngẫu nhiên với tần suất bằng nhau.
+ * - Các câu hỏi chưa từng xuất hiện hoặc có số lần xuất hiện ít nhất sẽ được ưu tiên bốc trước.
+ * - Các câu cùng số lần xuất hiện được xáo trộn ngẫu nhiên (Fisher-Yates).
+ * - Triệt tiêu hoàn toàn trường hợp câu thì xuất hiện nhiều lần, câu thì mãi không được bốc tới.
+ */
+export function fairSelectQuestions<T extends Question>(
+  candidates: T[],
+  count: number
+): T[] {
+  if (candidates.length <= count) {
+    return shuffleArray(candidates);
+  }
+
+  const exposureMap = loadQuestionExposureMap();
+
+  const tagged = candidates.map((q) => ({
+    question: q,
+    seen: exposureMap[q.id] || 0,
+    rand: Math.random(),
+  }));
+
+  tagged.sort((a, b) => {
+    if (a.seen !== b.seen) return a.seen - b.seen;
+    return a.rand - b.rand;
+  });
+
+  const selected = tagged.slice(0, count).map((t) => t.question);
+  return shuffleArray(selected);
+}
+
 export function buildExamQuestionSet(
   exam: Exam,
   setMode: 'original' | 'standard40',
@@ -55,23 +143,30 @@ export function buildExamQuestionSet(
     } else if (result.length < 40) {
       const needed = 40 - result.length;
       const existingIds = new Set(result.map((q) => q.id));
-      const pool = shuffleArray(allQuestions.filter((q) => !existingIds.has(q.id)));
-      result = [...result, ...pool.slice(0, needed)];
+      const pool = allQuestions.filter((q) => !existingIds.has(q.id));
+      const additional = fairSelectQuestions(pool, needed);
+      result = [...result, ...additional];
     }
   }
 
   return shuffle ? shuffleArray(result) : result;
 }
 
-export function generateOfficialMock40(): Question[] {
+export function generateOfficialMock40(autoRecord: boolean = true): Question[] {
   const selected: Question[] = [];
   for (const [chStr, count] of Object.entries(ISTQB_CHAPTER_WEIGHTS)) {
     const ch = Number(chStr);
-    const chPool = shuffleArray(allQuestions.filter((q) => q.chapter === ch));
-    selected.push(...chPool.slice(0, count));
+    const chPool = allQuestions.filter((q) => q.chapter === ch);
+    const chSelected = fairSelectQuestions(chPool, count);
+    selected.push(...chSelected);
   }
-  return shuffleArray(selected);
+  const result = shuffleArray(selected);
+  if (autoRecord) {
+    recordQuestionsExposure(result.map((q) => q.id));
+  }
+  return result;
 }
+
 
 export function loadAttempts(): AttemptRecord[] {
   try {
