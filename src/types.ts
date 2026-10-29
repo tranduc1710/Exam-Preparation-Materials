@@ -24,6 +24,7 @@ export interface Question {
   chapter: number;
   chapterTitle: string;
   category?: 'official' | 'ai';
+  mnemonic?: string;
 }
 
 export type ExamCategory = 'official' | 'ai';

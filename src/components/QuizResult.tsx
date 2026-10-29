@@ -15,6 +15,7 @@ import {
   X,
   Sparkles,
   Languages,
+  Lightbulb,
 } from 'lucide-react';
 import { AttemptRecord, LanguageMode, OptionKey, Question } from '../types';
 import { CHAPTER_SHORT_NAMES, formatTime, getQuestionById } from '../utils/quizHelper';
@@ -504,6 +505,15 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                       <div className="bg-white/80 border border-indigo-200/80 rounded-lg px-3 py-2 text-indigo-950 whitespace-pre-line">
                         <strong className="text-indigo-700">Tóm tắt nhanh: </strong>
                         {q.explanationShort}
+                      </div>
+                    )}
+                    {q.mnemonic && (
+                      <div className="text-amber-950 bg-amber-50/95 border border-amber-300 rounded-lg px-3 py-2 leading-relaxed flex items-start gap-2 shadow-2xs">
+                        <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <strong className="text-amber-900">Mẹo nhớ nhanh: </strong>
+                          <span>{q.mnemonic.replace(/^💡\s*mẹo nhớ:?\s*/i, '')}</span>
+                        </div>
                       </div>
                     )}
                     <div className="whitespace-pre-line">

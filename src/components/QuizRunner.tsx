@@ -23,6 +23,7 @@ import {
   Type,
   Ban,
   Layers,
+  Lightbulb,
 } from 'lucide-react';
 import { LanguageMode, OptionKey, Question, QuizConfig } from '../types';
 import { CHAPTER_SHORT_NAMES, formatTime } from '../utils/quizHelper';
@@ -738,6 +739,16 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                       <div className="text-sm sm:text-base text-indigo-950 bg-white/80 border border-indigo-200/80 rounded-xl px-3.5 py-2.5 leading-relaxed whitespace-pre-line">
                         <span className="font-bold text-indigo-700">Tóm tắt nhanh: </span>
                         {currentQ.explanationShort}
+                      </div>
+                    )}
+
+                    {currentQ.mnemonic && (
+                      <div className="text-sm sm:text-base text-amber-950 bg-amber-50/95 border border-amber-300 rounded-xl px-3.5 py-2.5 leading-relaxed flex items-start gap-2.5 shadow-2xs">
+                        <Lightbulb className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <strong className="text-amber-900">Mẹo nhớ nhanh: </strong>
+                          <span>{currentQ.mnemonic.replace(/^💡\s*mẹo nhớ:?\s*/i, '')}</span>
+                        </div>
                       </div>
                     )}
 
