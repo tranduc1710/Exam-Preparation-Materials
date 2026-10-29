@@ -72,6 +72,17 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const [groupByChapter, setGroupByChapter] = useState<boolean>(true);
   const [autoRevealPractice, setAutoRevealPractice] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [showAlwaysMnemonic, setShowAlwaysMnemonic] = useState<boolean>(false);
+  const [openMnemonicSet, setOpenMnemonicSet] = useState<Set<string>>(new Set());
+
+  const toggleMnemonic = (qId: string) => {
+    setOpenMnemonicSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(qId)) next.delete(qId);
+      else next.add(qId);
+      return next;
+    });
+  };
 
   const totalSecondsLimit = durationMinutes > 0 ? durationMinutes * 60 : 0;
   const remainingSeconds =
@@ -81,6 +92,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const isBookmarked = bookmarks.includes(currentQ.id);
   const isFlagged = flaggedSet.has(currentQ.id);
   const selectedAns = userAnswers[currentQ.id];
+  const isMnemonicOpen = showAlwaysMnemonic || openMnemonicSet.has(currentQ.id);
   const isRevealed =
     mode === 'practice' &&
     (Boolean(selectedAns && autoRevealPractice) || revealedSet.has(currentQ.id));
@@ -464,6 +476,26 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                       {isBookmarked ? 'Đã lưu' : 'Lưu câu hỏi'}
                     </span>
                   </button>
+
+                  {currentQ.mnemonic && (
+                    <button
+                      type="button"
+                      onClick={() => toggleMnemonic(currentQ.id)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                        isMnemonicOpen
+                          ? 'bg-amber-100 text-amber-950 border-amber-400 shadow-2xs font-bold'
+                          : 'bg-amber-50/90 text-amber-800 border-amber-300 hover:bg-amber-100 hover:border-amber-400'
+                      }`}
+                      title="Xem mẹo nhớ gợi ý cho câu hỏi này"
+                    >
+                      <Lightbulb
+                        className={`w-3.5 h-3.5 ${
+                          isMnemonicOpen ? 'fill-amber-500 text-amber-700' : 'text-amber-600'
+                        }`}
+                      />
+                      <span>{isMnemonicOpen ? 'Ẩn mẹo' : '💡 Mẹo nhớ'}</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -569,6 +601,30 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                           </button>
                         </div>
                       ))}
+                  </div>
+                )}
+
+                {/* Mnemonic Hint Card (Available in BOTH Exam & Practice mode!) */}
+                {currentQ.mnemonic && isMnemonicOpen && (
+                  <div className="p-4 rounded-xl bg-amber-50/95 border-2 border-amber-300 text-amber-950 flex items-start gap-3 shadow-xs">
+                    <div className="w-8 h-8 rounded-lg bg-amber-200/90 border border-amber-300 flex items-center justify-center shrink-0 mt-0.5 text-amber-900 shadow-2xs">
+                      <Lightbulb className="w-4 h-4 fill-amber-500 text-amber-700" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center justify-between">
+                        <span>💡 Mẹo nhớ nhanh (ISTQB CTFL v4.0):</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleMnemonic(currentQ.id)}
+                          className="text-[11px] text-amber-700 hover:text-amber-900 underline font-normal cursor-pointer"
+                        >
+                          Đóng
+                        </button>
+                      </div>
+                      <div className="text-xs sm:text-sm font-medium leading-relaxed">
+                        {currentQ.mnemonic.replace(/^💡\s*mẹo nhớ:?\s*/i, '')}
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -921,6 +977,27 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
               </button>
             </div>
           )}
+
+          {/* Mnemonic Toggle Switch in Sidebar */}
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs">
+            <span className="text-amber-950 font-semibold flex items-center gap-1.5">
+              <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>Gợi ý mẹo nhớ khi làm bài:</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowAlwaysMnemonic((v) => !v)}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                showAlwaysMnemonic ? 'bg-amber-600' : 'bg-slate-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                  showAlwaysMnemonic ? 'translate-x-4' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
 
           {/* Question Navigator Buttons */}
           <div className="max-h-96 overflow-y-auto p-1.5 space-y-3">
