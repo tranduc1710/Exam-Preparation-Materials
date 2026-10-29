@@ -102,7 +102,7 @@ const SYLLABUS_RULES: Array<{
     }
   },
   {
-    pattern: /(1\.4\.1|hoạt động.*kiểm thử|test activities|test process)/i,
+    pattern: /(1\.4\.1|\bhoạt động kiểm thử\b|\bquy trình kiểm thử\b|test activities|test process)/i,
     mnemonic: '💡 Mẹo nhớ các hoạt động kiểm thử: Kế hoạch (Plan) ➔ Giám sát & Kiểm soát (Monitor & Control) ➔ Phân tích (Analyze - Test What) ➔ Thiết kế (Design - Test How) ➔ Hiện thực (Implement) ➔ Thực thi (Execute) ➔ Hoàn tất (Complete).'
   },
   {
@@ -355,13 +355,37 @@ export function getQuestionMnemonic(q?: Question | null): string {
     return q.mnemonic.trim();
   }
 
+  // Priority 1: Official exams with curated `explanationShort`
+  if (q.explanationShort && q.explanationShort.trim().length > 10) {
+    let text = q.explanationShort.trim();
+    text = text.replace(/^(đáp án đúng là:?|chọn:?|phương án đúng là:?)\s*/i, '');
+    text = text.replace(/\n+/g, ' ').trim();
+    if (!text.endsWith('.')) text += '.';
+    return `💡 Mẹo nhớ: ${text}`;
+  }
+
+  // Priority 2: Questions with detailed `explanation`
+  if (q.explanation) {
+    let chunk = q.explanation.split(/các phương án (còn lại|khác)|các lựa chọn khác/i)[0].trim();
+    chunk = chunk.replace(/^(đáp án|phương án)\s*\([a-d]\)[^:]*:\s*/i, '');
+    chunk = chunk.replace(/^(đáp án|phương án)\s*\([a-d]\)\.?\s*/i, '');
+    chunk = chunk.replace(/^ghép đúng:\s*/i, '');
+    chunk = chunk.replace(/\n+/g, ' ').trim();
+
+    const sentences = chunk.split(/(?<=[.!?])\s+/).filter(Boolean);
+    let result = sentences.slice(0, 2).join(' ').trim();
+    if (result.length > 170 && sentences.length > 0) {
+      result = sentences[0].trim();
+    }
+    if (!result.endsWith('.')) result += '.';
+    return `💡 Mẹo nhớ: ${result}`;
+  }
+
   const knowledge = (q.knowledge || '').toLowerCase();
   const question = (q.questionVi || q.question || '').toLowerCase();
-  const expl = (q.explanation || '').toLowerCase();
-  const explShort = (q.explanationShort || '').toLowerCase();
-  const fullText = `${knowledge} ${question} ${expl} ${explShort}`;
+  const fullText = `${knowledge} ${question}`;
 
-  // Priority 1: Match specifically against the official Syllabus knowledge tag
+  // Priority 3: Match strictly against syllabus knowledge rules
   if (knowledge) {
     for (const rule of SYLLABUS_RULES) {
       if (rule.pattern.test(knowledge)) {
@@ -371,28 +395,5 @@ export function getQuestionMnemonic(q?: Question | null): string {
     }
   }
 
-  // Priority 2: Match against full question text & explanation
-  for (const rule of SYLLABUS_RULES) {
-    if (rule.pattern.test(fullText)) {
-      if (rule.custom) return rule.custom(fullText);
-      return rule.mnemonic || '';
-    }
-  }
-
-  // Priority 3: Distill directly from explanationShort
-  if (q.explanationShort && q.explanationShort.length >= 15 && q.explanationShort.length <= 160) {
-    let clean = q.explanationShort.replace(/^(đáp án đúng là|đáp án đúng:|chọn:?|phương án đúng là)\s*/i, '').trim();
-    if (!clean.endsWith('.')) clean += '.';
-    return `💡 Mẹo nhớ: Trọng tâm cốt lõi - ${clean}`;
-  }
-
-  // Priority 4: Extract first crisp sentence from explanation
-  if (q.explanation) {
-    const sentences = q.explanation.split(/[.\n]/).map(s => s.trim()).filter(s => s.length > 25 && s.length < 150);
-    if (sentences.length > 0) {
-      return `💡 Mẹo nhớ: Điểm then chốt - ${sentences[0]}.`;
-    }
-  }
-
-  return '💡 Mẹo nhớ: Nắm vững định nghĩa chuẩn ISTQB CTFL v4.0 và phân tích kỹ câu hỏi phủ định để loại trừ các đáp án gây nhiễu.';
+  return '💡 Mẹo nhớ: Nắm vững định nghĩa chuẩn ISTQB CTFL v4.0 và phân tích kỹ câu hỏi để loại bỏ các phương án bẫy.';
 }
