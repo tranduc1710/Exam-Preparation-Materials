@@ -351,6 +351,9 @@ const SYLLABUS_RULES: Array<{
  */
 export function getQuestionMnemonic(q?: Question | null): string {
   if (!q) return '';
+  if (q.hint && q.hint.trim()) {
+    return q.hint.trim();
+  }
   if (q.mnemonic && q.mnemonic.trim()) {
     return q.mnemonic.trim();
   }
@@ -361,7 +364,7 @@ export function getQuestionMnemonic(q?: Question | null): string {
     text = text.replace(/^(đáp án đúng là:?|chọn:?|phương án đúng là:?)\s*/i, '');
     text = text.replace(/\n+/g, ' ').trim();
     if (!text.endsWith('.')) text += '.';
-    return `💡 Mẹo nhớ: ${text}`;
+    return `💡 Gợi ý: ${text}`;
   }
 
   // Priority 2: Questions with detailed `explanation`

@@ -464,12 +464,12 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                           {q.explanationShort}
                         </div>
                       )}
-                      {q.mnemonic && (
+                      {(q.hint || q.mnemonic) && (
                         <div className="text-amber-950 bg-amber-50/95 border border-amber-300 rounded-lg px-3 py-2 leading-relaxed flex items-start gap-2 shadow-2xs">
                           <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                           <div className="flex-1">
-                            <strong className="text-amber-900">Mẹo nhớ nhanh: </strong>
-                            <span>{q.mnemonic.replace(/^💡\s*mẹo nhớ:?\s*/i, '')}</span>
+                            <strong className="text-amber-900">Gợi ý làm bài: </strong>
+                            <span>{(q.hint || q.mnemonic || '').replace(/^💡\s*(gợi ý|mẹo nhớ):?\s*/i, '')}</span>
                           </div>
                         </div>
                       )}

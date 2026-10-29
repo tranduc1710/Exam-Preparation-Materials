@@ -485,14 +485,14 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                           ? 'bg-amber-100 text-amber-950 border-amber-400 shadow-2xs font-bold'
                           : 'bg-amber-50/90 text-amber-800 border-amber-300 hover:bg-amber-100 hover:border-amber-400'
                       }`}
-                      title="Xem mẹo nhớ gợi ý cho câu hỏi này"
+                      title="Xem gợi ý làm bài cho câu hỏi này"
                     >
                       <Lightbulb
                         className={`w-3.5 h-3.5 ${
                           isMnemonicOpen ? 'fill-amber-500 text-amber-700' : 'text-amber-600'
                         }`}
                       />
-                      <span>{isMnemonicOpen ? 'Ẩn mẹo' : '💡 Mẹo nhớ'}</span>
+                      <span>{isMnemonicOpen ? 'Ẩn gợi ý' : '💡 Gợi ý'}</span>
                     </button>
                   )}
                 </div>
@@ -611,7 +611,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center justify-between">
-                        <span>💡 Mẹo nhớ nhanh (ISTQB CTFL v4.0):</span>
+                        <span>💡 Gợi ý làm bài (Hint):</span>
                         <button
                           type="button"
                           onClick={() => toggleMnemonic(currentQ.id)}
@@ -621,7 +621,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                         </button>
                       </div>
                       <div className="text-xs sm:text-sm font-medium leading-relaxed">
-                        {currentMnemonic.replace(/^💡\s*mẹo nhớ:?\s*/i, '')}
+                        {currentMnemonic.replace(/^💡\s*(gợi ý|mẹo nhớ):?\s*/i, '')}
                       </div>
                     </div>
                   </div>
@@ -797,12 +797,12 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                       </div>
                     )}
 
-                    {currentQ.mnemonic && (
+                    {(currentQ.hint || currentQ.mnemonic) && (
                       <div className="text-sm sm:text-base text-amber-950 bg-amber-50/95 border border-amber-300 rounded-xl px-3.5 py-2.5 leading-relaxed flex items-start gap-2.5 shadow-2xs">
                         <Lightbulb className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                         <div className="flex-1">
-                          <strong className="text-amber-900">Mẹo nhớ nhanh: </strong>
-                          <span>{currentQ.mnemonic.replace(/^💡\s*mẹo nhớ:?\s*/i, '')}</span>
+                          <strong className="text-amber-900">Gợi ý làm bài: </strong>
+                          <span>{(currentQ.hint || currentQ.mnemonic || '').replace(/^💡\s*(gợi ý|mẹo nhớ):?\s*/i, '')}</span>
                         </div>
                       </div>
                     )}

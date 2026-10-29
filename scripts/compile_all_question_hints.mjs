@@ -1,0 +1,157 @@
+import fs from 'fs';
+import path from 'path';
+
+function cleanSentence(text) {
+  let s = (text || '').trim();
+  s = s.replace(/[\s;:,]+$/, '');
+  if (!s.endsWith('.') && !s.endsWith('!') && !s.endsWith('?')) {
+    s += '.';
+  }
+  return s;
+}
+
+/**
+ * Curated question-specific hints for official questions
+ */
+export function deriveOfficialHint(q) {
+  if (q.explanationShort && q.explanationShort.trim().length > 5) {
+    let text = q.explanationShort.trim();
+    text = text.replace(/^(đáp án đúng là:?|chọn:?|phương án đúng là:?)\s*/i, '');
+    text = text.replace(/\n+/g, ' ').trim();
+    return `💡 Gợi ý: ${cleanSentence(text)}`;
+  }
+
+  if (q.explanation) {
+    let chunk = q.explanation.split(/các phương án (còn lại|khác)|các lựa chọn khác/i)[0].trim();
+    chunk = chunk.replace(/^(đáp án|phương án)\s*\([a-d]\)[^:]*:\s*/i, '');
+    chunk = chunk.replace(/^(đáp án|phương án)\s*\([a-d]\)\.?\s*/i, '');
+    chunk = chunk.replace(/\n+/g, ' ').trim();
+    const sentences = chunk.split(/(?<=[.!?])\s+/).filter(Boolean);
+    let res = sentences.slice(0, 2).join(' ').trim();
+    return `💡 Gợi ý: ${cleanSentence(res)}`;
+  }
+
+  return '💡 Gợi ý: Nắm vững định nghĩa chuẩn ISTQB CTFL v4.0 và phân tích kỹ câu hỏi để loại bỏ phương án bẫy.';
+}
+
+/**
+ * Curated question-specific hints for AI questions
+ */
+export function deriveAIHint(q) {
+  const expl = (q.explanation || '').trim();
+
+  // Handcrafted expert hints for tricky negative/DevOps/static testing questions
+  if (q.id === 'ai1_q9' || q.id === 'ai8_q10') {
+    return '💡 Gợi ý: Đề bài hỏi điểm KHÔNG PHẢI là lợi ích của DevOps. Việc phải đưa vào và bảo trì công cụ CI/CD là chi phí và thách thức kỹ thuật, không phải lợi ích đạt được.';
+  }
+  if (q.id === 'ai2_q10') {
+    return '💡 Gợi ý: Cảnh giác với từ mang tính tuyệt đối "loại bỏ hoàn toàn". DevOps tự động hóa nhiều kiểm thử hồi quy nhưng không thể loại bỏ kiểm thử thủ công (như kiểm thử khám phá hay UAT).';
+  }
+  if (q.id === 'ai3_q9') {
+    return '💡 Gợi ý: Đòi hỏi thêm nguồn lực và khó thiết lập/duy trì là một thách thức/rủi ro khi áp dụng DevOps, không phải là lợi ích.';
+  }
+  if (q.id === 'ai1_q25' || q.id === 'ai2_q24') {
+    return '💡 Gợi ý: Độ bao phủ nhánh (Branch Coverage) bắt buộc phải đo lường CẢ HAI kết quả: nhánh Đúng (True) VÀ nhánh Sai (False) của mọi điểm quyết định trong mã nguồn.';
+  }
+  if (q.id === 'ai4_q24') {
+    return '💡 Gợi ý: "Các câu lệnh có thể thực thi" là đối tượng bao phủ của kiểm thử câu lệnh (Statement Testing). Đối tượng của kiểm thử nhánh là các nhánh điều khiển True/False.';
+  }
+  if (q.id === 'ai1_q34' || q.id === 'ai9_q34') {
+    return '💡 Gợi ý: Tháp kiểm thử (Test Pyramid) có đỉnh là UI/End-to-End test: chạy chậm nhất và chi phí bảo trì đắt nhất; tầng đáy (Unit test) mới là nhanh nhất và chi phí thấp nhất.';
+  }
+  if (q.id === 'ai2_q15') {
+    return '💡 Gợi ý: Kiểm thử tĩnh (Static Testing) áp dụng cho MỌI sản phẩm công việc (tài liệu yêu cầu, thiết kế kiến trúc, user story, test plan...), không chỉ riêng mã nguồn.';
+  }
+  if (q.id === 'ai5_q15') {
+    return '💡 Gợi ý: Kiểm thử tĩnh và kiểm thử động BỔ TRỢ lẫn nhau, không thay thế nhau. Kiểm thử tĩnh tìm khiếm khuyết trong tài liệu/code, kiểm thử động tìm lỗi khi mã chạy thực tế.';
+  }
+  if (q.id === 'ai8_q15') {
+    return '💡 Gợi ý: Định nghĩa cốt lõi: Kiểm thử tĩnh KHÔNG THỰC THI (chạy) mã nguồn; chỉ có kiểm thử động mới chạy phần mềm để tìm sự cố (failures).';
+  }
+  if (q.id === 'ai10_q16') {
+    return '💡 Gợi ý: Kiểm thử tĩnh giúp phát hiện lỗi sớm (Shift-Left), giúp TIẾT KIỆM chi phí sửa lỗi cho toàn bộ dự án, chứ không làm tăng tổng chi phí.';
+  }
+  if (q.id === 'ai2_q25' || q.id === 'ai10_q25') {
+    return '💡 Gợi ý: Kiểm thử hộp trắng (White-box testing) có thể áp dụng ở MỌI cấp độ kiểm thử (thành phần, tích hợp, hệ thống...), không giới hạn ở kiểm thử thành phần.';
+  }
+  if (q.id === 'ai3_q27') {
+    return '💡 Gợi ý: Mô hình 3C của Ron Jeffries cho User Story gồm: Card (thẻ), Conversation (trao đổi/thảo luận), và Confirmation (tiêu chí nghiệm thu/xác nhận). Không có "Code".';
+  }
+  if (q.id === 'ai4_q27') {
+    return '💡 Gợi ý: Tiêu chí chấp nhận (Acceptance Criteria) viết bằng ngôn ngữ tự nhiên (hoặc Given/When/Then của BDD) để mọi bên cùng hiểu, KHÔNG BẮT BUỘC phải là mã nguồn tự động.';
+  }
+  if (q.id === 'ai5_q27') {
+    return '💡 Gợi ý: Theo phương pháp Test-First / Shift-Left, tiêu chí chấp nhận PHẢI được xác định TRƯỚC HOẶC TRONG KHI phân tích user story, không phải sau khi đã code xong.';
+  }
+  if (q.id === 'ai8_q6') {
+    return '💡 Gợi ý: Cách tiếp cận toàn đội ngũ (Whole-Team Approach) chia sẻ trách nhiệm chất lượng cho cả nhóm, nhưng VẪN RẤT CẦN các tester có kỹ năng chuyên sâu để định hướng và thiết kế test.';
+  }
+  if (q.id === 'ai10_q6') {
+    return '💡 Gợi ý: Triết lý Whole-Team Approach: Chất lượng là trách nhiệm CHUNG của cả nhóm (Dev, Tester, PO, BA), không phải là trách nhiệm của riêng cá nhân tester.';
+  }
+
+  // Matching questions
+  if (expl.startsWith('Ghép đúng:')) {
+    let matchPart = expl.split(/các phương án (khác|còn lại)/i)[0].trim();
+    return `💡 Gợi ý: Ghép nối chuẩn xác: ${cleanSentence(matchPart.replace(/Ghép đúng:\s*/i, ''))}`;
+  }
+
+  // Formula & Calculation
+  if (expl.includes('Công thức ước lượng ba điểm:') || expl.includes('E = (a + 4m + b) / 6')) {
+    return '💡 Gợi ý: Áp dụng công thức ước lượng ba điểm: E = (a + 4m + b) / 6, với a = lạc quan, m = khả dĩ nhất, b = bi quan.';
+  }
+
+  // Priority & Dependency Scheduling
+  if (expl.includes('Cách làm: tại mỗi bước') && expl.includes('phụ thuộc')) {
+    let steps = expl.split(/các phương án khác/i)[0].trim();
+    return `💡 Gợi ý: ${cleanSentence(steps)}`;
+  }
+
+  // General clean extraction
+  let chunk = expl.split(/các phương án (còn lại|khác)|các lựa chọn khác/i)[0].trim();
+  chunk = chunk.replace(/^(đáp án|phương án)\s*\([a-d]\)[^:]*:\s*/i, '');
+  chunk = chunk.replace(/^(đáp án|phương án)\s*\([a-d]\)\.?\s*/i, '');
+  chunk = chunk.replace(/^với bva 3 giá trị,?\s*/i, 'Với BVA 3 giá trị: ');
+  chunk = chunk.replace(/\n+/g, ' ').trim();
+
+  // Pick first 1-2 sentences
+  const sentences = chunk.split(/(?<=[.!?])\s+/).filter(Boolean);
+  let res = sentences.slice(0, 2).join(' ').trim();
+  if (res.length > 180 && sentences.length > 0) {
+    res = sentences[0].trim();
+  }
+  return `💡 Gợi ý: ${cleanSentence(res)}`;
+}
+
+export function compileDataset(filePath, isAI = false) {
+  console.log(`Compiling hints for: ${filePath}`);
+  const raw = fs.readFileSync(filePath, 'utf8');
+  const data = JSON.parse(raw);
+
+  let updatedCount = 0;
+  for (const exam of data.exams) {
+    for (const q of exam.questions) {
+      const hint = isAI ? deriveAIHint(q) : deriveOfficialHint(q);
+      q.hint = hint;
+      q.mnemonic = hint;
+      updatedCount++;
+    }
+  }
+
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+  console.log(`✓ Processed ${updatedCount} questions in ${path.basename(filePath)}`);
+
+  // Also sync to dist if dist exists
+  const distPath = filePath.replace('/public/', '/dist/');
+  if (fs.existsSync(path.dirname(distPath))) {
+    fs.writeFileSync(distPath, JSON.stringify(data, null, 2), 'utf8');
+    console.log(`✓ Synchronized ${updatedCount} questions to ${distPath}`);
+  }
+}
+
+const examsPath = path.resolve('public/data/examsData.json');
+const aiExamsPath = path.resolve('public/data/aiExamsData.json');
+
+compileDataset(examsPath, false);
+compileDataset(aiExamsPath, true);
+console.log('✅ Finished compiling dedicated hints for all 744 questions!');
