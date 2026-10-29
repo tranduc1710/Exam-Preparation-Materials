@@ -27,6 +27,8 @@ import {
 import {
   AttemptRecord,
   Exam,
+  ExamCategory,
+  ExamCollectionTab,
   LanguageMode,
   OptionKey,
   Question,
@@ -43,8 +45,11 @@ import {
   formatTime,
   generateOfficialMock40,
   getAllQuestions,
+  getAiDataset,
+  getExamsByCategory,
   getExamsDataset,
   getExposureStats,
+  getOfficialDataset,
   getQuestionById,
   initDataset,
   ISTQB_CHAPTER_WEIGHTS,
@@ -155,22 +160,36 @@ export function App() {
     getExposureStats()
   );
 
-  // Exam dataset is fetched at runtime from /data/examsData.json (public/data),
-  // it is no longer inlined into the JS bundle (see utils/quizHelper.ts).
+  // Exam collection tab ('official' vs 'ai')
+  const [examCollection, setExamCollection] = useState<ExamCategory>('official');
+  const [chapterCollection, setChapterCollection] = useState<ExamCollectionTab>('all');
+
+  // Exam datasets are fetched at runtime from /data/examsData.json & /data/aiExamsData.json (public/data),
+  // they are no longer inlined into the JS bundle (see utils/quizHelper.ts).
   const [dataReady, setDataReady] = useState(false);
   const [dataError, setDataError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    fetch('/data/examsData.json')
-      .then((res) => {
+    Promise.all([
+      fetch('/data/examsData.json').then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data: ExamsDataset) => {
+        return res.json() as Promise<ExamsDataset>;
+      }),
+      fetch('/data/aiExamsData.json')
+        .then((res) => {
+          if (!res.ok) return null;
+          return res.json() as Promise<ExamsDataset>;
+        })
+        .catch((err) => {
+          console.warn('AI dataset fetch failed, proceeding with official dataset', err);
+          return null;
+        }),
+    ])
+      .then(([officialData, aiData]) => {
         if (cancelled) return;
-        initDataset(data);
+        initDataset(officialData, aiData);
         return initUserDB();
       })
       .then((userDbResult) => {
@@ -396,14 +415,20 @@ export function App() {
     });
   };
 
-  const startRandomMock40 = (forcedMode?: QuizMode) => {
+  const startRandomMock40 = (forcedMode?: QuizMode, category: ExamCollectionTab = examCollection) => {
     const modeToUse = forcedMode || quizMode;
-    const qs = generateOfficialMock40(true);
+    const qs = generateOfficialMock40(category, true);
     const updatedStats = getExposureStats();
     setExposureStats(updatedStats);
     setViewingAttempt(null);
+    const catTitle =
+      category === 'ai'
+        ? 'Bộ Đề do AI Tạo'
+        : category === 'official'
+        ? 'Bộ Đề Chuẩn Quốc Tế'
+        : 'Toàn Bộ Kho Đề';
     setActiveQuiz({
-      title: 'Đề thi thử ISTQB CTFL Ngẫu Nhiên (Chuẩn 40 câu)',
+      title: `Đề thi thử ISTQB CTFL Ngẫu Nhiên (${catTitle})`,
       subtitle: `Phân bổ chuẩn 6 chương (Fair Shuffle-Bag • Vòng ${updatedStats.currentRound})`,
       mode: modeToUse,
       durationMinutes,
@@ -412,15 +437,20 @@ export function App() {
     });
   };
 
-  const startChapterPractice = (chapterNum: number, forcedMode: QuizMode = 'practice') => {
-    const pool = getAllQuestions().filter((q) => q.chapter === chapterNum);
+  const startChapterPractice = (
+    chapterNum: number,
+    forcedMode: QuizMode = 'practice',
+    category: ExamCollectionTab = chapterCollection
+  ) => {
+    const pool = getAllQuestions(category).filter((q) => q.chapter === chapterNum);
     const qs = shuffleQuestions ? shuffleArray(pool) : pool;
     recordQuestionsExposure(qs.map((q) => q.id));
     setExposureStats(getExposureStats());
     const chMeta = getExamsDataset().metadata.chapters.find((c) => c.chapter === chapterNum);
     setViewingAttempt(null);
+    const catLabel = category === 'ai' ? ' (Đề AI)' : category === 'official' ? ' (Đề Gốc)' : '';
     setActiveQuiz({
-      title: chMeta ? chMeta.title : `Chương ${chapterNum}`,
+      title: `${chMeta ? chMeta.title : `Chương ${chapterNum}`}${catLabel}`,
       subtitle: `Trọn bộ ${qs.length} câu hỏi thuộc Chương ${chapterNum}`,
       mode: forcedMode,
       durationMinutes: forcedMode === 'exam' ? durationMinutes : 0,
@@ -698,7 +728,7 @@ export function App() {
                 Hệ Thống Luyện Đề Thi Thử ISTQB CTFL
               </h1>
               <p className="text-slate-300 text-sm sm:text-base max-w-2xl">
-                Trích xuất nguyên bản từ 10 bộ đề PDF (344 câu hỏi trắc nghiệm, 66 sơ đồ/bảng minh họa,
+                Tổng hợp 20 bộ đề thi thử ISTQB CTFL v4.0 (344 câu chuẩn Quốc tế + 400 câu AI Mock v4.0.1, trọn bộ 744 câu trắc nghiệm chất lượng cao,
                 hỗ trợ chuyển đổi Tiếng Anh / Tiếng Việt / Song ngữ theo chuẩn thuật ngữ ISTQB).
               </p>
             </div>
@@ -729,7 +759,7 @@ export function App() {
           <nav className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex flex-wrap items-center gap-2">
               {[
-                { id: 'exams', label: '10 Bộ Đề Thi Thử', icon: FileText },
+                { id: 'exams', label: 'Kho Bộ Đề Thi Thử (20 Đề)', icon: FileText },
                 {
                   id: 'chapters',
                   label: 'Luyện Theo Chương & Câu Sai',
@@ -1000,19 +1030,59 @@ export function App() {
               </div>
             </div>
 
-            {/* 10 Exam Cards Grid */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-900">
-                  Danh sách 10 Đề Thi Thử ISTQB CTFL (Từ bộ file PDF)
-                </h2>
+            {/* Exam Cards Grid with Collection Switcher */}
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">
+                    {examCollection === 'official'
+                      ? 'Bộ Đề Chuẩn Quốc Tế (10 Đề Gốc – 344 câu)'
+                      : 'Bộ Đề do AI Tạo – Mock CTFL v4.0 (10 Đề Mới – 400 câu)'}
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {examCollection === 'official'
+                      ? 'Trích xuất nguyên bản từ bộ 10 đề thi PDF chuẩn Quốc tế (EN/VI song ngữ)'
+                      : '10 bộ đề thi thử độc lập biên soạn chuẩn theo đề cương ISTQB CTFL v4.0.1 (40 câu/đề)'}
+                  </p>
+                </div>
                 <span className="text-xs text-slate-500">
                   Đã hoàn thành {passedAttemptsCount} lượt thi đạt chuẩn (≥ 65%)
                 </span>
               </div>
 
+              {/* Segmented Switcher for 2 Collections */}
+              <div className="bg-slate-100 p-1.5 rounded-2xl flex flex-wrap items-center gap-2 border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setExamCollection('official')}
+                  className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer ${
+                    examCollection === 'official'
+                      ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/80'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <FileText className="w-4 h-4 text-indigo-600" />
+                  <span>Bộ Đề Chuẩn Quốc Tế (10 Đề Gốc)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExamCollection('ai')}
+                  className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer ${
+                    examCollection === 'ai'
+                      ? 'bg-white text-indigo-700 shadow-xs border border-slate-200/80'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <span>Bộ Đề do AI Tạo – Mock 2026 (10 Đề Mới)</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
+                    MỚI
+                  </span>
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {getExamsDataset().exams.map((exam) => {
+                {getExamsByCategory(examCollection).map((exam) => {
                   const examAttempts = attempts.filter((a) => a.examId === exam.id);
                   const bestAttempt =
                     examAttempts.length > 0
@@ -1032,9 +1102,16 @@ export function App() {
                       <div className="p-5 space-y-4">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-bold text-xs">
-                              {exam.shortTitle}
-                            </span>
+                            {exam.category === 'ai' ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200">
+                                <Sparkles className="w-3 h-3 text-emerald-600" />
+                                {exam.shortTitle}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-bold text-xs">
+                                {exam.shortTitle}
+                              </span>
+                            )}
                             <h3 className="text-base font-bold text-slate-900 mt-1.5">
                               {exam.title}
                             </h3>
@@ -1062,12 +1139,18 @@ export function App() {
                           <span className="px-2.5 py-1 rounded-lg bg-slate-100 font-medium">
                             Số câu thi: <strong>{displayQuestionCount} câu</strong>
                           </span>
-                          <span className="px-2.5 py-1 rounded-lg bg-slate-100">
-                            Gốc PDF: {exam.regularCount} câu
-                            {exam.supplementaryCount > 0
-                              ? ` + ${exam.supplementaryCount} câu v4.0`
-                              : ''}
-                          </span>
+                          {exam.category === 'ai' ? (
+                            <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-medium">
+                              Chuẩn 40 câu v4.0.1
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-lg bg-slate-100">
+                              Gốc PDF: {exam.regularCount} câu
+                              {exam.supplementaryCount > 0
+                                ? ` + ${exam.supplementaryCount} câu v4.0`
+                                : ''}
+                            </span>
+                          )}
                           {exam.imageCount > 0 && (
                             <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700">
                               {exam.imageCount} sơ đồ/bảng
@@ -1097,28 +1180,43 @@ export function App() {
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
-                          {exam.pdfViUrl && (
+                          {exam.category === 'ai' ? (
                             <a
-                              href={exam.pdfViUrl}
+                              href={exam.pdfUrl}
                               target="_blank"
                               rel="noreferrer"
-                              title={`Mở PDF bản dịch tiếng Việt: ${exam.pdfViFileName}`}
-                              className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition"
+                              title={`Mở PDF đề thi: ${exam.pdfFileName}`}
+                              className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs transition"
                             >
                               <FileText className="w-3.5 h-3.5" />
-                              <span>PDF VI</span>
+                              <span>PDF Đề</span>
                             </a>
+                          ) : (
+                            <>
+                              {exam.pdfViUrl && (
+                                <a
+                                  href={exam.pdfViUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title={`Mở PDF bản dịch tiếng Việt: ${exam.pdfViFileName}`}
+                                  className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition"
+                                >
+                                  <FileText className="w-3.5 h-3.5" />
+                                  <span>PDF VI</span>
+                                </a>
+                              )}
+                              <a
+                                href={exam.pdfUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={`Mở PDF gốc: ${exam.pdfFileName}`}
+                                className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 font-semibold text-xs transition"
+                              >
+                                <FileText className="w-3.5 h-3.5" />
+                                <span>PDF EN</span>
+                              </a>
+                            </>
                           )}
-                          <a
-                            href={exam.pdfUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            title={`Mở PDF gốc: ${exam.pdfFileName}`}
-                            className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 font-semibold text-xs transition"
-                          >
-                            <FileText className="w-3.5 h-3.5" />
-                            <span>PDF EN</span>
-                          </a>
                         </div>
                       </div>
                     </div>
@@ -1234,51 +1332,84 @@ export function App() {
 
             {/* 6 Syllabus Chapters */}
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-slate-900">
-                Luyện Tập Theo Từng Chương Chuẩn ISTQB Syllabus (Chương 1 → Chương 6)
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {getExamsDataset().metadata.chapters.map((ch) => (
-                  <div
-                    key={ch.chapter}
-                    className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-bold text-xs">
-                          Chương {ch.chapter}
-                        </span>
-                        <span className="text-xs text-slate-500 font-medium">
-                          Tỷ trọng đề thi thật: {ISTQB_CHAPTER_WEIGHTS[ch.chapter]} / 40 câu
-                        </span>
-                      </div>
-                      <h3 className="text-base font-bold text-slate-900 leading-snug">
-                        {ch.title}
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        Tổng số câu trong kho:{' '}
-                        <strong className="text-slate-800">{ch.questionCount} câu hỏi</strong>
-                      </p>
-                    </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">
+                    Luyện Tập Theo Từng Chương Chuẩn ISTQB Syllabus (Chương 1 → Chương 6)
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Lọc ngân hàng câu hỏi theo bộ đề Chuẩn Quốc Tế, bộ đề do AI tạo hoặc toàn bộ kho
+                  </p>
+                </div>
 
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                      <button
-                        type="button"
-                        onClick={() => startChapterPractice(ch.chapter, 'practice')}
-                        className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm transition cursor-pointer"
-                      >
-                        Luyện tập ({ch.questionCount} câu)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => startChapterPractice(ch.chapter, 'exam')}
-                        className="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm transition cursor-pointer"
-                      >
-                        Kiểm tra
-                      </button>
+                {/* Collection filter tabs */}
+                <div className="bg-slate-100 p-1 rounded-xl flex flex-wrap items-center gap-1 border border-slate-200">
+                  {[
+                    { id: 'all', label: `Tất cả (${getAllQuestions('all').length} câu)` },
+                    { id: 'official', label: `Chuẩn QT (${getAllQuestions('official').length} câu)` },
+                    { id: 'ai', label: `AI Mock (${getAllQuestions('ai').length} câu)` },
+                  ].map((col) => (
+                    <button
+                      key={col.id}
+                      type="button"
+                      onClick={() => setChapterCollection(col.id as ExamCollectionTab)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                        chapterCollection === col.id
+                          ? 'bg-white text-indigo-700 shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {col.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {getExamsDataset().metadata.chapters.map((ch) => {
+                  const chPool = getAllQuestions(chapterCollection).filter((q) => q.chapter === ch.chapter);
+                  return (
+                    <div
+                      key={ch.chapter}
+                      className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-bold text-xs">
+                            Chương {ch.chapter}
+                          </span>
+                          <span className="text-xs text-slate-500 font-medium">
+                            Tỷ trọng đề thi thật: {ISTQB_CHAPTER_WEIGHTS[ch.chapter]} / 40 câu
+                          </span>
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 leading-snug">
+                          {ch.title}
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Tổng số câu trong kho ({chapterCollection === 'all' ? 'Tất cả' : chapterCollection === 'official' ? 'Chuẩn QT' : 'AI Mock'}):{' '}
+                          <strong className="text-slate-800">{chPool.length} câu hỏi</strong>
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => startChapterPractice(ch.chapter, 'practice', chapterCollection)}
+                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm transition cursor-pointer"
+                        >
+                          Luyện tập ({chPool.length} câu)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => startChapterPractice(ch.chapter, 'exam', chapterCollection)}
+                          className="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm transition cursor-pointer"
+                        >
+                          Kiểm tra
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -1369,6 +1500,15 @@ export function App() {
                         <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">
                           {att.mode === 'exam' ? 'Thi thử tính giờ' : 'Luyện tập'}
                         </span>
+                        {att.examId && att.examId >= 101 ? (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                            🤖 Đề AI
+                          </span>
+                        ) : att.examId ? (
+                          <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-xs font-semibold">
+                            🏛️ Đề Gốc
+                          </span>
+                        ) : null}
                         <span className="text-xs text-slate-400">
                           {new Date(att.timestamp).toLocaleString('vi-VN')}
                         </span>

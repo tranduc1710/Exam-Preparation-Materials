@@ -10,8 +10,13 @@ import {
   X,
   Languages,
 } from 'lucide-react';
-import { LanguageMode, OptionKey, Question } from '../types';
-import { CHAPTER_SHORT_NAMES, getAllQuestions, getExamsDataset } from '../utils/quizHelper';
+import { ExamCollectionTab, LanguageMode, OptionKey, Question } from '../types';
+import {
+  CHAPTER_SHORT_NAMES,
+  getAllQuestions,
+  getExamsByCategory,
+  getExamsDataset,
+} from '../utils/quizHelper';
 
 interface QuestionBankViewProps {
   languageMode: LanguageMode;
@@ -36,6 +41,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
   onToggleBookmark,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [collectionFilter, setCollectionFilter] = useState<ExamCollectionTab>('all');
   const [selectedExam, setSelectedExam] = useState<number | 'all'>('all');
   const [selectedChapter, setSelectedChapter] = useState<number | 'all'>('all');
   const [specialFilter, setSpecialFilter] = useState<'all' | 'v4' | 'bookmarked' | 'wrong'>(
@@ -46,9 +52,14 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  const availableExams = useMemo(() => {
+    return getExamsByCategory(collectionFilter);
+  }, [collectionFilter]);
+
   const filtered = useMemo(() => {
     const qLower = searchQuery.trim().toLowerCase();
     return getAllQuestions().filter((q) => {
+      if (collectionFilter !== 'all' && (q.category || 'official') !== collectionFilter) return false;
       if (selectedExam !== 'all' && q.examId !== selectedExam) return false;
       if (selectedChapter !== 'all' && q.chapter !== selectedChapter) return false;
       if (specialFilter === 'v4' && !q.isV4) return false;
@@ -65,12 +76,12 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
       }
       return true;
     });
-  }, [searchQuery, selectedExam, selectedChapter, specialFilter, bookmarks, wrongIds]);
+  }, [searchQuery, collectionFilter, selectedExam, selectedChapter, specialFilter, bookmarks, wrongIds]);
 
   // Any filter change restarts pagination from the first page.
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [searchQuery, selectedExam, selectedChapter, specialFilter]);
+  }, [searchQuery, collectionFilter, selectedExam, selectedChapter, specialFilter]);
 
   const toggleRevealOne = (id: string) => {
     setRevealedIds((prev) => {
@@ -85,6 +96,35 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
     <div className="space-y-6">
       {/* Filter Toolbar */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        {/* Collection Selector Tabs */}
+        <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-100">
+          <span className="text-xs font-bold text-slate-500 mr-1">Bộ đề:</span>
+          {[
+            { id: 'all', label: `🌐 Toàn bộ kho (${getAllQuestions('all').length} câu)` },
+            { id: 'official', label: `🏛️ Bộ Đề Chuẩn Quốc Tế (${getAllQuestions('official').length} câu)` },
+            { id: 'ai', label: `🤖 Bộ Đề AI Mock 2026 (${getAllQuestions('ai').length} câu)` },
+          ].map((col) => {
+            const active = collectionFilter === col.id;
+            return (
+              <button
+                key={col.id}
+                type="button"
+                onClick={() => {
+                  setCollectionFilter(col.id as ExamCollectionTab);
+                  setSelectedExam('all');
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  active
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {col.label}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           {/* Search Input */}
           <div className="md:col-span-5 relative">
@@ -107,8 +147,14 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
               }
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="all">Tất cả 10 Đề ({getAllQuestions().length} câu)</option>
-              {getExamsDataset().exams.map((ex) => (
+              <option value="all">
+                {collectionFilter === 'all'
+                  ? `Tất cả 20 Đề (${getAllQuestions('all').length} câu)`
+                  : collectionFilter === 'official'
+                  ? `Tất cả 10 Đề Gốc (${getAllQuestions('official').length} câu)`
+                  : `Tất cả 10 Đề AI (${getAllQuestions('ai').length} câu)`}
+              </option>
+              {availableExams.map((ex) => (
                 <option key={ex.id} value={ex.id}>
                   {ex.shortTitle} ({ex.questionCount} câu)
                 </option>
@@ -128,7 +174,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
               <option value="all">Tất cả 6 Chương Syllabus</option>
               {getExamsDataset().metadata.chapters.map((ch) => (
                 <option key={ch.chapter} value={ch.chapter}>
-                  {CHAPTER_SHORT_NAMES[ch.chapter]} ({ch.questionCount} câu)
+                  {CHAPTER_SHORT_NAMES[ch.chapter]}
                 </option>
               ))}
             </select>
@@ -229,6 +275,15 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                     <span className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold text-xs">
                       {q.examTitle} • {q.label}
                     </span>
+                    {q.category === 'ai' ? (
+                      <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs">
+                        🤖 AI Mock
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium text-xs">
+                        🏛️ Chuẩn Quốc Tế
+                      </span>
+                    )}
                     <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-medium text-xs">
                       {CHAPTER_SHORT_NAMES[q.chapter]}
                     </span>

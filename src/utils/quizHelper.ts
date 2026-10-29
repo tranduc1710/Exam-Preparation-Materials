@@ -1,6 +1,8 @@
 import {
   AttemptRecord,
   Exam,
+  ExamCategory,
+  ExamCollectionTab,
   ExamsDataset,
   Question,
   QuestionExposureStats,
@@ -8,11 +10,11 @@ import {
 } from '../types';
 import { saveUserProgress } from './db';
 
-// Dataset is NOT bundled into the JS anymore: App fetches it at runtime from
-// /data/examsData.json (public/data/examsData.json) and calls initDataset()
-// before rendering any data-dependent UI. Keeping it out of the bundle keeps
-// the initial JS small and lets the web server gzip + cache the JSON on its own.
+// Datasets are fetched at runtime from /data/examsData.json & /data/aiExamsData.json
 let _examsDataset: ExamsDataset | null = null;
+let _aiDataset: ExamsDataset | null = null;
+let _officialQuestions: Question[] = [];
+let _aiQuestions: Question[] = [];
 let _allQuestions: Question[] = [];
 let _questionById: Record<string, Question> = {};
 
@@ -36,9 +38,31 @@ export function getActiveUserProgress(): UserProgressData | null {
   return _activeUserProgress;
 }
 
-export function initDataset(data: ExamsDataset): void {
-  _examsDataset = data;
-  _allQuestions = data.exams.flatMap((e) => e.questions);
+export function initDataset(officialData: ExamsDataset, aiData?: ExamsDataset | null): void {
+  _examsDataset = officialData;
+  officialData.exams.forEach((e) => {
+    e.category = 'official';
+    e.questions.forEach((q) => {
+      q.category = 'official';
+    });
+  });
+  _officialQuestions = officialData.exams.flatMap((e) => e.questions);
+
+  if (aiData) {
+    _aiDataset = aiData;
+    aiData.exams.forEach((e) => {
+      e.category = 'ai';
+      e.questions.forEach((q) => {
+        q.category = 'ai';
+      });
+    });
+    _aiQuestions = aiData.exams.flatMap((e) => e.questions);
+  } else {
+    _aiDataset = null;
+    _aiQuestions = [];
+  }
+
+  _allQuestions = [..._officialQuestions, ..._aiQuestions];
   _questionById = Object.fromEntries(_allQuestions.map((q) => [q.id, q]));
 }
 
@@ -49,7 +73,27 @@ export function getExamsDataset(): ExamsDataset {
   return _examsDataset;
 }
 
-export function getAllQuestions(): Question[] {
+export function getOfficialDataset(): ExamsDataset {
+  return getExamsDataset();
+}
+
+export function getAiDataset(): ExamsDataset | null {
+  return _aiDataset;
+}
+
+export function getExamsByCategory(category: ExamCollectionTab = 'all'): Exam[] {
+  if (category === 'official') {
+    return _examsDataset ? _examsDataset.exams : [];
+  }
+  if (category === 'ai') {
+    return _aiDataset ? _aiDataset.exams : [];
+  }
+  return [...(_examsDataset?.exams || []), ...(_aiDataset?.exams || [])];
+}
+
+export function getAllQuestions(category: ExamCollectionTab = 'all'): Question[] {
+  if (category === 'official') return _officialQuestions;
+  if (category === 'ai') return _aiQuestions;
   return _allQuestions;
 }
 
@@ -213,11 +257,15 @@ export function buildExamQuestionSet(
   return shuffle ? shuffleArray(result) : result;
 }
 
-export function generateOfficialMock40(autoRecord: boolean = true): Question[] {
+export function generateOfficialMock40(
+  category: ExamCollectionTab = 'all',
+  autoRecord: boolean = true
+): Question[] {
   const selected: Question[] = [];
+  const pool = getAllQuestions(category);
   for (const [chStr, count] of Object.entries(ISTQB_CHAPTER_WEIGHTS)) {
     const ch = Number(chStr);
-    const chPool = _allQuestions.filter((q) => q.chapter === ch);
+    const chPool = pool.filter((q) => q.chapter === ch);
     const chSelected = fairSelectQuestions(chPool, count);
     selected.push(...chSelected);
   }

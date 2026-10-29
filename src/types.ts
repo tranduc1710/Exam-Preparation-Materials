@@ -23,7 +23,11 @@ export interface Question {
   knowledge: string;
   chapter: number;
   chapterTitle: string;
+  category?: 'official' | 'ai';
 }
+
+export type ExamCategory = 'official' | 'ai';
+export type ExamCollectionTab = 'all' | 'official' | 'ai';
 
 export interface Exam {
   id: number;
@@ -37,6 +41,7 @@ export interface Exam {
   regularCount: number;
   supplementaryCount: number;
   imageCount: number;
+  category?: ExamCategory;
   questions: Question[];
 }
 
