@@ -219,18 +219,39 @@ if (typeof window !== 'undefined') {
 // ================= Public High-Level API (Server DB + Local Resilience) =================
 
 /**
- * Sends a periodic heartbeat to server to maintain 'Online' status
+ * Sends a periodic heartbeat to server to maintain 'Online' status.
+ * Returns the latest onlineCount if successful.
  */
-export async function sendHeartbeat(username: string): Promise<boolean> {
-  if (!username) return false;
+export async function sendHeartbeat(username: string): Promise<number | null> {
+  if (!username) return null;
   try {
     const res = await fetch(`${API_BASE}/users/${encodeURIComponent(username)}/heartbeat`, {
       method: 'POST',
     });
-    return res.ok;
+    if (res.ok) {
+      const data = await res.json();
+      return typeof data.onlineCount === 'number' ? data.onlineCount : null;
+    }
   } catch {
-    return false;
+    // ignore
   }
+  return null;
+}
+
+/**
+ * Gets the current count of active online users without loading full profiles
+ */
+export async function getOnlineCount(): Promise<number> {
+  try {
+    const res = await fetch(`${API_BASE}/online-count`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      return typeof data.onlineCount === 'number' ? data.onlineCount : 1;
+    }
+  } catch {
+    // ignore
+  }
+  return 1;
 }
 
 /**
@@ -351,7 +372,6 @@ export async function getAllProfiles(): Promise<UserProfile[]> {
     const res = await fetch(`${API_BASE}/profiles`, { cache: 'no-store' });
     if (res.ok) {
       const list: UserProfile[] = await res.json();
-      for (const p of list) cacheProfileLocally(p).catch(() => {});
       return list;
     }
   } catch (err) {
@@ -463,16 +483,14 @@ export async function loadUserProgress(username: string): Promise<UserProgressDa
 export async function saveUserProgress(progress: UserProgressData): Promise<void> {
   progress.updatedAt = new Date().toISOString();
 
-  // Instant local cache
-  await cacheProgressLocally(progress);
-
-  // Queue server SQLite persist
+  // Queue server SQLite persist & local cache with 800ms debounce
   _pendingProgressToSave = progress;
   if (_saveTimeout) clearTimeout(_saveTimeout);
 
   _saveTimeout = setTimeout(() => {
     flushPendingProgressSave();
-  }, 300);
+    cacheProgressLocally(progress).catch(() => {});
+  }, 800);
 }
 
 /**

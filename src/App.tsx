@@ -71,6 +71,7 @@ import {
   setActiveUsername,
   sendHeartbeat,
   logoutUser,
+  getOnlineCount,
 } from './utils/db';
 import { UserAccountModal } from './components/UserAccountModal';
 import { ResetProgressModal } from './components/ResetProgressModal';
@@ -122,6 +123,7 @@ export function App() {
   // Active user & profile state
   const [activeUsername, setActiveUsernameState] = useState<string | null>(() => getActiveUsername());
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [onlineCount, setOnlineCount] = useState<number>(1);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -176,6 +178,7 @@ export function App() {
         const { activeUser, profiles: dbProfiles, currentProgress } = userDbResult;
         setActiveUsernameState(activeUser);
         setProfiles(dbProfiles);
+        setOnlineCount(dbProfiles.filter((p) => p.isOnline).length || 1);
 
         if (activeUser && currentProgress) {
           // Bind active user context to helper
@@ -217,34 +220,46 @@ export function App() {
     };
   }, []);
 
-  // Real-time Heartbeat & Profiles Online Status Polling
+  // Real-time Lightweight Heartbeat (No heavy profiles poll, zero lag)
   useEffect(() => {
     if (!activeUsername) return;
 
-    sendHeartbeat(activeUsername).catch(() => {});
+    const doHeartbeat = () => {
+      sendHeartbeat(activeUsername)
+        .then((count) => {
+          if (typeof count === 'number' && count > 0) {
+            setOnlineCount(count);
+          }
+        })
+        .catch(() => {});
+    };
 
-    const hbInterval = setInterval(() => {
-      sendHeartbeat(activeUsername).catch(() => {});
-    }, 25000);
+    doHeartbeat();
 
-    const pollInterval = setInterval(() => {
-      getAllProfiles().then(setProfiles).catch(() => {});
-    }, 25000);
+    const hbInterval = setInterval(doHeartbeat, 30000);
 
     const onVisible = () => {
       if (document.visibilityState === 'visible') {
-        sendHeartbeat(activeUsername).catch(() => {});
-        getAllProfiles().then(setProfiles).catch(() => {});
+        doHeartbeat();
       }
     };
     document.addEventListener('visibilitychange', onVisible);
 
     return () => {
       clearInterval(hbInterval);
-      clearInterval(pollInterval);
       document.removeEventListener('visibilitychange', onVisible);
     };
   }, [activeUsername]);
+
+  const openUserModal = async () => {
+    try {
+      const allP = await getAllProfiles();
+      setProfiles(allP);
+    } catch {
+      // ignore
+    }
+    setIsUserModalOpen(true);
+  };
 
   const handleSelectUser = async (username: string) => {
     const progress = await loadUserProgress(username);
@@ -617,7 +632,7 @@ export function App() {
             <div className="flex items-center gap-2.5 flex-wrap">
               <button
                 type="button"
-                onClick={() => setIsUserModalOpen(true)}
+                onClick={openUserModal}
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-medium text-xs sm:text-sm transition cursor-pointer shadow-xs group"
                 title="Quản lý tài khoản học tập (Đang online)"
               >
@@ -638,12 +653,12 @@ export function App() {
 
               <button
                 type="button"
-                onClick={() => setIsUserModalOpen(true)}
+                onClick={openUserModal}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/30 text-emerald-200 text-xs font-semibold transition cursor-pointer"
                 title="Xem danh sách học viên đang online"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>{profiles.filter((p) => p.isOnline).length} online</span>
+                <span>{onlineCount} online</span>
               </button>
 
               <button

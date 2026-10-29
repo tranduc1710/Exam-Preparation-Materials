@@ -3,7 +3,7 @@ import https from 'node:https';
 import net from 'node:net';
 import fs from 'node:fs';
 import path from 'node:path';
-import { createGzip } from 'node:zlib';
+import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,14 +16,30 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-// ================= SQLite Database Initialization =================
+// ================= High-Performance SQLite Setup =================
 let sqliteDb = null;
+let stmtGetProfiles = null;
+let stmtGetProfile = null;
+let stmtSaveProfile = null;
+let stmtHeartbeat = null;
+let stmtLogout = null;
+let stmtGetProgress = null;
+let stmtSaveProgress = null;
+let stmtDeleteProfile = null;
+let stmtDeleteProgress = null;
+
 try {
   const { DatabaseSync } = await import('node:sqlite');
   const dbFile = path.join(DATA_DIR, 'istqb.db');
   sqliteDb = new DatabaseSync(dbFile);
+
+  // Fast SQLite PRAGMAs for high concurrency
   sqliteDb.exec(`
     PRAGMA journal_mode = WAL;
+    PRAGMA synchronous = NORMAL;
+    PRAGMA cache_size = -64000;
+    PRAGMA temp_store = MEMORY;
+    PRAGMA busy_timeout = 5000;
     CREATE TABLE IF NOT EXISTS profiles (
       username TEXT PRIMARY KEY,
       display_name TEXT NOT NULL,
@@ -36,7 +52,41 @@ try {
       updated_at TEXT NOT NULL
     );
   `);
-  console.log(`[Database] SQLite connected at ${dbFile} (WAL mode enabled)`);
+
+  // Pre-compiled prepared statements for zero CPU parsing overhead
+  stmtGetProfiles = sqliteDb.prepare(
+    'SELECT username, display_name AS displayName, created_at AS createdAt, last_active_at AS lastActiveAt FROM profiles ORDER BY datetime(last_active_at) DESC'
+  );
+  stmtGetProfile = sqliteDb.prepare(
+    'SELECT username, display_name AS displayName, created_at AS createdAt, last_active_at AS lastActiveAt FROM profiles WHERE lower(username) = ?'
+  );
+  stmtSaveProfile = sqliteDb.prepare(`
+    INSERT INTO profiles (username, display_name, created_at, last_active_at)
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(username) DO UPDATE SET
+      display_name = excluded.display_name,
+      last_active_at = excluded.last_active_at
+  `);
+  stmtHeartbeat = sqliteDb.prepare(
+    'UPDATE profiles SET last_active_at = ? WHERE lower(username) = ?'
+  );
+  stmtLogout = sqliteDb.prepare(
+    'UPDATE profiles SET last_active_at = ? WHERE lower(username) = ?'
+  );
+  stmtGetProgress = sqliteDb.prepare(
+    'SELECT data_json, updated_at FROM progress WHERE lower(username) = ?'
+  );
+  stmtSaveProgress = sqliteDb.prepare(`
+    INSERT INTO progress (username, data_json, updated_at)
+    VALUES (?, ?, ?)
+    ON CONFLICT(username) DO UPDATE SET
+      data_json = excluded.data_json,
+      updated_at = excluded.updated_at
+  `);
+  stmtDeleteProfile = sqliteDb.prepare('DELETE FROM profiles WHERE lower(username) = ?');
+  stmtDeleteProgress = sqliteDb.prepare('DELETE FROM progress WHERE lower(username) = ?');
+
+  console.log(`[Database] SQLite connected at ${dbFile} (WAL + Prepared Statements ready)`);
 } catch (err) {
   console.warn(
     `[Database] node:sqlite unavailable (${err.message}), using file-based storage in ${DATA_DIR}`
@@ -68,17 +118,14 @@ function fallbackWriteJson(filePath, data) {
   }
 }
 
-// Database helper functions
-const ONLINE_WINDOW_MS = 70 * 1000; // Active within 70s is online
+// Active within 70s is considered online
+const ONLINE_WINDOW_MS = 70 * 1000;
 
 function dbGetProfiles() {
   const now = Date.now();
   let rawList = [];
-  if (sqliteDb) {
-    const stmt = sqliteDb.prepare(
-      'SELECT username, display_name AS displayName, created_at AS createdAt, last_active_at AS lastActiveAt FROM profiles ORDER BY datetime(last_active_at) DESC'
-    );
-    rawList = stmt.all();
+  if (stmtGetProfiles) {
+    rawList = stmtGetProfiles.all();
   } else {
     const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
     rawList = Object.values(map).sort(
@@ -87,23 +134,28 @@ function dbGetProfiles() {
   }
 
   return rawList.map((p) => {
-    const lastActiveTime = new Date(p.lastActiveAt).getTime();
-    const isOnline = now - lastActiveTime < ONLINE_WINDOW_MS;
-    return {
-      ...p,
-      isOnline,
-    };
+    const isOnline = now - new Date(p.lastActiveAt).getTime() < ONLINE_WINDOW_MS;
+    return { ...p, isOnline };
   });
+}
+
+function dbGetOnlineCount() {
+  const now = Date.now();
+  if (stmtGetProfiles) {
+    const rows = stmtGetProfiles.all();
+    return rows.filter((r) => now - new Date(r.lastActiveAt).getTime() < ONLINE_WINDOW_MS).length;
+  }
+  const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
+  return Object.values(map).filter(
+    (p) => now - new Date(p.lastActiveAt).getTime() < ONLINE_WINDOW_MS
+  ).length;
 }
 
 function dbGetProfile(username) {
   const key = (username || '').trim().toLowerCase();
   let p = null;
-  if (sqliteDb) {
-    const stmt = sqliteDb.prepare(
-      'SELECT username, display_name AS displayName, created_at AS createdAt, last_active_at AS lastActiveAt FROM profiles WHERE lower(username) = ?'
-    );
-    p = stmt.get(key) || null;
+  if (stmtGetProfile) {
+    p = stmtGetProfile.get(key) || null;
   } else {
     const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
     p = map[key] || null;
@@ -115,15 +167,8 @@ function dbGetProfile(username) {
 
 function dbSaveProfile(profile) {
   const key = profile.username.trim().toLowerCase();
-  if (sqliteDb) {
-    const stmt = sqliteDb.prepare(`
-      INSERT INTO profiles (username, display_name, created_at, last_active_at)
-      VALUES (?, ?, ?, ?)
-      ON CONFLICT(username) DO UPDATE SET
-        display_name = excluded.display_name,
-        last_active_at = excluded.last_active_at
-    `);
-    stmt.run(profile.username, profile.displayName, profile.createdAt, profile.lastActiveAt);
+  if (stmtSaveProfile) {
+    stmtSaveProfile.run(profile.username, profile.displayName, profile.createdAt, profile.lastActiveAt);
     return;
   }
   const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
@@ -131,13 +176,42 @@ function dbSaveProfile(profile) {
   fallbackWriteJson(FALLBACK_PROFILES_FILE, map);
 }
 
+function dbHeartbeat(username) {
+  const key = (username || '').trim().toLowerCase();
+  const now = new Date().toISOString();
+  if (stmtHeartbeat) {
+    stmtHeartbeat.run(now, key);
+    return true;
+  }
+  const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
+  if (map[key]) {
+    map[key].lastActiveAt = now;
+    fallbackWriteJson(FALLBACK_PROFILES_FILE, map);
+    return true;
+  }
+  return false;
+}
+
+function dbLogout(username) {
+  const key = (username || '').trim().toLowerCase();
+  const past = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  if (stmtLogout) {
+    stmtLogout.run(past, key);
+    return true;
+  }
+  const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
+  if (map[key]) {
+    map[key].lastActiveAt = past;
+    fallbackWriteJson(FALLBACK_PROFILES_FILE, map);
+    return true;
+  }
+  return false;
+}
+
 function dbGetProgress(username) {
   const key = (username || '').trim().toLowerCase();
-  if (sqliteDb) {
-    const stmt = sqliteDb.prepare(
-      'SELECT data_json, updated_at FROM progress WHERE lower(username) = ?'
-    );
-    const row = stmt.get(key);
+  if (stmtGetProgress) {
+    const row = stmtGetProgress.get(key);
     if (row && row.data_json) {
       try {
         return JSON.parse(row.data_json);
@@ -150,7 +224,6 @@ function dbGetProgress(username) {
     if (map[key]) return map[key];
   }
 
-  // Blank default progress
   return {
     username,
     attempts: [],
@@ -168,15 +241,8 @@ function dbSaveProgress(progress) {
   progress.updatedAt = now;
   const jsonStr = JSON.stringify(progress);
 
-  if (sqliteDb) {
-    const stmt = sqliteDb.prepare(`
-      INSERT INTO progress (username, data_json, updated_at)
-      VALUES (?, ?, ?)
-      ON CONFLICT(username) DO UPDATE SET
-        data_json = excluded.data_json,
-        updated_at = excluded.updated_at
-    `);
-    stmt.run(username, jsonStr, now);
+  if (stmtSaveProgress) {
+    stmtSaveProgress.run(username, jsonStr, now);
     return;
   }
 
@@ -187,11 +253,9 @@ function dbSaveProgress(progress) {
 
 function dbDeleteProfile(username) {
   const key = (username || '').trim().toLowerCase();
-  if (sqliteDb) {
-    const s1 = sqliteDb.prepare('DELETE FROM profiles WHERE lower(username) = ?');
-    const s2 = sqliteDb.prepare('DELETE FROM progress WHERE lower(username) = ?');
-    s1.run(key);
-    s2.run(key);
+  if (stmtDeleteProfile && stmtDeleteProgress) {
+    stmtDeleteProfile.run(key);
+    stmtDeleteProgress.run(key);
     return;
   }
   const profs = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
@@ -225,14 +289,16 @@ function readBody(req) {
 }
 
 function sendJson(res, statusCode, data) {
+  const jsonBuf = Buffer.from(JSON.stringify(data));
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
+    'Content-Length': jsonBuf.length,
     'Cache-Control': 'no-store, no-cache, must-revalidate',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   });
-  res.end(JSON.stringify(data));
+  res.end(jsonBuf);
 }
 
 async function handleApiRequest(req, res, urlObj) {
@@ -259,13 +325,18 @@ async function handleApiRequest(req, res, urlObj) {
       });
     }
 
-    // 2. Get all profiles: GET /api/profiles
+    // 2. Fast Online Count
+    if (pathname === '/api/online-count' && method === 'GET') {
+      return sendJson(res, 200, { onlineCount: dbGetOnlineCount() });
+    }
+
+    // 3. Get all profiles: GET /api/profiles
     if (pathname === '/api/profiles' && method === 'GET') {
       const profiles = dbGetProfiles();
       return sendJson(res, 200, profiles);
     }
 
-    // 3. Login or Create User (Passwordless): POST /api/users/login
+    // 4. Login or Create User (Passwordless): POST /api/users/login
     if (pathname === '/api/users/login' && method === 'POST') {
       const body = await readBody(req);
       const rawName = (body.username || '').trim().replace(/\s+/g, ' ');
@@ -307,19 +378,29 @@ async function handleApiRequest(req, res, urlObj) {
         const progressData = await readBody(req);
         progressData.username = username;
         dbSaveProgress(progressData);
-
-        // Update lastActiveAt on profile
-        const prof = dbGetProfile(username);
-        if (prof) {
-          prof.lastActiveAt = new Date().toISOString();
-          dbSaveProfile(prof);
-        }
-
+        dbHeartbeat(username);
         return sendJson(res, 200, { success: true, updatedAt: progressData.updatedAt });
       }
     }
 
-    // Match /api/users/:username/reset: POST /api/users/:username/reset
+    // Match /api/users/:username/heartbeat: POST
+    const heartbeatMatch = pathname.match(/^\/api\/users\/([^/]+)\/heartbeat$/);
+    if (heartbeatMatch && method === 'POST') {
+      const username = decodeURIComponent(heartbeatMatch[1]);
+      const updated = dbHeartbeat(username);
+      const onlineCount = dbGetOnlineCount();
+      return sendJson(res, 200, { success: updated, isOnline: true, onlineCount });
+    }
+
+    // Match /api/users/:username/logout: POST
+    const logoutMatch = pathname.match(/^\/api\/users\/([^/]+)\/logout$/);
+    if (logoutMatch && method === 'POST') {
+      const username = decodeURIComponent(logoutMatch[1]);
+      dbLogout(username);
+      return sendJson(res, 200, { success: true });
+    }
+
+    // Match /api/users/:username/reset: POST
     const resetMatch = pathname.match(/^\/api\/users\/([^/]+)\/reset$/);
     if (resetMatch && method === 'POST') {
       const username = decodeURIComponent(resetMatch[1]);
@@ -341,32 +422,7 @@ async function handleApiRequest(req, res, urlObj) {
       return sendJson(res, 200, updated);
     }
 
-    // Match /api/users/:username/heartbeat: POST /api/users/:username/heartbeat
-    const heartbeatMatch = pathname.match(/^\/api\/users\/([^/]+)\/heartbeat$/);
-    if (heartbeatMatch && method === 'POST') {
-      const username = decodeURIComponent(heartbeatMatch[1]);
-      const prof = dbGetProfile(username);
-      if (prof) {
-        prof.lastActiveAt = new Date().toISOString();
-        dbSaveProfile(prof);
-        return sendJson(res, 200, { success: true, isOnline: true, lastActiveAt: prof.lastActiveAt });
-      }
-      return sendJson(res, 404, { error: 'User not found' });
-    }
-
-    // Match /api/users/:username/logout: POST /api/users/:username/logout
-    const logoutMatch = pathname.match(/^\/api\/users\/([^/]+)\/logout$/);
-    if (logoutMatch && method === 'POST') {
-      const username = decodeURIComponent(logoutMatch[1]);
-      const prof = dbGetProfile(username);
-      if (prof) {
-        prof.lastActiveAt = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-        dbSaveProfile(prof);
-      }
-      return sendJson(res, 200, { success: true });
-    }
-
-    // Match /api/users/:username: DELETE /api/users/:username
+    // Match /api/users/:username: DELETE
     const userMatch = pathname.match(/^\/api\/users\/([^/]+)$/);
     if (userMatch && method === 'DELETE') {
       const username = decodeURIComponent(userMatch[1]);
@@ -374,7 +430,6 @@ async function handleApiRequest(req, res, urlObj) {
       return sendJson(res, 200, { success: true });
     }
 
-    // Not found API route
     return sendJson(res, 404, { error: 'API route not found' });
   } catch (err) {
     console.error('API Error:', err);
@@ -382,7 +437,7 @@ async function handleApiRequest(req, res, urlObj) {
   }
 }
 
-// ================= Static File Handler =================
+// ================= High-Performance Static File Serving with RAM Cache =================
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
@@ -395,6 +450,30 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon',
   '.pdf': 'application/pdf',
 };
+
+// In-memory cache for ultra-low latency & zero CPU streaming overhead
+const staticCache = new Map();
+
+function getCachedFile(filePath, ext) {
+  try {
+    const stat = fs.statSync(filePath);
+    const key = `${filePath}:${stat.mtimeMs}`;
+    let item = staticCache.get(key);
+    if (!item) {
+      const raw = fs.readFileSync(filePath);
+      const compressible = ['.html', '.js', '.css', '.json', '.svg'].includes(ext);
+      const gzipped = compressible ? gzipSync(raw, { level: 6 }) : null;
+      const etag = `W/"${stat.size}-${stat.mtimeMs}"`;
+      item = { raw, gzipped, etag, mtime: stat.mtime };
+      // Limit cache size to 100 items
+      if (staticCache.size > 100) staticCache.clear();
+      staticCache.set(key, item);
+    }
+    return item;
+  } catch {
+    return null;
+  }
+}
 
 function handleRequest(req, res) {
   try {
@@ -418,28 +497,49 @@ function handleRequest(req, res) {
 
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    const isAsset = safePath.startsWith('assets/');
 
-    // HTML and dataset (.json) must never be served stale; assets can cache
-    const cacheControl =
-      ext === '.html' || ext === '.json' ? 'no-cache' : 'public, max-age=86400';
+    // Assets can cache forever; HTML & JSON use 304 revalidation
+    const cacheControl = isAsset
+      ? 'public, max-age=31536000, immutable'
+      : ext === '.html'
+      ? 'no-cache'
+      : 'public, max-age=3600';
 
-    const compressible = ['.html', '.js', '.css', '.json', '.svg'].includes(ext);
+    const cached = getCachedFile(filePath, ext);
+    if (!cached) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      return res.end('File Not Found');
+    }
+
+    // 304 Not Modified Check (Zero bandwidth)
+    if (req.headers['if-none-match'] === cached.etag) {
+      res.writeHead(304, {
+        'ETag': cached.etag,
+        'Cache-Control': cacheControl,
+      });
+      return res.end();
+    }
+
     const acceptEncoding = String(req.headers['accept-encoding'] || '');
-    const useGzip = compressible && /\bgzip\b/.test(acceptEncoding);
+    const useGzip = Boolean(cached.gzipped && /\bgzip\b/.test(acceptEncoding));
+    const body = useGzip ? cached.gzipped : cached.raw;
 
     const headers = {
       'Content-Type': contentType,
+      'Content-Length': body.length,
+      'ETag': cached.etag,
       'Cache-Control': cacheControl,
     };
-    let stream = fs.createReadStream(filePath);
     if (useGzip) {
       headers['Content-Encoding'] = 'gzip';
       headers['Vary'] = 'Accept-Encoding';
-      stream = stream.pipe(createGzip());
     }
+
     res.writeHead(200, headers);
-    stream.pipe(res);
+    res.end(body);
   } catch (err) {
+    console.error('Request handling error:', err);
     res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Internal Server Error');
   }
@@ -448,30 +548,30 @@ function handleRequest(req, res) {
 const httpServer = http.createServer(handleRequest);
 
 let httpsServer = null;
-const certPath = path.join(__dirname, 'cert.pem');
-const keyPath = path.join(__dirname, 'key.pem');
-if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
-  httpsServer = https.createServer(
-    {
-      cert: fs.readFileSync(certPath),
-      key: fs.readFileSync(keyPath),
-    },
-    handleRequest
-  );
+const SSL_CERT = process.env.SSL_CERT;
+const SSL_KEY = process.env.SSL_KEY;
+
+if (SSL_CERT && SSL_KEY && fs.existsSync(SSL_CERT) && fs.existsSync(SSL_KEY)) {
+  try {
+    const httpsOptions = {
+      cert: fs.readFileSync(SSL_CERT),
+      key: fs.readFileSync(SSL_KEY),
+    };
+    httpsServer = https.createServer(httpsOptions, handleRequest);
+  } catch (err) {
+    console.error('Failed to initialize HTTPS:', err);
+  }
 }
 
-// Multiplex HTTP and HTTPS on the same port (3030)
+// Multiplex HTTP and HTTPS on the same port if SSL certificates exist
 const server = net.createServer((socket) => {
-  socket.once('readable', () => {
-    const chunk = socket.read(1);
-    if (!chunk) return;
-    socket.unshift(chunk);
-    // 0x16 (22) is TLS Handshake record
-    if (chunk[0] === 0x16 && httpsServer) {
-      httpsServer.emit('connection', socket);
-    } else {
-      httpServer.emit('connection', socket);
-    }
+  socket.once('data', (buffer) => {
+    socket.pause();
+    const isTls = buffer[0] === 22; // TLS handshake byte
+    const targetServer = isTls && httpsServer ? httpsServer : httpServer;
+    socket.unshift(buffer);
+    targetServer.emit('connection', socket);
+    process.nextTick(() => socket.resume());
   });
 });
 
