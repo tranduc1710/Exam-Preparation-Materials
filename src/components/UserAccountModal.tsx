@@ -98,9 +98,14 @@ export const UserAccountModal: React.FC<UserAccountModalProps> = ({
               <User className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Tài Khoản Học Tập</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold">Tài Khoản Học Tập</h2>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/25 text-emerald-100 border border-emerald-300/30">
+                  Server DB
+                </span>
+              </div>
               <p className="text-xs text-indigo-100 mt-0.5">
-                Nhập tên để lưu riêng biệt lịch sử & tiến độ (Không cần mật khẩu)
+                Lưu trữ đồng bộ vào Database máy chủ Docker (Không cần mật khẩu)
               </p>
             </div>
           </div>
@@ -220,7 +225,10 @@ export const UserAccountModal: React.FC<UserAccountModalProps> = ({
 
         {/* Modal Footer */}
         <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>Dữ liệu được lưu an toàn trong IndexedDB của trình duyệt.</span>
+          <div className="flex items-center gap-1.5 text-slate-600">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Dữ liệu lưu vào Server Database (Docker SQLite).</span>
+          </div>
           <button
             type="button"
             onClick={onClose}

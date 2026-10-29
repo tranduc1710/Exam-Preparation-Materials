@@ -8,6 +8,7 @@ import {
   UserProgressData,
 } from '../types';
 
+const API_BASE = '/api';
 const DB_NAME = 'ISTQB_CTFL_DB';
 const DB_VERSION = 1;
 const STORE_PROFILES = 'profiles';
@@ -16,7 +17,7 @@ const STORE_PROGRESS = 'progress';
 const ACTIVE_USER_KEY = 'istqb_ctfl_active_user_v1';
 export const DEFAULT_USERNAME = 'Học viên 1';
 
-// Legacy localStorage keys for automatic one-time migration
+// Legacy localStorage keys for automatic one-time migration to server DB
 const LEGACY_ATTEMPTS_KEY = 'istqb_ctfl_attempts_v1';
 const LEGACY_BOOKMARKS_KEY = 'istqb_ctfl_bookmarks_v1';
 const LEGACY_WRONG_IDS_KEY = 'istqb_ctfl_wrong_ids_v1';
@@ -51,13 +52,8 @@ export function getDB(): Promise<IDBDatabase> {
       }
     };
 
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
-
-    request.onerror = () => {
-      reject(request.error || new Error('Failed to open IndexedDB.'));
-    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('Failed to open IndexedDB.'));
   });
 
   return _dbPromise;
@@ -116,8 +112,108 @@ function readLegacyLocalStorageData(): {
   }
 }
 
+// ================= Local Fallback Cache Helpers =================
+
+async function cacheProfileLocally(profile: UserProfile): Promise<void> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction(STORE_PROFILES, 'readwrite');
+    tx.objectStore(STORE_PROFILES).put(profile);
+  } catch {
+    // ignore
+  }
+}
+
+async function cacheProgressLocally(progress: UserProgressData): Promise<void> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction(STORE_PROGRESS, 'readwrite');
+    tx.objectStore(STORE_PROGRESS).put(progress);
+  } catch {
+    // ignore
+  }
+}
+
+async function getLocalProfiles(): Promise<UserProfile[]> {
+  try {
+    const db = await getDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_PROFILES, 'readonly');
+      const req = tx.objectStore(STORE_PROFILES).getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function getLocalProgress(username: string): Promise<UserProgressData | null> {
+  try {
+    const db = await getDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_PROGRESS, 'readonly');
+      const req = tx.objectStore(STORE_PROGRESS).get(username);
+      req.onsuccess = () => resolve((req.result as UserProgressData) || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function removeLocalProfile(username: string): Promise<void> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction([STORE_PROFILES, STORE_PROGRESS], 'readwrite');
+    tx.objectStore(STORE_PROFILES).delete(username);
+    tx.objectStore(STORE_PROGRESS).delete(username);
+  } catch {
+    // ignore
+  }
+}
+
+// ================= Debounced Server Progress Saving =================
+let _saveTimeout: any = null;
+let _pendingProgressToSave: UserProgressData | null = null;
+
+async function flushPendingProgressSave(): Promise<void> {
+  if (!_pendingProgressToSave) return;
+  const progress = _pendingProgressToSave;
+  _pendingProgressToSave = null;
+
+  try {
+    const res = await fetch(`${API_BASE}/users/${encodeURIComponent(progress.username)}/progress`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(progress),
+    });
+    if (!res.ok) {
+      console.warn(`[ServerDB] PUT progress returned ${res.status}`);
+    }
+  } catch (err) {
+    console.warn('[ServerDB] Failed to persist progress to server SQLite DB:', err);
+  }
+}
+
+// Auto-flush on tab hide/close
+if (typeof window !== 'undefined') {
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      flushPendingProgressSave();
+    }
+  });
+  window.addEventListener('beforeunload', () => {
+    flushPendingProgressSave();
+  });
+}
+
+// ================= Public High-Level API (Server DB + Local Resilience) =================
+
 /**
- * Initializes the database: ensures default user profile and migrates any legacy localStorage data.
+ * Initializes database connection with the Server.
+ * Fetches existing profiles from server SQLite DB; if empty or first run,
+ * logs in default user and auto-migrates any legacy local test records.
  */
 export async function initUserDB(): Promise<{
   activeUser: string;
@@ -127,21 +223,89 @@ export async function initUserDB(): Promise<{
   let activeUser = getActiveUsername();
 
   try {
-    const db = await getDB();
-    const profiles = await getAllProfilesFromDB(db);
+    // 1. Fetch profiles list from server
+    const res = await fetch(`${API_BASE}/profiles`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const profiles: UserProfile[] = await res.json();
 
     if (profiles.length === 0) {
-      // First run: migrate legacy localStorage data to default profile
+      // First run on server: Create user and sync any existing legacy local progress
+      const loginRes = await fetch(`${API_BASE}/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: activeUser }),
+      });
+      const data = await loginRes.json();
+      let currentProgress: UserProgressData = data.progress;
+
+      // Migrate legacy localStorage data if exists
       const legacy = readLegacyLocalStorageData();
-      const now = new Date().toISOString();
-      const defaultProfile: UserProfile = {
+      if (
+        legacy.attempts.length > 0 ||
+        legacy.bookmarks.length > 0 ||
+        legacy.wrongIds.length > 0 ||
+        Object.keys(legacy.exposureMap).length > 0
+      ) {
+        currentProgress = {
+          username: activeUser,
+          attempts: legacy.attempts,
+          bookmarks: legacy.bookmarks,
+          wrongIds: legacy.wrongIds,
+          exposureMap: legacy.exposureMap,
+          updatedAt: new Date().toISOString(),
+        };
+        await saveUserProgress(currentProgress);
+      }
+
+      await cacheProfileLocally(data.profile);
+      await cacheProgressLocally(currentProgress);
+
+      return {
+        activeUser: data.profile.username,
+        profiles: [data.profile],
+        currentProgress,
+      };
+    }
+
+    // Server has profiles: find active user or default to first active profile
+    const existing = profiles.find((p) => p.username.toLowerCase() === activeUser.toLowerCase());
+    if (existing) {
+      activeUser = existing.username;
+    } else {
+      activeUser = profiles[0].username;
+    }
+    setActiveUsername(activeUser);
+
+    // Fetch user progress from server
+    const currentProgress = await loadUserProgress(activeUser);
+
+    // Cache locally for offline availability
+    for (const p of profiles) {
+      cacheProfileLocally(p).catch(() => {});
+    }
+    cacheProgressLocally(currentProgress).catch(() => {});
+
+    return {
+      activeUser,
+      profiles,
+      currentProgress,
+    };
+  } catch (serverErr) {
+    console.warn('[ServerDB] Cannot reach server DB, using local cache fallback:', serverErr);
+
+    // Offline / Local fallback mode
+    const localProfiles = await getLocalProfiles();
+    const legacy = readLegacyLocalStorageData();
+    const now = new Date().toISOString();
+
+    if (localProfiles.length === 0) {
+      const fallbackProfile: UserProfile = {
         username: activeUser,
         displayName: activeUser,
         createdAt: now,
         lastActiveAt: now,
       };
-
-      const defaultProgress: UserProgressData = {
+      const fallbackProgress: UserProgressData = {
         username: activeUser,
         attempts: legacy.attempts,
         bookmarks: legacy.bookmarks,
@@ -150,44 +314,24 @@ export async function initUserDB(): Promise<{
         updatedAt: now,
       };
 
-      await saveProfileToDB(db, defaultProfile);
-      await saveProgressToDB(db, defaultProgress);
+      await cacheProfileLocally(fallbackProfile);
+      await cacheProgressLocally(fallbackProgress);
 
       return {
         activeUser,
-        profiles: [defaultProfile],
-        currentProgress: defaultProgress,
+        profiles: [fallbackProfile],
+        currentProgress: fallbackProgress,
       };
     }
 
-    // Ensure activeUser exists in profiles, otherwise pick first profile
-    const existing = profiles.find((p) => p.username.toLowerCase() === activeUser.toLowerCase());
-    if (existing) {
-      activeUser = existing.username;
-      setActiveUsername(activeUser);
-    } else {
-      activeUser = profiles[0].username;
-      setActiveUsername(activeUser);
-    }
+    const matched = localProfiles.find(
+      (p) => p.username.toLowerCase() === activeUser.toLowerCase()
+    );
+    if (matched) activeUser = matched.username;
+    else activeUser = localProfiles[0].username;
+    setActiveUsername(activeUser);
 
-    const currentProgress = await getProgressFromDB(db, activeUser);
-    return {
-      activeUser,
-      profiles,
-      currentProgress,
-    };
-  } catch (err) {
-    console.warn('IndexedDB unavailable, falling back to in-memory/localStorage profile mode:', err);
-    // Fallback: localStorage-only mode
-    const legacy = readLegacyLocalStorageData();
-    const now = new Date().toISOString();
-    const fallbackProfile: UserProfile = {
-      username: activeUser,
-      displayName: activeUser,
-      createdAt: now,
-      lastActiveAt: now,
-    };
-    const fallbackProgress: UserProgressData = {
+    const cachedProgress = (await getLocalProgress(activeUser)) || {
       username: activeUser,
       attempts: legacy.attempts,
       bookmarks: legacy.bookmarks,
@@ -198,116 +342,45 @@ export async function initUserDB(): Promise<{
 
     return {
       activeUser,
-      profiles: [fallbackProfile],
-      currentProgress: fallbackProgress,
+      profiles: localProfiles,
+      currentProgress: cachedProgress,
     };
   }
 }
-
-// ================= IndexedDB Low-level Helpers =================
-
-function getAllProfilesFromDB(db: IDBDatabase): Promise<UserProfile[]> {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_PROFILES, 'readonly');
-    const store = tx.objectStore(STORE_PROFILES);
-    const req = store.getAll();
-
-    req.onsuccess = () => {
-      const list: UserProfile[] = req.result || [];
-      // Sort newest active first
-      list.sort(
-        (a, b) => new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
-      );
-      resolve(list);
-    };
-    req.onerror = () => reject(req.error);
-  });
-}
-
-function saveProfileToDB(db: IDBDatabase, profile: UserProfile): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_PROFILES, 'readwrite');
-    const store = tx.objectStore(STORE_PROFILES);
-    const req = store.put(profile);
-
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
-}
-
-function getProgressFromDB(db: IDBDatabase, username: string): Promise<UserProgressData> {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_PROGRESS, 'readonly');
-    const store = tx.objectStore(STORE_PROGRESS);
-    const req = store.get(username);
-
-    req.onsuccess = () => {
-      if (req.result) {
-        resolve(req.result as UserProgressData);
-      } else {
-        // Return blank progress
-        const blank: UserProgressData = {
-          username,
-          attempts: [],
-          bookmarks: [],
-          wrongIds: [],
-          exposureMap: {},
-          updatedAt: new Date().toISOString(),
-        };
-        resolve(blank);
-      }
-    };
-    req.onerror = () => reject(req.error);
-  });
-}
-
-function saveProgressToDB(db: IDBDatabase, progress: UserProgressData): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_PROGRESS, 'readwrite');
-    const store = tx.objectStore(STORE_PROGRESS);
-    const req = store.put(progress);
-
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
-}
-
-function deleteProfileFromDB(db: IDBDatabase, username: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction([STORE_PROFILES, STORE_PROGRESS], 'readwrite');
-    tx.objectStore(STORE_PROFILES).delete(username);
-    tx.objectStore(STORE_PROGRESS).delete(username);
-
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-// ================= High-Level Public API =================
 
 /**
  * Gets all user profiles stored in DB
  */
 export async function getAllProfiles(): Promise<UserProfile[]> {
   try {
-    const db = await getDB();
-    return await getAllProfilesFromDB(db);
-  } catch {
-    return [
-      {
-        username: getActiveUsername(),
-        displayName: getActiveUsername(),
-        createdAt: new Date().toISOString(),
-        lastActiveAt: new Date().toISOString(),
-      },
-    ];
+    const res = await fetch(`${API_BASE}/profiles`, { cache: 'no-store' });
+    if (res.ok) {
+      const list: UserProfile[] = await res.json();
+      for (const p of list) cacheProfileLocally(p).catch(() => {});
+      return list;
+    }
+  } catch (err) {
+    console.warn('[ServerDB] getAllProfiles fallback to local:', err);
   }
+
+  const local = await getLocalProfiles();
+  if (local.length > 0) return local;
+
+  const current = getActiveUsername();
+  return [
+    {
+      username: current,
+      displayName: current,
+      createdAt: new Date().toISOString(),
+      lastActiveAt: new Date().toISOString(),
+    },
+  ];
 }
 
 /**
  * Logs in or creates a profile by raw username (no password needed).
- * If user exists, updates lastActiveAt and loads their progress.
- * If user does not exist, creates profile and fresh progress.
+ * If user exists on server, updates lastActiveAt and loads their progress.
+ * If user does not exist, server creates profile and fresh progress in SQLite.
  */
 export async function loginOrCreateUser(rawUsername: string): Promise<{
   profile: UserProfile;
@@ -315,112 +388,134 @@ export async function loginOrCreateUser(rawUsername: string): Promise<{
   isNew: boolean;
 }> {
   const cleanUsername = sanitizeUsername(rawUsername);
-  const now = new Date().toISOString();
 
   try {
-    const db = await getDB();
-    const profiles = await getAllProfilesFromDB(db);
-    const existing = profiles.find(
-      (p) => p.username.toLowerCase() === cleanUsername.toLowerCase()
-    );
+    const res = await fetch(`${API_BASE}/users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: cleanUsername }),
+    });
 
-    if (existing) {
-      existing.lastActiveAt = now;
-      await saveProfileToDB(db, existing);
-      setActiveUsername(existing.username);
-      const progress = await getProgressFromDB(db, existing.username);
-
-      return { profile: existing, progress, isNew: false };
+    if (res.ok) {
+      const data: { profile: UserProfile; progress: UserProgressData; isNew: boolean } =
+        await res.json();
+      setActiveUsername(data.profile.username);
+      await cacheProfileLocally(data.profile);
+      await cacheProgressLocally(data.progress);
+      return data;
     }
-
-    // Create new profile
-    const newProfile: UserProfile = {
-      username: cleanUsername,
-      displayName: cleanUsername,
-      createdAt: now,
-      lastActiveAt: now,
-    };
-    const newProgress: UserProgressData = {
-      username: cleanUsername,
-      attempts: [],
-      bookmarks: [],
-      wrongIds: [],
-      exposureMap: {},
-      updatedAt: now,
-    };
-
-    await saveProfileToDB(db, newProfile);
-    await saveProgressToDB(db, newProgress);
-    setActiveUsername(cleanUsername);
-
-    return { profile: newProfile, progress: newProgress, isNew: true };
   } catch (err) {
-    console.warn('Error in loginOrCreateUser:', err);
-    setActiveUsername(cleanUsername);
-    const fallbackProfile: UserProfile = {
-      username: cleanUsername,
-      displayName: cleanUsername,
-      createdAt: now,
-      lastActiveAt: now,
-    };
-    const fallbackProgress: UserProgressData = {
-      username: cleanUsername,
-      attempts: [],
-      bookmarks: [],
-      wrongIds: [],
-      exposureMap: {},
-      updatedAt: now,
-    };
-    return { profile: fallbackProfile, progress: fallbackProgress, isNew: true };
+    console.warn('[ServerDB] loginOrCreateUser server unreachable, falling back locally:', err);
   }
+
+  // Local fallback
+  setActiveUsername(cleanUsername);
+  const now = new Date().toISOString();
+  const existingProgress = await getLocalProgress(cleanUsername);
+
+  const profile: UserProfile = {
+    username: cleanUsername,
+    displayName: cleanUsername,
+    createdAt: now,
+    lastActiveAt: now,
+  };
+  const progress: UserProgressData = existingProgress || {
+    username: cleanUsername,
+    attempts: [],
+    bookmarks: [],
+    wrongIds: [],
+    exposureMap: {},
+    updatedAt: now,
+  };
+
+  await cacheProfileLocally(profile);
+  await cacheProgressLocally(progress);
+
+  return { profile, progress, isNew: !existingProgress };
 }
 
 /**
- * Loads user progress by username
+ * Loads user progress by username from server SQLite DB
  */
 export async function loadUserProgress(username: string): Promise<UserProgressData> {
   const clean = sanitizeUsername(username);
+
   try {
-    const db = await getDB();
-    return await getProgressFromDB(db, clean);
-  } catch {
-    const legacy = readLegacyLocalStorageData();
-    return {
-      username: clean,
-      attempts: legacy.attempts,
-      bookmarks: legacy.bookmarks,
-      wrongIds: legacy.wrongIds,
-      exposureMap: legacy.exposureMap,
-      updatedAt: new Date().toISOString(),
-    };
+    const res = await fetch(`${API_BASE}/users/${encodeURIComponent(clean)}/progress`, {
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      const data: UserProgressData = await res.json();
+      await cacheProgressLocally(data);
+      return data;
+    }
+  } catch (err) {
+    console.warn('[ServerDB] loadUserProgress fallback to local cache:', err);
   }
+
+  const local = await getLocalProgress(clean);
+  if (local) return local;
+
+  const legacy = readLegacyLocalStorageData();
+  return {
+    username: clean,
+    attempts: legacy.attempts,
+    bookmarks: legacy.bookmarks,
+    wrongIds: legacy.wrongIds,
+    exposureMap: legacy.exposureMap,
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 /**
- * Saves entire user progress to DB
+ * Saves entire user progress to server SQLite DB.
+ * Uses 300ms debounce to avoid high-frequency network requests while instantly caching locally.
  */
 export async function saveUserProgress(progress: UserProgressData): Promise<void> {
   progress.updatedAt = new Date().toISOString();
-  try {
-    const db = await getDB();
-    await saveProgressToDB(db, progress);
-  } catch (err) {
-    console.warn('Could not save user progress to IndexedDB:', err);
-  }
+
+  // Instant local cache
+  await cacheProgressLocally(progress);
+
+  // Queue server SQLite persist
+  _pendingProgressToSave = progress;
+  if (_saveTimeout) clearTimeout(_saveTimeout);
+
+  _saveTimeout = setTimeout(() => {
+    flushPendingProgressSave();
+  }, 300);
 }
 
 /**
  * Resets learning progress for a specific user:
  * Clears attempts, wrong questions, and fair question exposure map.
- * Optionally preserves or clears bookmarks.
+ * Preserves or clears bookmarks according to keepBookmarks.
+ * Saved directly to Server SQLite DB.
  */
 export async function resetUserLearningProgress(
   username: string,
   keepBookmarks: boolean = false
 ): Promise<UserProgressData> {
   const clean = sanitizeUsername(username);
-  const current = await loadUserProgress(clean);
 
+  try {
+    const res = await fetch(`${API_BASE}/users/${encodeURIComponent(clean)}/reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keepBookmarks }),
+    });
+
+    if (res.ok) {
+      const updated: UserProgressData = await res.json();
+      await cacheProgressLocally(updated);
+      return updated;
+    }
+  } catch (err) {
+    console.warn('[ServerDB] resetUserLearningProgress fallback to local update:', err);
+  }
+
+  // Fallback update
+  const current = await loadUserProgress(clean);
   const updatedProgress: UserProgressData = {
     ...current,
     username: clean,
@@ -431,12 +526,13 @@ export async function resetUserLearningProgress(
     updatedAt: new Date().toISOString(),
   };
 
+  await cacheProgressLocally(updatedProgress);
   await saveUserProgress(updatedProgress);
   return updatedProgress;
 }
 
 /**
- * Deletes a user profile and all their progress data.
+ * Deletes a user profile and all their progress data from server SQLite DB.
  */
 export async function deleteUserProfile(
   username: string
@@ -445,27 +541,30 @@ export async function deleteUserProfile(
   const currentActive = getActiveUsername();
 
   try {
-    const db = await getDB();
-    await deleteProfileFromDB(db, clean);
-    let remaining = await getAllProfilesFromDB(db);
-
-    if (remaining.length === 0) {
-      // Re-create default
-      const res = await loginOrCreateUser(DEFAULT_USERNAME);
-      remaining = [res.profile];
-      setActiveUsername(DEFAULT_USERNAME);
-      return { remaining, nextActiveUser: DEFAULT_USERNAME };
+    const res = await fetch(`${API_BASE}/users/${encodeURIComponent(clean)}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      console.warn(`[ServerDB] DELETE user returned ${res.status}`);
     }
-
-    let nextActive = currentActive;
-    if (currentActive.toLowerCase() === clean.toLowerCase()) {
-      nextActive = remaining[0].username;
-      setActiveUsername(nextActive);
-    }
-
-    return { remaining, nextActiveUser: nextActive };
   } catch (err) {
-    console.warn('Failed to delete user profile from IndexedDB:', err);
-    return { remaining: [], nextActiveUser: DEFAULT_USERNAME };
+    console.warn('[ServerDB] deleteUserProfile network error:', err);
   }
+
+  await removeLocalProfile(clean);
+
+  const remaining = await getAllProfiles();
+  let nextActive = currentActive;
+
+  if (remaining.length === 0) {
+    const fresh = await loginOrCreateUser(DEFAULT_USERNAME);
+    return { remaining: [fresh.profile], nextActiveUser: DEFAULT_USERNAME };
+  }
+
+  if (currentActive.toLowerCase() === clean.toLowerCase()) {
+    nextActive = remaining[0].username;
+    setActiveUsername(nextActive);
+  }
+
+  return { remaining, nextActiveUser: nextActive };
 }

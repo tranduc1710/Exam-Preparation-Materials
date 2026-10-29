@@ -5,9 +5,12 @@ services:
     restart: always
     ports:
       - "3030:3030"
+    volumes:
+      - ./data:/app/data
     networks:
       - default
 
 networks:
   default:
     name: bot_debits_default
+
