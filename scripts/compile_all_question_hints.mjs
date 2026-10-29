@@ -38,9 +38,11 @@ export function deriveOfficialHint(q) {
  * Curated question-specific hints for AI questions
  */
 export function deriveAIHint(q) {
-  const expl = (q.explanation || '').trim();
+  const qVi = (q.questionVi || q.question || '').toLowerCase().replace(/\s+/g, ' ');
+  const rawExpl = (q.explanation || '').trim();
+  const explNorm = rawExpl.toLowerCase().replace(/\s+/g, ' ');
 
-  // Handcrafted expert hints for tricky negative/DevOps/static testing questions
+  // 1. Handcrafted expert hints for tricky negative/DevOps/static testing questions
   if (q.id === 'ai1_q9' || q.id === 'ai8_q10') {
     return '💡 Gợi ý: Đề bài hỏi điểm KHÔNG PHẢI là lợi ích của DevOps. Việc phải đưa vào và bảo trì công cụ CI/CD là chi phí và thách thức kỹ thuật, không phải lợi ích đạt được.';
   }
@@ -89,26 +91,91 @@ export function deriveAIHint(q) {
   if (q.id === 'ai10_q6') {
     return '💡 Gợi ý: Triết lý Whole-Team Approach: Chất lượng là trách nhiệm CHUNG của cả nhóm (Dev, Tester, PO, BA), không phải là trách nhiệm của riêng cá nhân tester.';
   }
+  if (q.id === 'ai4_q16') {
+    return '💡 Gợi ý: Giá trị đặc biệt của kiểm thử tĩnh: phát hiện các khiếm khuyết trong code/tài liệu ngay cả khi mã không chạy được (như biến chưa khai báo, mã không thể đạt tới - unreachable code).';
+  }
+  if (q.id === 'ai6_q16') {
+    return '💡 Gợi ý: Kiểm thử tĩnh đáp ứng trực tiếp nguyên tắc kiểm thử sớm (Shift-Left), giúp phát hiện và ngăn ngừa lỗi ngay từ khâu đặc tả yêu cầu và thiết kế kiến trúc.';
+  }
+  if (q.id === 'ai6_q24') {
+    return '💡 Gợi ý: Khái niệm cốt lõi: Hạng mục bao phủ (coverage item) của kiểm thử câu lệnh là các câu lệnh có thể thực thi (executable statements).';
+  }
+  if (q.id === 'ai10_q24') {
+    return '💡 Gợi ý: Khái niệm cốt lõi: Hạng mục bao phủ (coverage item) của kiểm thử nhánh là các nhánh — tức sự chuyển giao điều khiển giữa hai nút trong đồ thị luồng điều khiển.';
+  }
+  if (q.id === 'ai5_q25') {
+    return '💡 Gợi ý: Công thức độ bao phủ nhánh = (Số nhánh đã thực thi ÷ Tổng số nhánh) × 100%.';
+  }
+  if (q.id === 'ai7_q25') {
+    return '💡 Gợi ý: Phân loại nhánh: Một nhánh có thể là có điều kiện (kết quả True/False của lệnh if, switch-case) hoặc không điều kiện (kết thúc khối lệnh nhảy đến điểm tiếp theo).';
+  }
+  if (q.id === 'ai6_q25') {
+    return '💡 Gợi ý: Lợi ích lớn của kiểm thử hộp trắng: cung cấp thước đo độ bao phủ định lượng khách quan và chỉ ra các vùng mã nguồn chưa được test case nào chạm tới.';
+  }
+  if (q.id === 'ai8_q25') {
+    return '💡 Gợi ý: Kỹ thuật hộp trắng cũng có thể áp dụng tĩnh bằng cách rà soát luồng điều khiển hoặc dry run (chạy thử khô trên giấy) mã nguồn.';
+  }
+  if (q.id === 'ai4_q25') {
+    return '💡 Gợi ý: Trong kiểm thử câu lệnh, lỗi chỉ bộc lộ khi câu lệnh chứa lỗi được thực thi dưới điều kiện kích hoạt sự cố cụ thể.';
+  }
+  if (q.id === 'ai8_q24' || q.id === 'ai9_q25' || q.id === 'ai3_q25' || q.id === 'ai6_q25') {
+    return '💡 Gợi ý: 100% bao phủ câu lệnh có thể bỏ sót kết quả quyết định (ví dụ nhánh Sai của lệnh if thiếu mệnh đề else). 100% bao phủ nhánh mới bảo đảm 100% câu lệnh.';
+  }
 
-  // Matching questions
-  if (expl.startsWith('Ghép đúng:')) {
-    let matchPart = expl.split(/các phương án (khác|còn lại)/i)[0].trim();
+  // 2. Matching questions
+  if (rawExpl.startsWith('Ghép đúng:')) {
+    let matchPart = rawExpl.split(/các phương án (khác|còn lại)/i)[0].trim();
     return `💡 Gợi ý: Ghép nối chuẩn xác: ${cleanSentence(matchPart.replace(/Ghép đúng:\s*/i, ''))}`;
   }
 
-  // Formula & Calculation
-  if (expl.includes('Công thức ước lượng ba điểm:') || expl.includes('E = (a + 4m + b) / 6')) {
+  // 3. Formula & Calculation
+  if (rawExpl.includes('Công thức ước lượng ba điểm:') || rawExpl.includes('E = (a + 4m + b) / 6')) {
     return '💡 Gợi ý: Áp dụng công thức ước lượng ba điểm: E = (a + 4m + b) / 6, với a = lạc quan, m = khả dĩ nhất, b = bi quan.';
   }
 
-  // Priority & Dependency Scheduling
-  if (expl.includes('Cách làm: tại mỗi bước') && expl.includes('phụ thuộc')) {
-    let steps = expl.split(/các phương án khác/i)[0].trim();
+  // 4. Priority & Dependency Scheduling
+  if (rawExpl.includes('Cách làm: tại mỗi bước') && rawExpl.includes('phụ thuộc')) {
+    let steps = rawExpl.split(/các phương án khác/i)[0].trim();
     return `💡 Gợi ý: ${cleanSentence(steps)}`;
   }
 
-  // General clean extraction
-  let chunk = expl.split(/các phương án (còn lại|khác)|các lựa chọn khác/i)[0].trim();
+  // 5. Pattern-based pedagogical hints when raw explanation is too brief
+  if (qVi.includes('mục tiêu kiểm thử')) {
+    return '💡 Gợi ý: Mục tiêu kiểm thử gồm: đánh giá sản phẩm, xác minh yêu cầu, thẩm định kỳ vọng người dùng, tìm lỗi để giảm rủi ro vận hành (lưu ý: kiểm thử KHÔNG sửa lỗi - sửa lỗi là của Developer).';
+  }
+  if ((qVi.includes('lợi ích của tự động hóa') || qVi.includes('lợi ích của công cụ')) && qVi.includes('không phải')) {
+    return '💡 Gợi ý: Tìm phương án nói về rủi ro/chi phí: chi phí bảo trì script, kỳ vọng phi thực tế, hoặc phụ thuộc nhà cung cấp là RỦI RO của công cụ, không phải lợi ích.';
+  }
+  if (qVi.includes('lợi ích của tự động hóa') || qVi.includes('lợi ích của công cụ')) {
+    return '💡 Gợi ý: Lợi ích cốt lõi của công cụ/tự động hóa: giảm tác vụ lặp lại nhàm chán, tăng tính nhất quán/khả năng lặp lại và đo lường khách quan.';
+  }
+  if (qVi.includes('kỹ năng') && qVi.includes('tester')) {
+    return '💡 Gợi ý: Tester chuyên nghiệp cần: tư duy phân tích & phản biện, chú ý chi tiết, kỹ năng giao tiếp tốt và tinh thần hợp tác toàn đội ngũ.';
+  }
+  if (qVi.includes('yếu tố thành công') && qVi.includes('rà soát')) {
+    return '💡 Gợi ý: Yếu tố thành công của rà soát: mục tiêu rõ ràng, phân định vai trò cụ thể, chuẩn bị kỹ lưỡng, văn hóa cởi mở và cung cấp phản hồi tích cực để sửa lỗi.';
+  }
+  if ((qVi.includes('độ bao phủ câu lệnh') || qVi.includes('độ bao phủ nhánh')) && qVi.includes('phát biểu đúng')) {
+    return '💡 Gợi ý: 100% bao phủ nhánh BẢO ĐẢM 100% bao phủ câu lệnh. Ngược lại, 100% câu lệnh có thể KHÔNG phủ hết nhánh (ví dụ lệnh if thiếu nhánh else).';
+  }
+  if (qVi.includes('user story') && qVi.includes('tiêu chí chấp nhận') && qVi.includes('phát biểu đúng')) {
+    return '💡 Gợi ý: Tiêu chí chấp nhận (Acceptance Criteria) xác định phạm vi user story, tạo đồng thuận giữa các bên (PO, Dev, Tester) và làm cơ sở thiết kế test case nghiệm thu.';
+  }
+  if (qVi.includes('kế hoạch kiểm thử') && qVi.includes('không phải')) {
+    return '💡 Gợi ý: Kế hoạch kiểm thử (Test Plan) định hướng cấp cao (phạm vi, rủi ro, lịch trình, nguồn lực, tiêu chí vào/ra); không chứa test case chi tiết hay kết quả thực thi.';
+  }
+  if (qVi.includes('độc lập trong kiểm thử') && qVi.includes('không phải')) {
+    return '💡 Gợi ý: Hạn chế của tính độc lập: tester có thể bị cô lập khỏi nhóm phát triển, thiếu thông tin sâu về ngữ cảnh sản phẩm hoặc khiến lập trình viên ỷ lại.';
+  }
+  if (qVi.includes('lợi ích của tính độc lập')) {
+    return '💡 Gợi ý: Lợi ích lớn nhất của kiểm thử độc lập là góc nhìn khách quan, không bị thiên kiến của tác giả và phát hiện các loại khiếm khuyết khác biệt.';
+  }
+  if (qVi.includes('lợi ích của devops')) {
+    return '💡 Gợi ý: DevOps mang lại: phản hồi nhanh chóng về chất lượng mã qua CI/CD, tự động hóa hồi quy liên tục và môi trường build/test ổn định.';
+  }
+
+  // 6. General clean extraction from raw explanation
+  let chunk = rawExpl.split(/các phương án (còn lại|khác)|các lựa chọn khác/i)[0].trim();
   chunk = chunk.replace(/^(đáp án|phương án)\s*\([a-d]\)[^:]*:\s*/i, '');
   chunk = chunk.replace(/^(đáp án|phương án)\s*\([a-d]\)\.?\s*/i, '');
   chunk = chunk.replace(/^với bva 3 giá trị,?\s*/i, 'Với BVA 3 giá trị: ');
