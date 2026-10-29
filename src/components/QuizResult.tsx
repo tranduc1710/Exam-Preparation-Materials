@@ -527,7 +527,7 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                     )}
                     <div className="whitespace-pre-line">
                       <strong className="text-indigo-950">Giải thích chi tiết: </strong>
-                      {q.explanation}
+                      {renderHighlightedText(q.explanation)}
                     </div>
                     {q.knowledge && (
                       <div className="pt-2 border-t border-indigo-200/60 flex items-start gap-2 text-xs text-indigo-900 font-medium">

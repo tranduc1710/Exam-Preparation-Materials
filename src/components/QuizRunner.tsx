@@ -818,7 +818,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
 
                     <div className="text-sm sm:text-base text-slate-800 leading-relaxed whitespace-pre-line">
                       <span className="font-bold text-indigo-950">Giải thích chi tiết: </span>
-                      {currentQ.explanation}
+                      {renderHighlightedText(currentQ.explanation)}
                     </div>
 
                     {currentQ.knowledge && (
