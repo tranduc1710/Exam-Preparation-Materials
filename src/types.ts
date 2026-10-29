@@ -27,7 +27,7 @@ export interface Question {
 }
 
 export type ExamCategory = 'official' | 'ai';
-export type ExamCollectionTab = 'all' | 'official' | 'ai';
+export type ExamCollectionTab = 'official' | 'ai';
 
 export interface Exam {
   id: number;

@@ -81,17 +81,14 @@ export function getAiDataset(): ExamsDataset | null {
   return _aiDataset;
 }
 
-export function getExamsByCategory(category: ExamCollectionTab = 'all'): Exam[] {
-  if (category === 'official') {
-    return _examsDataset ? _examsDataset.exams : [];
-  }
+export function getExamsByCategory(category: ExamCategory = 'official'): Exam[] {
   if (category === 'ai') {
     return _aiDataset ? _aiDataset.exams : [];
   }
-  return [...(_examsDataset?.exams || []), ...(_aiDataset?.exams || [])];
+  return _examsDataset ? _examsDataset.exams : [];
 }
 
-export function getAllQuestions(category: ExamCollectionTab = 'all'): Question[] {
+export function getAllQuestions(category?: ExamCategory): Question[] {
   if (category === 'official') return _officialQuestions;
   if (category === 'ai') return _aiQuestions;
   return _allQuestions;
@@ -167,22 +164,23 @@ export function recordQuestionsExposure(qIds: string[]): void {
   saveQuestionExposureMap(current);
 }
 
-export function resetQuestionsExposure(): void {
-  if (_activeUserProgress) {
-    _activeUserProgress.exposureMap = {};
-    saveUserProgress(_activeUserProgress).catch(console.error);
+export function resetQuestionsExposure(category: ExamCategory = 'official'): void {
+  const current = { ...loadQuestionExposureMap() };
+  const pool = category === 'ai' ? _aiQuestions : _officialQuestions;
+  for (const q of pool) {
+    delete current[q.id];
   }
-  try {
-    localStorage.removeItem(QUESTION_EXPOSURE_KEY);
-  } catch {
-    // ignore
-  }
+  saveQuestionExposureMap(current);
 }
 
-export function getExposureStats(customMap?: Record<string, number>): QuestionExposureStats {
+export function getExposureStats(
+  category: ExamCategory = 'official',
+  customMap?: Record<string, number>
+): QuestionExposureStats {
   const map = customMap || loadQuestionExposureMap();
-  const totalQuestions = _allQuestions.length;
-  const counts = _allQuestions.map((q) => map[q.id] || 0);
+  const pool = category === 'ai' ? _aiQuestions : _officialQuestions;
+  const totalQuestions = pool.length;
+  const counts = pool.map((q) => map[q.id] || 0);
 
   const minSeen = counts.length > 0 ? Math.min(...counts) : 0;
   const maxSeen = counts.length > 0 ? Math.max(...counts) : 0;
@@ -248,7 +246,8 @@ export function buildExamQuestionSet(
     } else if (result.length < 40) {
       const needed = 40 - result.length;
       const existingIds = new Set(result.map((q) => q.id));
-      const pool = _allQuestions.filter((q) => !existingIds.has(q.id));
+      const categoryPool = exam.category === 'ai' ? _aiQuestions : _officialQuestions;
+      const pool = categoryPool.filter((q) => !existingIds.has(q.id));
       const additional = fairSelectQuestions(pool, needed);
       result = [...result, ...additional];
     }
@@ -258,11 +257,11 @@ export function buildExamQuestionSet(
 }
 
 export function generateOfficialMock40(
-  category: ExamCollectionTab = 'all',
+  category: ExamCategory = 'official',
   autoRecord: boolean = true
 ): Question[] {
   const selected: Question[] = [];
-  const pool = getAllQuestions(category);
+  const pool = category === 'ai' ? _aiQuestions : _officialQuestions;
   for (const [chStr, count] of Object.entries(ISTQB_CHAPTER_WEIGHTS)) {
     const ch = Number(chStr);
     const chPool = pool.filter((q) => q.chapter === ch);

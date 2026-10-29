@@ -41,7 +41,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
   onToggleBookmark,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [collectionFilter, setCollectionFilter] = useState<ExamCollectionTab>('all');
+  const [collectionFilter, setCollectionFilter] = useState<ExamCollectionTab>('official');
   const [selectedExam, setSelectedExam] = useState<number | 'all'>('all');
   const [selectedChapter, setSelectedChapter] = useState<number | 'all'>('all');
   const [specialFilter, setSpecialFilter] = useState<'all' | 'v4' | 'bookmarked' | 'wrong'>(
@@ -58,8 +58,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
 
   const filtered = useMemo(() => {
     const qLower = searchQuery.trim().toLowerCase();
-    return getAllQuestions().filter((q) => {
-      if (collectionFilter !== 'all' && (q.category || 'official') !== collectionFilter) return false;
+    return getAllQuestions(collectionFilter).filter((q) => {
       if (selectedExam !== 'all' && q.examId !== selectedExam) return false;
       if (selectedChapter !== 'all' && q.chapter !== selectedChapter) return false;
       if (specialFilter === 'v4' && !q.isV4) return false;
@@ -98,11 +97,10 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
         {/* Collection Selector Tabs */}
         <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-100">
-          <span className="text-xs font-bold text-slate-500 mr-1">Bộ đề:</span>
+          <span className="text-xs font-bold text-slate-500 mr-1">Phần bộ đề:</span>
           {[
-            { id: 'all', label: `🌐 Toàn bộ kho (${getAllQuestions('all').length} câu)` },
             { id: 'official', label: `🏛️ Bộ Đề Chuẩn Quốc Tế (${getAllQuestions('official').length} câu)` },
-            { id: 'ai', label: `🤖 Bộ Đề AI Mock 2026 (${getAllQuestions('ai').length} câu)` },
+            { id: 'ai', label: `🤖 Bộ Đề do AI Tạo (${getAllQuestions('ai').length} câu)` },
           ].map((col) => {
             const active = collectionFilter === col.id;
             return (
@@ -113,7 +111,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                   setCollectionFilter(col.id as ExamCollectionTab);
                   setSelectedExam('all');
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
                   active
                     ? 'bg-indigo-600 text-white shadow-xs'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -148,9 +146,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="all">
-                {collectionFilter === 'all'
-                  ? `Tất cả 20 Đề (${getAllQuestions('all').length} câu)`
-                  : collectionFilter === 'official'
+                {collectionFilter === 'official'
                   ? `Tất cả 10 Đề Gốc (${getAllQuestions('official').length} câu)`
                   : `Tất cả 10 Đề AI (${getAllQuestions('ai').length} câu)`}
               </option>
@@ -172,11 +168,14 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="all">Tất cả 6 Chương Syllabus</option>
-              {getExamsDataset().metadata.chapters.map((ch) => (
-                <option key={ch.chapter} value={ch.chapter}>
-                  {CHAPTER_SHORT_NAMES[ch.chapter]}
-                </option>
-              ))}
+              {getExamsDataset().metadata.chapters.map((ch) => {
+                const count = getAllQuestions(collectionFilter).filter((q) => q.chapter === ch.chapter).length;
+                return (
+                  <option key={ch.chapter} value={ch.chapter}>
+                    {CHAPTER_SHORT_NAMES[ch.chapter]} ({count} câu)
+                  </option>
+                );
+              })}
             </select>
           </div>
         </div>
