@@ -69,29 +69,48 @@ function fallbackWriteJson(filePath, data) {
 }
 
 // Database helper functions
+const ONLINE_WINDOW_MS = 70 * 1000; // Active within 70s is online
+
 function dbGetProfiles() {
+  const now = Date.now();
+  let rawList = [];
   if (sqliteDb) {
     const stmt = sqliteDb.prepare(
       'SELECT username, display_name AS displayName, created_at AS createdAt, last_active_at AS lastActiveAt FROM profiles ORDER BY datetime(last_active_at) DESC'
     );
-    return stmt.all();
+    rawList = stmt.all();
+  } else {
+    const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
+    rawList = Object.values(map).sort(
+      (a, b) => new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
+    );
   }
-  const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
-  return Object.values(map).sort(
-    (a, b) => new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
-  );
+
+  return rawList.map((p) => {
+    const lastActiveTime = new Date(p.lastActiveAt).getTime();
+    const isOnline = now - lastActiveTime < ONLINE_WINDOW_MS;
+    return {
+      ...p,
+      isOnline,
+    };
+  });
 }
 
 function dbGetProfile(username) {
   const key = (username || '').trim().toLowerCase();
+  let p = null;
   if (sqliteDb) {
     const stmt = sqliteDb.prepare(
       'SELECT username, display_name AS displayName, created_at AS createdAt, last_active_at AS lastActiveAt FROM profiles WHERE lower(username) = ?'
     );
-    return stmt.get(key) || null;
+    p = stmt.get(key) || null;
+  } else {
+    const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
+    p = map[key] || null;
   }
-  const map = fallbackReadJson(FALLBACK_PROFILES_FILE, {});
-  return map[key] || null;
+  if (!p) return null;
+  const isOnline = Date.now() - new Date(p.lastActiveAt).getTime() < ONLINE_WINDOW_MS;
+  return { ...p, isOnline };
 }
 
 function dbSaveProfile(profile) {
@@ -320,6 +339,31 @@ async function handleApiRequest(req, res, urlObj) {
 
       dbSaveProgress(updated);
       return sendJson(res, 200, updated);
+    }
+
+    // Match /api/users/:username/heartbeat: POST /api/users/:username/heartbeat
+    const heartbeatMatch = pathname.match(/^\/api\/users\/([^/]+)\/heartbeat$/);
+    if (heartbeatMatch && method === 'POST') {
+      const username = decodeURIComponent(heartbeatMatch[1]);
+      const prof = dbGetProfile(username);
+      if (prof) {
+        prof.lastActiveAt = new Date().toISOString();
+        dbSaveProfile(prof);
+        return sendJson(res, 200, { success: true, isOnline: true, lastActiveAt: prof.lastActiveAt });
+      }
+      return sendJson(res, 404, { error: 'User not found' });
+    }
+
+    // Match /api/users/:username/logout: POST /api/users/:username/logout
+    const logoutMatch = pathname.match(/^\/api\/users\/([^/]+)\/logout$/);
+    if (logoutMatch && method === 'POST') {
+      const username = decodeURIComponent(logoutMatch[1]);
+      const prof = dbGetProfile(username);
+      if (prof) {
+        prof.lastActiveAt = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+        dbSaveProfile(prof);
+      }
+      return sendJson(res, 200, { success: true });
     }
 
     // Match /api/users/:username: DELETE /api/users/:username

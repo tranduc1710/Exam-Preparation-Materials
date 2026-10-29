@@ -112,6 +112,7 @@ export interface UserProfile {
   displayName: string;
   createdAt: string;
   lastActiveAt: string;
+  isOnline?: boolean;
 }
 
 export interface UserProgressData {

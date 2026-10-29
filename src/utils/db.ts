@@ -60,27 +60,35 @@ export function getDB(): Promise<IDBDatabase> {
 }
 
 /**
- * Normalizes username input: trims spaces, falls back to default if empty
+ * Normalizes username input: trims spaces
  */
 export function sanitizeUsername(raw: string): string {
-  const trimmed = (raw || '').trim().replace(/\s+/g, ' ');
-  return trimmed.length > 0 ? trimmed : DEFAULT_USERNAME;
+  return (raw || '').trim().replace(/\s+/g, ' ');
 }
 
-export function getActiveUsername(): string {
+export function getActiveUsername(): string | null {
   try {
     const saved = localStorage.getItem(ACTIVE_USER_KEY);
     if (saved && saved.trim()) return sanitizeUsername(saved);
   } catch {
     // ignore
   }
-  return DEFAULT_USERNAME;
+  return null;
 }
 
 export function setActiveUsername(username: string): void {
   const clean = sanitizeUsername(username);
+  if (!clean) return;
   try {
     localStorage.setItem(ACTIVE_USER_KEY, clean);
+  } catch {
+    // ignore
+  }
+}
+
+export function clearActiveUsername(): void {
+  try {
+    localStorage.removeItem(ACTIVE_USER_KEY);
   } catch {
     // ignore
   }
@@ -211,14 +219,45 @@ if (typeof window !== 'undefined') {
 // ================= Public High-Level API (Server DB + Local Resilience) =================
 
 /**
+ * Sends a periodic heartbeat to server to maintain 'Online' status
+ */
+export async function sendHeartbeat(username: string): Promise<boolean> {
+  if (!username) return false;
+  try {
+    const res = await fetch(`${API_BASE}/users/${encodeURIComponent(username)}/heartbeat`, {
+      method: 'POST',
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Logs out user: informs server to mark offline immediately and clears local session
+ */
+export async function logoutUser(username: string): Promise<void> {
+  const clean = sanitizeUsername(username);
+  if (clean) {
+    try {
+      await fetch(`${API_BASE}/users/${encodeURIComponent(clean)}/logout`, {
+        method: 'POST',
+      });
+    } catch {
+      // ignore
+    }
+  }
+  clearActiveUsername();
+}
+
+/**
  * Initializes database connection with the Server.
- * Fetches existing profiles from server SQLite DB; if empty or first run,
- * logs in default user and auto-migrates any legacy local test records.
+ * Requires user to log in if no active session is found in localStorage.
  */
 export async function initUserDB(): Promise<{
-  activeUser: string;
+  activeUser: string | null;
   profiles: UserProfile[];
-  currentProgress: UserProgressData;
+  currentProgress: UserProgressData | null;
 }> {
   let activeUser = getActiveUsername();
 
@@ -228,122 +267,78 @@ export async function initUserDB(): Promise<{
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const profiles: UserProfile[] = await res.json();
 
-    if (profiles.length === 0) {
-      // First run on server: Create user and sync any existing legacy local progress
-      const loginRes = await fetch(`${API_BASE}/users/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: activeUser }),
-      });
-      const data = await loginRes.json();
-      let currentProgress: UserProgressData = data.progress;
-
-      // Migrate legacy localStorage data if exists
-      const legacy = readLegacyLocalStorageData();
-      if (
-        legacy.attempts.length > 0 ||
-        legacy.bookmarks.length > 0 ||
-        legacy.wrongIds.length > 0 ||
-        Object.keys(legacy.exposureMap).length > 0
-      ) {
-        currentProgress = {
-          username: activeUser,
-          attempts: legacy.attempts,
-          bookmarks: legacy.bookmarks,
-          wrongIds: legacy.wrongIds,
-          exposureMap: legacy.exposureMap,
-          updatedAt: new Date().toISOString(),
-        };
-        await saveUserProgress(currentProgress);
-      }
-
-      await cacheProfileLocally(data.profile);
-      await cacheProgressLocally(currentProgress);
-
-      return {
-        activeUser: data.profile.username,
-        profiles: [data.profile],
-        currentProgress,
-      };
-    }
-
-    // Server has profiles: find active user or default to first active profile
-    const existing = profiles.find((p) => p.username.toLowerCase() === activeUser.toLowerCase());
-    if (existing) {
-      activeUser = existing.username;
-    } else {
-      activeUser = profiles[0].username;
-    }
-    setActiveUsername(activeUser);
-
-    // Fetch user progress from server
-    const currentProgress = await loadUserProgress(activeUser);
-
-    // Cache locally for offline availability
     for (const p of profiles) {
       cacheProfileLocally(p).catch(() => {});
     }
-    cacheProgressLocally(currentProgress).catch(() => {});
 
-    return {
-      activeUser,
-      profiles,
-      currentProgress,
-    };
+    if (!activeUser) {
+      // Must log in first: do not auto-login
+      return {
+        activeUser: null,
+        profiles,
+        currentProgress: null,
+      };
+    }
+
+    // Verify activeUser exists in profiles
+    const existing = profiles.find((p) => p.username.toLowerCase() === activeUser!.toLowerCase());
+    if (existing) {
+      activeUser = existing.username;
+      setActiveUsername(activeUser);
+
+      // Send initial heartbeat to mark online
+      sendHeartbeat(activeUser).catch(() => {});
+
+      // Fetch user progress from server
+      const currentProgress = await loadUserProgress(activeUser);
+      cacheProgressLocally(currentProgress).catch(() => {});
+
+      return {
+        activeUser,
+        profiles,
+        currentProgress,
+      };
+    } else {
+      // Stored user does not exist in server DB anymore
+      clearActiveUsername();
+      return {
+        activeUser: null,
+        profiles,
+        currentProgress: null,
+      };
+    }
   } catch (serverErr) {
     console.warn('[ServerDB] Cannot reach server DB, using local cache fallback:', serverErr);
 
     // Offline / Local fallback mode
     const localProfiles = await getLocalProfiles();
-    const legacy = readLegacyLocalStorageData();
-    const now = new Date().toISOString();
-
-    if (localProfiles.length === 0) {
-      const fallbackProfile: UserProfile = {
-        username: activeUser,
-        displayName: activeUser,
-        createdAt: now,
-        lastActiveAt: now,
-      };
-      const fallbackProgress: UserProgressData = {
-        username: activeUser,
-        attempts: legacy.attempts,
-        bookmarks: legacy.bookmarks,
-        wrongIds: legacy.wrongIds,
-        exposureMap: legacy.exposureMap,
-        updatedAt: now,
-      };
-
-      await cacheProfileLocally(fallbackProfile);
-      await cacheProgressLocally(fallbackProgress);
-
+    if (!activeUser) {
       return {
-        activeUser,
-        profiles: [fallbackProfile],
-        currentProgress: fallbackProgress,
+        activeUser: null,
+        profiles: localProfiles,
+        currentProgress: null,
       };
     }
 
     const matched = localProfiles.find(
-      (p) => p.username.toLowerCase() === activeUser.toLowerCase()
+      (p) => p.username.toLowerCase() === activeUser!.toLowerCase()
     );
-    if (matched) activeUser = matched.username;
-    else activeUser = localProfiles[0].username;
-    setActiveUsername(activeUser);
+    if (matched) {
+      activeUser = matched.username;
+      setActiveUsername(activeUser);
+      const cachedProgress = await getLocalProgress(activeUser);
+      return {
+        activeUser,
+        profiles: localProfiles,
+        currentProgress: cachedProgress,
+      };
+    }
 
-    const cachedProgress = (await getLocalProgress(activeUser)) || {
-      username: activeUser,
-      attempts: legacy.attempts,
-      bookmarks: legacy.bookmarks,
-      wrongIds: legacy.wrongIds,
-      exposureMap: legacy.exposureMap,
-      updatedAt: now,
-    };
-
+    clearActiveUsername();
     return {
-      activeUser,
+      activeUser: null,
       profiles: localProfiles,
-      currentProgress: cachedProgress,
+      currentProgress: null,
     };
   }
 }
@@ -363,18 +358,7 @@ export async function getAllProfiles(): Promise<UserProfile[]> {
     console.warn('[ServerDB] getAllProfiles fallback to local:', err);
   }
 
-  const local = await getLocalProfiles();
-  if (local.length > 0) return local;
-
-  const current = getActiveUsername();
-  return [
-    {
-      username: current,
-      displayName: current,
-      createdAt: new Date().toISOString(),
-      lastActiveAt: new Date().toISOString(),
-    },
-  ];
+  return await getLocalProfiles();
 }
 
 /**
@@ -388,6 +372,9 @@ export async function loginOrCreateUser(rawUsername: string): Promise<{
   isNew: boolean;
 }> {
   const cleanUsername = sanitizeUsername(rawUsername);
+  if (!cleanUsername) {
+    throw new Error('Vui lòng nhập tên tài khoản.');
+  }
 
   try {
     const res = await fetch(`${API_BASE}/users/login`, {
@@ -402,6 +389,7 @@ export async function loginOrCreateUser(rawUsername: string): Promise<{
       setActiveUsername(data.profile.username);
       await cacheProfileLocally(data.profile);
       await cacheProgressLocally(data.progress);
+      sendHeartbeat(data.profile.username).catch(() => {});
       return data;
     }
   } catch (err) {
@@ -418,6 +406,7 @@ export async function loginOrCreateUser(rawUsername: string): Promise<{
     displayName: cleanUsername,
     createdAt: now,
     lastActiveAt: now,
+    isOnline: true,
   };
   const progress: UserProgressData = existingProgress || {
     username: cleanUsername,
@@ -536,7 +525,7 @@ export async function resetUserLearningProgress(
  */
 export async function deleteUserProfile(
   username: string
-): Promise<{ remaining: UserProfile[]; nextActiveUser: string }> {
+): Promise<{ remaining: UserProfile[]; nextActiveUser: string | null }> {
   const clean = sanitizeUsername(username);
   const currentActive = getActiveUsername();
 
@@ -556,14 +545,9 @@ export async function deleteUserProfile(
   const remaining = await getAllProfiles();
   let nextActive = currentActive;
 
-  if (remaining.length === 0) {
-    const fresh = await loginOrCreateUser(DEFAULT_USERNAME);
-    return { remaining: [fresh.profile], nextActiveUser: DEFAULT_USERNAME };
-  }
-
-  if (currentActive.toLowerCase() === clean.toLowerCase()) {
-    nextActive = remaining[0].username;
-    setActiveUsername(nextActive);
+  if (currentActive && currentActive.toLowerCase() === clean.toLowerCase()) {
+    nextActive = null;
+    clearActiveUsername();
   }
 
   return { remaining, nextActiveUser: nextActive };

@@ -22,6 +22,7 @@ import {
   RotateCcw,
   User,
   X,
+  LogOut,
 } from 'lucide-react';
 import {
   AttemptRecord,
@@ -68,9 +69,12 @@ import {
   deleteUserProfile,
   getActiveUsername,
   setActiveUsername,
+  sendHeartbeat,
+  logoutUser,
 } from './utils/db';
 import { UserAccountModal } from './components/UserAccountModal';
 import { ResetProgressModal } from './components/ResetProgressModal';
+import { LoginScreen } from './components/LoginScreen';
 import type { ExamsDataset } from './types';
 
 // Heavy views are code-split: their code loads only when first opened.
@@ -115,8 +119,8 @@ export function App() {
     return 'bilingual';
   });
 
-  // Active user & profile state (IndexedDB)
-  const [activeUsername, setActiveUsernameState] = useState<string>(() => getActiveUsername());
+  // Active user & profile state
+  const [activeUsername, setActiveUsernameState] = useState<string | null>(() => getActiveUsername());
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
@@ -173,25 +177,29 @@ export function App() {
         setActiveUsernameState(activeUser);
         setProfiles(dbProfiles);
 
-        // Bind active user context to helper
-        setActiveUserProgress(currentProgress);
+        if (activeUser && currentProgress) {
+          // Bind active user context to helper
+          setActiveUserProgress(currentProgress);
 
-        // Sync local states
-        setAttempts(currentProgress.attempts || []);
-        setBookmarks(currentProgress.bookmarks || []);
-        setWrongIds(currentProgress.wrongIds || []);
-        setExposureStats(getExposureStats(currentProgress.exposureMap || {}));
+          // Sync local states
+          setAttempts(currentProgress.attempts || []);
+          setBookmarks(currentProgress.bookmarks || []);
+          setWrongIds(currentProgress.wrongIds || []);
+          setExposureStats(getExposureStats(currentProgress.exposureMap || {}));
 
-        if (currentProgress.settings) {
-          if (currentProgress.settings.quizMode) setQuizMode(currentProgress.settings.quizMode);
-          if (currentProgress.settings.durationMinutes !== undefined)
-            setDurationMinutes(currentProgress.settings.durationMinutes);
-          if (currentProgress.settings.questionSetMode)
-            setQuestionSetMode(currentProgress.settings.questionSetMode);
-          if (currentProgress.settings.shuffleQuestions !== undefined)
-            setShuffleQuestions(currentProgress.settings.shuffleQuestions);
-          if (currentProgress.settings.languageMode)
-            setLanguageModeState(currentProgress.settings.languageMode);
+          if (currentProgress.settings) {
+            if (currentProgress.settings.quizMode) setQuizMode(currentProgress.settings.quizMode);
+            if (currentProgress.settings.durationMinutes !== undefined)
+              setDurationMinutes(currentProgress.settings.durationMinutes);
+            if (currentProgress.settings.questionSetMode)
+              setQuestionSetMode(currentProgress.settings.questionSetMode);
+            if (currentProgress.settings.shuffleQuestions !== undefined)
+              setShuffleQuestions(currentProgress.settings.shuffleQuestions);
+            if (currentProgress.settings.languageMode)
+              setLanguageModeState(currentProgress.settings.languageMode);
+          }
+        } else {
+          setActiveUserProgress(null);
         }
 
         setDataReady(true);
@@ -209,11 +217,41 @@ export function App() {
     };
   }, []);
 
+  // Real-time Heartbeat & Profiles Online Status Polling
+  useEffect(() => {
+    if (!activeUsername) return;
+
+    sendHeartbeat(activeUsername).catch(() => {});
+
+    const hbInterval = setInterval(() => {
+      sendHeartbeat(activeUsername).catch(() => {});
+    }, 25000);
+
+    const pollInterval = setInterval(() => {
+      getAllProfiles().then(setProfiles).catch(() => {});
+    }, 25000);
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        sendHeartbeat(activeUsername).catch(() => {});
+        getAllProfiles().then(setProfiles).catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      clearInterval(hbInterval);
+      clearInterval(pollInterval);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [activeUsername]);
+
   const handleSelectUser = async (username: string) => {
     const progress = await loadUserProgress(username);
     setActiveUserProgress(progress);
     setActiveUsername(username);
     setActiveUsernameState(username);
+    sendHeartbeat(username).catch(() => {});
 
     setAttempts(progress.attempts || []);
     setBookmarks(progress.bookmarks || []);
@@ -241,6 +279,7 @@ export function App() {
     setActiveUserProgress(res.progress);
     setActiveUsername(res.profile.username);
     setActiveUsernameState(res.profile.username);
+    sendHeartbeat(res.profile.username).catch(() => {});
 
     setAttempts(res.progress.attempts || []);
     setBookmarks(res.progress.bookmarks || []);
@@ -256,16 +295,38 @@ export function App() {
     );
   };
 
+  const handleLogout = async () => {
+    if (activeUsername) {
+      await logoutUser(activeUsername);
+    }
+    setActiveUsernameState(null);
+    setActiveQuiz(null);
+    setViewingAttempt(null);
+    setActiveUserProgress(null);
+    const allP = await getAllProfiles();
+    setProfiles(allP);
+    setToastMessage('Bạn đã đăng xuất khỏi hệ thống.');
+  };
+
   const handleDeleteProfile = async (username: string) => {
     const res = await deleteUserProfile(username);
     setProfiles(res.remaining);
-    if (res.nextActiveUser.toLowerCase() !== activeUsername.toLowerCase()) {
+    if (!res.nextActiveUser) {
+      setActiveUsernameState(null);
+      setActiveUserProgress(null);
+      setActiveQuiz(null);
+      setViewingAttempt(null);
+      setToastMessage(`Đã xóa tài khoản "${username}". Vui lòng đăng nhập để tiếp tục.`);
+    } else if (activeUsername && res.nextActiveUser.toLowerCase() !== activeUsername.toLowerCase()) {
       await handleSelectUser(res.nextActiveUser);
+      setToastMessage(`Đã xóa tài khoản "${username}".`);
+    } else {
+      setToastMessage(`Đã xóa tài khoản "${username}".`);
     }
-    setToastMessage(`Đã xóa tài khoản "${username}".`);
   };
 
   const handleConfirmResetProgress = async (keepBookmarks: boolean) => {
+    if (!activeUsername) return;
     const updated = await resetUserLearningProgress(activeUsername, keepBookmarks);
     setActiveUserProgress(updated);
 
@@ -470,6 +531,17 @@ export function App() {
     );
   }
 
+  // Mandatory Login Gate: Force user to log in before viewing or taking quizzes
+  if (!activeUsername) {
+    return (
+      <LoginScreen
+        profiles={profiles}
+        onLogin={handleCreateOrLogin}
+        onDeleteProfile={handleDeleteProfile}
+      />
+    );
+  }
+
   // Active Quiz View
   if (activeQuiz) {
     return (
@@ -547,17 +619,41 @@ export function App() {
                 type="button"
                 onClick={() => setIsUserModalOpen(true)}
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-medium text-xs sm:text-sm transition cursor-pointer shadow-xs group"
-                title="Quản lý tài khoản học tập (Nhập tên tự do, không cần mật khẩu)"
+                title="Quản lý tài khoản học tập (Đang online)"
               >
                 <div className="w-6 h-6 rounded-lg bg-indigo-500 group-hover:bg-indigo-400 text-white flex items-center justify-center font-bold text-[11px] shrink-0">
-                  {activeUsername.slice(0, 2).toUpperCase()}
+                  {activeUsername ? activeUsername.slice(0, 2).toUpperCase() : 'U'}
                 </div>
                 <span>
                   Tài khoản: <strong className="text-white font-bold">{activeUsername}</strong>
                 </span>
+                <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-500/25 text-emerald-200 border border-emerald-400/30 px-1.5 py-0.5 rounded-md font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Online
+                </span>
                 <span className="text-[10px] bg-white/20 text-indigo-100 px-1.5 py-0.5 rounded-md font-semibold">
                   Đổi
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsUserModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/30 text-emerald-200 text-xs font-semibold transition cursor-pointer"
+                title="Xem danh sách học viên đang online"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>{profiles.filter((p) => p.isOnline).length} online</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-rose-500/20 border border-white/15 hover:border-rose-400/30 text-slate-300 hover:text-rose-200 text-xs font-medium transition cursor-pointer"
+                title="Đăng xuất khỏi tài khoản này"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Đăng xuất</span>
               </button>
 
               <button
@@ -573,7 +669,7 @@ export function App() {
 
             <div className="text-[11px] text-indigo-200 hidden md:flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
-              <span>Dữ liệu lưu tự động trong cơ sở dữ liệu IndexedDB của trình duyệt</span>
+              <span>Dữ liệu lưu tự động trên Server Database (Docker SQLite)</span>
             </div>
           </div>
 
@@ -1321,18 +1417,19 @@ export function App() {
       <UserAccountModal
         isOpen={isUserModalOpen}
         onClose={() => setIsUserModalOpen(false)}
-        activeUsername={activeUsername}
+        activeUsername={activeUsername || ''}
         profiles={profiles}
         onSelectUser={handleSelectUser}
         onCreateOrLogin={handleCreateOrLogin}
         onDeleteProfile={handleDeleteProfile}
+        onLogout={handleLogout}
       />
 
       {/* Reset Lesson Progress Modal */}
       <ResetProgressModal
         isOpen={isResetModalOpen}
         onClose={() => setIsResetModalOpen(false)}
-        username={activeUsername}
+        username={activeUsername || ''}
         attemptsCount={attempts.length}
         wrongCount={wrongIds.length}
         bookmarksCount={bookmarks.length}
