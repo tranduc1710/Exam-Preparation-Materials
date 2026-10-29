@@ -20,6 +20,8 @@ import {
   Languages,
   BookMarked,
   RotateCcw,
+  User,
+  X,
 } from 'lucide-react';
 import {
   AttemptRecord,
@@ -31,6 +33,8 @@ import {
   QuestionSetMode,
   QuizConfig,
   QuizMode,
+  UserProfile,
+  UserProgressData,
 } from './types';
 import {
   buildExamQuestionSet,
@@ -50,9 +54,23 @@ import {
   resetQuestionsExposure,
   saveAttempt,
   saveBookmarks,
+  setActiveUserProgress,
   shuffleArray,
   updateWrongIdsAfterQuiz,
 } from './utils/quizHelper';
+import {
+  initUserDB,
+  getAllProfiles,
+  loginOrCreateUser,
+  loadUserProgress,
+  saveUserProgress,
+  resetUserLearningProgress,
+  deleteUserProfile,
+  getActiveUsername,
+  setActiveUsername,
+} from './utils/db';
+import { UserAccountModal } from './components/UserAccountModal';
+import { ResetProgressModal } from './components/ResetProgressModal';
 import type { ExamsDataset } from './types';
 
 // Heavy views are code-split: their code loads only when first opened.
@@ -97,6 +115,19 @@ export function App() {
     return 'bilingual';
   });
 
+  // Active user & profile state (IndexedDB)
+  const [activeUsername, setActiveUsernameState] = useState<string>(() => getActiveUsername());
+  const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timer = setTimeout(() => setToastMessage(null), 3500);
+    return () => clearTimeout(timer);
+  }, [toastMessage]);
+
   const setLanguageMode = (lang: LanguageMode) => {
     setLanguageModeState(lang);
     try {
@@ -125,6 +156,7 @@ export function App() {
 
   useEffect(() => {
     let cancelled = false;
+
     fetch('/data/examsData.json')
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -133,20 +165,120 @@ export function App() {
       .then((data: ExamsDataset) => {
         if (cancelled) return;
         initDataset(data);
-        setExposureStats(getExposureStats());
+        return initUserDB();
+      })
+      .then((userDbResult) => {
+        if (cancelled || !userDbResult) return;
+        const { activeUser, profiles: dbProfiles, currentProgress } = userDbResult;
+        setActiveUsernameState(activeUser);
+        setProfiles(dbProfiles);
+
+        // Bind active user context to helper
+        setActiveUserProgress(currentProgress);
+
+        // Sync local states
+        setAttempts(currentProgress.attempts || []);
+        setBookmarks(currentProgress.bookmarks || []);
+        setWrongIds(currentProgress.wrongIds || []);
+        setExposureStats(getExposureStats(currentProgress.exposureMap || {}));
+
+        if (currentProgress.settings) {
+          if (currentProgress.settings.quizMode) setQuizMode(currentProgress.settings.quizMode);
+          if (currentProgress.settings.durationMinutes !== undefined)
+            setDurationMinutes(currentProgress.settings.durationMinutes);
+          if (currentProgress.settings.questionSetMode)
+            setQuestionSetMode(currentProgress.settings.questionSetMode);
+          if (currentProgress.settings.shuffleQuestions !== undefined)
+            setShuffleQuestions(currentProgress.settings.shuffleQuestions);
+          if (currentProgress.settings.languageMode)
+            setLanguageModeState(currentProgress.settings.languageMode);
+        }
+
         setDataReady(true);
       })
       .catch((err) => {
         if (cancelled) return;
-        console.error('Failed to load exams dataset', err);
+        console.error('Failed to load exams dataset or user DB', err);
         setDataError(
           'Không tải được dữ liệu đề thi. Vui lòng kiểm tra kết nối rồi tải lại trang.'
         );
       });
+
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const handleSelectUser = async (username: string) => {
+    const progress = await loadUserProgress(username);
+    setActiveUserProgress(progress);
+    setActiveUsername(username);
+    setActiveUsernameState(username);
+
+    setAttempts(progress.attempts || []);
+    setBookmarks(progress.bookmarks || []);
+    setWrongIds(progress.wrongIds || []);
+    setExposureStats(getExposureStats(progress.exposureMap || {}));
+
+    if (progress.settings) {
+      if (progress.settings.quizMode) setQuizMode(progress.settings.quizMode);
+      if (progress.settings.durationMinutes !== undefined)
+        setDurationMinutes(progress.settings.durationMinutes);
+      if (progress.settings.questionSetMode)
+        setQuestionSetMode(progress.settings.questionSetMode);
+      if (progress.settings.shuffleQuestions !== undefined)
+        setShuffleQuestions(progress.settings.shuffleQuestions);
+      if (progress.settings.languageMode) setLanguageModeState(progress.settings.languageMode);
+    }
+
+    const allP = await getAllProfiles();
+    setProfiles(allP);
+    setToastMessage(`Đã chuyển sang tài khoản "${username}".`);
+  };
+
+  const handleCreateOrLogin = async (rawName: string) => {
+    const res = await loginOrCreateUser(rawName);
+    setActiveUserProgress(res.progress);
+    setActiveUsername(res.profile.username);
+    setActiveUsernameState(res.profile.username);
+
+    setAttempts(res.progress.attempts || []);
+    setBookmarks(res.progress.bookmarks || []);
+    setWrongIds(res.progress.wrongIds || []);
+    setExposureStats(getExposureStats(res.progress.exposureMap || {}));
+
+    const allP = await getAllProfiles();
+    setProfiles(allP);
+    setToastMessage(
+      res.isNew
+        ? `Đã tạo tài khoản "${res.profile.displayName}" mới thành công!`
+        : `Chào mừng trở lại, ${res.profile.displayName}!`
+    );
+  };
+
+  const handleDeleteProfile = async (username: string) => {
+    const res = await deleteUserProfile(username);
+    setProfiles(res.remaining);
+    if (res.nextActiveUser.toLowerCase() !== activeUsername.toLowerCase()) {
+      await handleSelectUser(res.nextActiveUser);
+    }
+    setToastMessage(`Đã xóa tài khoản "${username}".`);
+  };
+
+  const handleConfirmResetProgress = async (keepBookmarks: boolean) => {
+    const updated = await resetUserLearningProgress(activeUsername, keepBookmarks);
+    setActiveUserProgress(updated);
+
+    setAttempts([]);
+    setWrongIds([]);
+    setExposureStats(getExposureStats({}));
+    if (!keepBookmarks) {
+      setBookmarks([]);
+    }
+    setToastMessage(
+      `Đã đặt lại toàn bộ tiến độ bài học của tài khoản "${activeUsername}" thành công!`
+    );
+  };
 
   const handleResetExposure = () => {
     if (
@@ -408,6 +540,43 @@ export function App() {
       {/* Hero Header */}
       <header className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+          {/* Top Bar: User Account & Reset Lesson Action */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setIsUserModalOpen(true)}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-medium text-xs sm:text-sm transition cursor-pointer shadow-xs group"
+                title="Quản lý tài khoản học tập (Nhập tên tự do, không cần mật khẩu)"
+              >
+                <div className="w-6 h-6 rounded-lg bg-indigo-500 group-hover:bg-indigo-400 text-white flex items-center justify-center font-bold text-[11px] shrink-0">
+                  {activeUsername.slice(0, 2).toUpperCase()}
+                </div>
+                <span>
+                  Tài khoản: <strong className="text-white font-bold">{activeUsername}</strong>
+                </span>
+                <span className="text-[10px] bg-white/20 text-indigo-100 px-1.5 py-0.5 rounded-md font-semibold">
+                  Đổi
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsResetModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/30 text-rose-100 hover:text-white font-medium text-xs transition cursor-pointer"
+                title="Đặt lại bài học: Xóa kết quả làm bài, câu sai và reset vòng quay câu hỏi của tài khoản này"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-rose-300" />
+                <span>Reset bài học</span>
+              </button>
+            </div>
+
+            <div className="text-[11px] text-indigo-200 hidden md:flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
+              <span>Dữ liệu lưu tự động trong cơ sở dữ liệu IndexedDB của trình duyệt</span>
+            </div>
+          </div>
+
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-semibold">
@@ -522,14 +691,22 @@ export function App() {
         {/* Configuration Panel (Shown on Exams & Chapters tabs) */}
         {(activeTab === 'exams' || activeTab === 'chapters') && (
           <section className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Clock className="w-5 h-5 text-indigo-600" />
                 <span>Cấu hình chế độ làm bài, Thời gian & Ngôn ngữ hiển thị câu hỏi</span>
               </h2>
-              <span className="text-xs text-slate-500">
-                Bạn có thể đổi ngôn ngữ Anh / Việt bất kỳ lúc nào ngay cả khi đang làm bài
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsResetModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-semibold text-xs transition cursor-pointer"
+                  title="Đặt lại bài học: Xóa lịch sử thi, câu làm sai và reset vòng quay câu hỏi của tài khoản hiện tại"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Reset bài học</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -1124,6 +1301,43 @@ export function App() {
           </div>
         )}
       </main>
+
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-700 animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="text-xs sm:text-sm font-semibold">{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* User Account Switcher / Passwordless Login Modal */}
+      <UserAccountModal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        activeUsername={activeUsername}
+        profiles={profiles}
+        onSelectUser={handleSelectUser}
+        onCreateOrLogin={handleCreateOrLogin}
+        onDeleteProfile={handleDeleteProfile}
+      />
+
+      {/* Reset Lesson Progress Modal */}
+      <ResetProgressModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        username={activeUsername}
+        attemptsCount={attempts.length}
+        wrongCount={wrongIds.length}
+        bookmarksCount={bookmarks.length}
+        onConfirmReset={handleConfirmResetProgress}
+      />
     </div>
   );
 }

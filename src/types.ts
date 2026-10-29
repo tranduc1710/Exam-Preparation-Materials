@@ -107,3 +107,26 @@ export interface QuestionExposureStats {
   currentRound: number;
 }
 
+export interface UserProfile {
+  username: string;
+  displayName: string;
+  createdAt: string;
+  lastActiveAt: string;
+}
+
+export interface UserProgressData {
+  username: string;
+  attempts: AttemptRecord[];
+  bookmarks: string[];
+  wrongIds: string[];
+  exposureMap: Record<string, number>;
+  settings?: {
+    quizMode?: QuizMode;
+    durationMinutes?: number;
+    questionSetMode?: QuestionSetMode;
+    shuffleQuestions?: boolean;
+    languageMode?: LanguageMode;
+  };
+  updatedAt: string;
+}
+

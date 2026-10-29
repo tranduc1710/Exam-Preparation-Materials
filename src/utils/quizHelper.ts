@@ -4,7 +4,10 @@ import {
   ExamsDataset,
   Question,
   QuestionExposureStats,
+  UserProgressData,
 } from '../types';
+import { saveUserProgress } from './db';
+
 // Dataset is NOT bundled into the JS anymore: App fetches it at runtime from
 // /data/examsData.json (public/data/examsData.json) and calls initDataset()
 // before rendering any data-dependent UI. Keeping it out of the bundle keeps
@@ -12,6 +15,26 @@ import {
 let _examsDataset: ExamsDataset | null = null;
 let _allQuestions: Question[] = [];
 let _questionById: Record<string, Question> = {};
+
+let _activeUserProgress: UserProgressData | null = null;
+
+export function setActiveUserProgress(progress: UserProgressData | null): void {
+  _activeUserProgress = progress;
+  if (progress) {
+    try {
+      localStorage.setItem(QUESTION_EXPOSURE_KEY, JSON.stringify(progress.exposureMap || {}));
+      localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(progress.attempts || []));
+      localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(progress.bookmarks || []));
+      localStorage.setItem(WRONG_IDS_KEY, JSON.stringify(progress.wrongIds || []));
+    } catch {
+      // ignore
+    }
+  }
+}
+
+export function getActiveUserProgress(): UserProgressData | null {
+  return _activeUserProgress;
+}
 
 export function initDataset(data: ExamsDataset): void {
   _examsDataset = data;
@@ -68,6 +91,9 @@ export function shuffleArray<T>(arr: T[]): T[] {
 }
 
 export function loadQuestionExposureMap(): Record<string, number> {
+  if (_activeUserProgress?.exposureMap) {
+    return _activeUserProgress.exposureMap;
+  }
   try {
     const raw = localStorage.getItem(QUESTION_EXPOSURE_KEY);
     return raw ? JSON.parse(raw) : {};
@@ -77,12 +103,20 @@ export function loadQuestionExposureMap(): Record<string, number> {
 }
 
 export function saveQuestionExposureMap(map: Record<string, number>): void {
-  localStorage.setItem(QUESTION_EXPOSURE_KEY, JSON.stringify(map));
+  if (_activeUserProgress) {
+    _activeUserProgress.exposureMap = map;
+    saveUserProgress(_activeUserProgress).catch(console.error);
+  }
+  try {
+    localStorage.setItem(QUESTION_EXPOSURE_KEY, JSON.stringify(map));
+  } catch {
+    // ignore
+  }
 }
 
 export function recordQuestionsExposure(qIds: string[]): void {
   if (!qIds || qIds.length === 0) return;
-  const current = loadQuestionExposureMap();
+  const current = { ...loadQuestionExposureMap() };
   for (const id of qIds) {
     current[id] = (current[id] || 0) + 1;
   }
@@ -90,11 +124,19 @@ export function recordQuestionsExposure(qIds: string[]): void {
 }
 
 export function resetQuestionsExposure(): void {
-  localStorage.removeItem(QUESTION_EXPOSURE_KEY);
+  if (_activeUserProgress) {
+    _activeUserProgress.exposureMap = {};
+    saveUserProgress(_activeUserProgress).catch(console.error);
+  }
+  try {
+    localStorage.removeItem(QUESTION_EXPOSURE_KEY);
+  } catch {
+    // ignore
+  }
 }
 
-export function getExposureStats(): QuestionExposureStats {
-  const map = loadQuestionExposureMap();
+export function getExposureStats(customMap?: Record<string, number>): QuestionExposureStats {
+  const map = customMap || loadQuestionExposureMap();
   const totalQuestions = _allQuestions.length;
   const counts = _allQuestions.map((q) => map[q.id] || 0);
 
@@ -188,6 +230,9 @@ export function generateOfficialMock40(autoRecord: boolean = true): Question[] {
 
 
 export function loadAttempts(): AttemptRecord[] {
+  if (_activeUserProgress?.attempts) {
+    return _activeUserProgress.attempts;
+  }
   try {
     const raw = localStorage.getItem(ATTEMPTS_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -199,15 +244,34 @@ export function loadAttempts(): AttemptRecord[] {
 export function saveAttempt(attempt: AttemptRecord): AttemptRecord[] {
   const current = loadAttempts();
   const next = [attempt, ...current].slice(0, 100);
-  localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(next));
+  if (_activeUserProgress) {
+    _activeUserProgress.attempts = next;
+    saveUserProgress(_activeUserProgress).catch(console.error);
+  }
+  try {
+    localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
   return next;
 }
 
 export function clearAttempts(): void {
-  localStorage.removeItem(ATTEMPTS_KEY);
+  if (_activeUserProgress) {
+    _activeUserProgress.attempts = [];
+    saveUserProgress(_activeUserProgress).catch(console.error);
+  }
+  try {
+    localStorage.removeItem(ATTEMPTS_KEY);
+  } catch {
+    // ignore
+  }
 }
 
 export function loadBookmarks(): string[] {
+  if (_activeUserProgress?.bookmarks) {
+    return _activeUserProgress.bookmarks;
+  }
   try {
     const raw = localStorage.getItem(BOOKMARKS_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -217,10 +281,22 @@ export function loadBookmarks(): string[] {
 }
 
 export function saveBookmarks(ids: string[]): void {
-  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(Array.from(new Set(ids))));
+  const unique = Array.from(new Set(ids));
+  if (_activeUserProgress) {
+    _activeUserProgress.bookmarks = unique;
+    saveUserProgress(_activeUserProgress).catch(console.error);
+  }
+  try {
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(unique));
+  } catch {
+    // ignore
+  }
 }
 
 export function loadWrongIds(): string[] {
+  if (_activeUserProgress?.wrongIds) {
+    return _activeUserProgress.wrongIds;
+  }
   try {
     const raw = localStorage.getItem(WRONG_IDS_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -244,7 +320,15 @@ export function updateWrongIdsAfterQuiz(
     }
   }
   const next = Array.from(currentSet);
-  localStorage.setItem(WRONG_IDS_KEY, JSON.stringify(next));
+  if (_activeUserProgress) {
+    _activeUserProgress.wrongIds = next;
+    saveUserProgress(_activeUserProgress).catch(console.error);
+  }
+  try {
+    localStorage.setItem(WRONG_IDS_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
   return next;
 }
 
