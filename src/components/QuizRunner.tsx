@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { LanguageMode, OptionKey, Question, QuizConfig } from '../types';
 import { CHAPTER_SHORT_NAMES, formatTime } from '../utils/quizHelper';
-import { isContentBilingual, renderHighlightedText } from '../utils/textHelper';
+import { getQuestionMnemonic, isContentBilingual, renderHighlightedText } from '../utils/textHelper';
 
 interface QuizRunnerProps {
   config: QuizConfig;
@@ -90,6 +90,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const isBookmarked = bookmarks.includes(currentQ.id);
   const isFlagged = flaggedSet.has(currentQ.id);
   const selectedAns = userAnswers[currentQ.id];
+  const currentMnemonic = getQuestionMnemonic(currentQ);
   const isMnemonicOpen = toggledMnemonicMap[currentQ.id] ?? showAlwaysMnemonic;
   const isRevealed =
     mode === 'practice' &&
@@ -475,7 +476,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                     </span>
                   </button>
 
-                  {currentQ.mnemonic && (
+                  {Boolean(currentMnemonic) && (
                     <button
                       type="button"
                       onClick={() => toggleMnemonic(currentQ.id)}
@@ -603,7 +604,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                 )}
 
                 {/* Mnemonic Hint Card (Available in BOTH Exam & Practice mode!) */}
-                {currentQ.mnemonic && isMnemonicOpen && (
+                {Boolean(currentMnemonic && isMnemonicOpen) && (
                   <div className="p-4 rounded-xl bg-amber-50/95 border-2 border-amber-300 text-amber-950 flex items-start gap-3 shadow-xs">
                     <div className="w-8 h-8 rounded-lg bg-amber-200/90 border border-amber-300 flex items-center justify-center shrink-0 mt-0.5 text-amber-900 shadow-2xs">
                       <Lightbulb className="w-4 h-4 fill-amber-500 text-amber-700" />
@@ -620,7 +621,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                         </button>
                       </div>
                       <div className="text-xs sm:text-sm font-medium leading-relaxed">
-                        {currentQ.mnemonic.replace(/^💡\s*mẹo nhớ:?\s*/i, '')}
+                        {currentMnemonic.replace(/^💡\s*mẹo nhớ:?\s*/i, '')}
                       </div>
                     </div>
                   </div>

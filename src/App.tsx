@@ -183,11 +183,11 @@ export function App() {
     let cancelled = false;
 
     Promise.all([
-      fetch('/data/examsData.json').then((res) => {
+      fetch(`/data/examsData.json?v=4.0&t=${Date.now()}`).then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<ExamsDataset>;
       }),
-      fetch('/data/aiExamsData.json')
+      fetch(`/data/aiExamsData.json?v=4.0&t=${Date.now()}`)
         .then((res) => {
           if (!res.ok) return null;
           return res.json() as Promise<ExamsDataset>;

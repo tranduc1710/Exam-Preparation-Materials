@@ -502,8 +502,8 @@ function handleRequest(req, res) {
     // Assets can cache forever; HTML & JSON use 304 revalidation
     const cacheControl = isAsset
       ? 'public, max-age=31536000, immutable'
-      : ext === '.html'
-      ? 'no-cache'
+      : (ext === '.html' || ext === '.json')
+      ? 'no-cache, must-revalidate'
       : 'public, max-age=3600';
 
     const cached = getCachedFile(filePath, ext);
