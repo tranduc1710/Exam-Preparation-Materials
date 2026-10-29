@@ -722,45 +722,11 @@ export function App() {
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Luyện Tập Theo Chương – {catTitle} ({totalQuestions} câu)
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               {isAi
                 ? 'Toàn bộ 400 câu hỏi thi thử thế hệ mới do AI biên soạn bám sát cấu trúc đề thi thật ISTQB CTFL v4.0.1 (chuẩn 40 câu/đề có bảng, sơ đồ và kỹ thuật kiểm thử chi tiết). Tuyệt đối không lẫn câu hỏi từ đề chuẩn Quốc tế.'
                 : 'Toàn bộ 344 câu hỏi được trích xuất từ 10 bộ đề thi chuẩn Quốc tế (Sample Exam A, B, C... của ISTQB & các tổ chức khảo thí), phân loại chuẩn theo 6 chương Syllabus CTFL v4.0. Tuyệt đối không lẫn câu hỏi từ đề AI.'}
             </p>
-          </div>
-
-          {/* Quick Segmented Switcher */}
-          <div className="bg-white/90 backdrop-blur-xs p-1.5 rounded-2xl flex items-center gap-1.5 border border-slate-200 shadow-xs shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('chapters-official');
-                setChapterCollection('official');
-              }}
-              className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 ${
-                !isAi
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-            >
-              <Award className="w-4 h-4" />
-              <span>Luyện Tập Chương: Đề Quốc Tế ({getAllQuestions('official').length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('chapters-ai');
-                setChapterCollection('ai');
-              }}
-              className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 ${
-                isAi
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Luyện Tập Chương: Đề do AI ({getAllQuestions('ai').length})</span>
-            </button>
           </div>
         </div>
 
