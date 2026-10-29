@@ -225,16 +225,18 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
     const flagged = flaggedSet.has(q.id);
     const isCurrent = idx === currentIndex;
 
-    let btnClass = 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
+    let btnClass = 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300';
 
     if (mode === 'practice' && ans) {
       if (ans === q.correctAnswer) {
-        btnClass = 'bg-emerald-600 text-white border-emerald-600';
+        btnClass = 'bg-emerald-600 text-white border-emerald-600 shadow-2xs';
       } else {
-        btnClass = 'bg-rose-600 text-white border-rose-600';
+        btnClass = 'bg-rose-600 text-white border-rose-600 shadow-2xs';
       }
     } else if (ans) {
-      btnClass = 'bg-indigo-600 text-white border-indigo-600';
+      btnClass = 'bg-indigo-600 text-white border-indigo-600 shadow-2xs';
+    } else if (isCurrent) {
+      btnClass = 'bg-indigo-50 text-indigo-700 border-indigo-400 font-extrabold';
     }
 
     return (
@@ -243,12 +245,12 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
         type="button"
         onClick={() => setCurrentIndex(idx)}
         className={`relative h-9 rounded-lg border text-xs font-bold transition flex items-center justify-center cursor-pointer ${btnClass} ${
-          isCurrent ? 'ring-2 ring-offset-1 ring-indigo-600 shadow-xs' : ''
+          isCurrent ? 'ring-2 ring-offset-2 ring-indigo-600 shadow-sm z-10 font-black' : ''
         }`}
       >
         {idx + 1}
         {flagged && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-white shadow-2xs" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-white shadow-2xs z-20" />
         )}
       </button>
     );
@@ -910,7 +912,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
           )}
 
           {/* Question Navigator Buttons */}
-          <div className="max-h-96 overflow-y-auto pr-1 space-y-3">
+          <div className="max-h-96 overflow-y-auto p-1.5 space-y-3">
             {groupByChapter && navFilter === 'all' ? (
               Object.entries(groupedByChapter).map(([chNum, qIndices]) => (
                 <div key={chNum} className="space-y-1.5">
@@ -918,13 +920,13 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                     <span className="truncate">{CHAPTER_SHORT_NAMES[Number(chNum)] || `Chương ${chNum}`}</span>
                     <span className="text-slate-400 font-normal shrink-0">{qIndices.length} câu</span>
                   </div>
-                  <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-1.5">
+                  <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2 p-1">
                     {qIndices.map((idx) => renderPaletteButton(idx))}
                   </div>
                 </div>
               ))
             ) : (
-              <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-1.5">
+              <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2 p-1">
                 {questions.map((q, idx) => {
                   const ans = userAnswers[q.id];
                   const flagged = flaggedSet.has(q.id);
