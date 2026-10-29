@@ -72,16 +72,14 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const [groupByChapter, setGroupByChapter] = useState<boolean>(true);
   const [autoRevealPractice, setAutoRevealPractice] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [showAlwaysMnemonic, setShowAlwaysMnemonic] = useState<boolean>(false);
-  const [openMnemonicSet, setOpenMnemonicSet] = useState<Set<string>>(new Set());
+  const [showAlwaysMnemonic, setShowAlwaysMnemonic] = useState<boolean>(true);
+  const [toggledMnemonicMap, setToggledMnemonicMap] = useState<Record<string, boolean>>({});
 
   const toggleMnemonic = (qId: string) => {
-    setOpenMnemonicSet((prev) => {
-      const next = new Set(prev);
-      if (next.has(qId)) next.delete(qId);
-      else next.add(qId);
-      return next;
-    });
+    setToggledMnemonicMap((prev) => ({
+      ...prev,
+      [qId]: !(prev[qId] ?? showAlwaysMnemonic),
+    }));
   };
 
   const totalSecondsLimit = durationMinutes > 0 ? durationMinutes * 60 : 0;
@@ -92,7 +90,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const isBookmarked = bookmarks.includes(currentQ.id);
   const isFlagged = flaggedSet.has(currentQ.id);
   const selectedAns = userAnswers[currentQ.id];
-  const isMnemonicOpen = showAlwaysMnemonic || openMnemonicSet.has(currentQ.id);
+  const isMnemonicOpen = toggledMnemonicMap[currentQ.id] ?? showAlwaysMnemonic;
   const isRevealed =
     mode === 'practice' &&
     (Boolean(selectedAns && autoRevealPractice) || revealedSet.has(currentQ.id));
