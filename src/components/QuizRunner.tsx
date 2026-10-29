@@ -548,7 +548,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                           key={`en-${idx}`}
                           className="relative group bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col items-center"
                         >
-                          {languageMode === 'bilingual' && (
+                          {languageMode === 'bilingual' && currentQ.imagesVi && currentQ.imagesVi.length > 0 && (
                             <span className="self-start text-[11px] font-bold uppercase text-slate-500 mb-1.5">
                               Hình gốc tiếng Anh (EN):
                             </span>

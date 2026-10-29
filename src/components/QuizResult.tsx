@@ -386,7 +386,7 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                             key={`en-${i}`}
                             className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col items-center"
                           >
-                            {languageMode === 'bilingual' && (
+                            {languageMode === 'bilingual' && q.imagesVi && q.imagesVi.length > 0 && (
                               <span className="self-start text-[11px] font-bold uppercase text-slate-500 mb-1">
                                 Hình gốc tiếng Anh (EN):
                               </span>

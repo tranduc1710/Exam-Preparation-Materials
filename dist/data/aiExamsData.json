@@ -5,7 +5,7 @@
     "category": "ai",
     "totalExams": 10,
     "totalQuestions": 400,
-    "totalImages": 0,
+    "totalImages": 37,
     "totalViImages": 0,
     "standardQuestionCount": 40,
     "passPercentage": 65,
@@ -60,7 +60,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 4,
       "category": "ai",
       "questions": [
         {
@@ -765,9 +765,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Sai.\nR1\nR2\nR3\nR4\nĐiều kiện\nTài xế dưới 25 tuổi\nĐ\nĐ\nS\nS\nCó tai nạn trong 3 năm qua\nĐ\nS\nĐ\nS\nHành động\nPhụ phí 20%\nKhông\nCó\nKhông\nKhông\nPhụ phí 15%\nKhông\nKhông\nCó\nKhông\nTừ chối bảo hiểm\nCó\nKhông\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Sai.\nR1\nR2\nR3\nR4\nĐiều kiện\nTài xế dưới 25 tuổi\nĐ\nĐ\nS\nS\nCó tai nạn trong 3 năm qua\nĐ\nS\nĐ\nS\nHành động\nPhụ phí 20%\nKhông\nCó\nKhông\nKhông\nPhụ phí 15%\nKhông\nKhông\nCó\nKhông\nTừ chối bảo hiểm\nCó\nKhông\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai1_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Phụ phí 15%, Từ chối bảo hiểm",
@@ -798,9 +800,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Bắt đầu từ trạng thái “Chưa kích hoạt”, hệ thống nhận lần lượt các sự kiện: Xác nhận email\n→ Vi phạm chính sách → Hết hạn khóa → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa.\nTrạng thái cuối cùng của hệ thống là gì?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Bắt đầu từ trạng thái “Chưa kích hoạt”, hệ thống nhận lần lượt các sự kiện: Xác nhận email\n→ Vi phạm chính sách → Hết hạn khóa → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa.\nTrạng thái cuối cùng của hệ thống là gì?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Bắt đầu từ trạng thái “Chưa kích hoạt”, hệ thống nhận lần lượt các sự kiện: Xác nhận email\n→ Vi phạm chính sách → Hết hạn khóa → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa.\nTrạng thái cuối cùng của hệ thống là gì?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Bắt đầu từ trạng thái “Chưa kích hoạt”, hệ thống nhận lần lượt các sự kiện: Xác nhận email\n→ Vi phạm chính sách → Hết hạn khóa → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa.\nTrạng thái cuối cùng của hệ thống là gì?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai1_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Hoạt động",
@@ -1128,9 +1132,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nXuất hóa đơn\nCao (1)\n—\nTC2\nTạo đơn hàng\nCao (1)\n—\nTC3\nTrả hàng\nThấp (3)\nTC1\nTC4\nÁp mã giảm giá\nCao (1)\nTC5\nTC5\nĐổi mật khẩu\nTrung bình (2)\n—\nTC6\nHủy đơn hàng\nCao (1)\nTC2\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nXuất hóa đơn\nCao (1)\n—\nTC2\nTạo đơn hàng\nCao (1)\n—\nTC3\nTrả hàng\nThấp (3)\nTC1\nTC4\nÁp mã giảm giá\nCao (1)\nTC5\nTC5\nĐổi mật khẩu\nTrung bình (2)\n—\nTC6\nHủy đơn hàng\nCao (1)\nTC2\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai1_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC1 → TC6 → TC2 → TC5 → TC4 → TC3",
@@ -1194,9 +1200,11 @@
           "originalLabel": "Câu 35",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Đánh giá rủi ro định lượng cho ra kết quả trong bảng ở hình. Mức rủi ro được tính bằng khả năng xảy\nra × mức độ ảnh hưởng. Theo chiến lược kiểm thử dựa vào rủi ro, rủi ro nào nên được kiểm thử ĐẦU\nTIÊN?\nMã\nRủi ro sản phẩm\nKhả năng xảy ra (1–5)\nMức độ ảnh hưởng (1–5)\nR1\nKhông gửi được email xác nhận\n1\n5\nR2\nSai định dạng ngày trên hóa đơn\n4\n1\nR3\nLộ thông tin thẻ thanh toán\n4\n4\nR4\nBáo cáo xuất chậm\n3\n4",
-          "questionVi": "Đánh giá rủi ro định lượng cho ra kết quả trong bảng ở hình. Mức rủi ro được tính bằng khả năng xảy\nra × mức độ ảnh hưởng. Theo chiến lược kiểm thử dựa vào rủi ro, rủi ro nào nên được kiểm thử ĐẦU\nTIÊN?\nMã\nRủi ro sản phẩm\nKhả năng xảy ra (1–5)\nMức độ ảnh hưởng (1–5)\nR1\nKhông gửi được email xác nhận\n1\n5\nR2\nSai định dạng ngày trên hóa đơn\n4\n1\nR3\nLộ thông tin thẻ thanh toán\n4\n4\nR4\nBáo cáo xuất chậm\n3\n4",
-          "images": [],
+          "question": "Đánh giá rủi ro định lượng cho ra kết quả trong bảng ở hình. Mức rủi ro được tính bằng khả năng xảy\nra × mức độ ảnh hưởng. Theo chiến lược kiểm thử dựa vào rủi ro, rủi ro nào nên được kiểm thử ĐẦU\nTIÊN?",
+          "questionVi": "Đánh giá rủi ro định lượng cho ra kết quả trong bảng ở hình. Mức rủi ro được tính bằng khả năng xảy\nra × mức độ ảnh hưởng. Theo chiến lược kiểm thử dựa vào rủi ro, rủi ro nào nên được kiểm thử ĐẦU\nTIÊN?",
+          "images": [
+            "/images/ai/ai1_q35.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "R3 – Lộ thông tin thẻ thanh toán",
@@ -1396,7 +1404,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 4,
       "category": "ai",
       "questions": [
         {
@@ -2101,9 +2109,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một cửa hàng trực tuyến áp dụng quy tắc giao hàng như bảng quyết định sau. Kết quả mong đợi cho\ntest case sau là gì? — Khách hàng thành viên: Sai; Giá trị đơn hàng ≥ 500.000 đồng: Sai; Giao hàng\nnhanh: Sai.\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nKhách hàng thành viên\nĐ\nĐ\nĐ\nS\nS\nS\nGiá trị đơn hàng ≥ 500.000 đồng\nĐ\nĐ\nS\nĐ\nĐ\nS\nGiao hàng nhanh\nĐ\nS\n–\nĐ\nS\n–\nHành động\nMiễn phí giao hàng\nCó\nCó\nKhông\nCó\nCó\nKhông\nPhụ phí giao nhanh 30.000 đồng\nCó\nKhông\n–\nCó\nKhông\n–\nĐ = Đúng, S = Sai. Ký hiệu “–” ở điều kiện nghĩa là không quan tâm; ở hành động nghĩa là không áp\ndụng.",
-          "questionVi": "Một cửa hàng trực tuyến áp dụng quy tắc giao hàng như bảng quyết định sau. Kết quả mong đợi cho\ntest case sau là gì? — Khách hàng thành viên: Sai; Giá trị đơn hàng ≥ 500.000 đồng: Sai; Giao hàng\nnhanh: Sai.\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nKhách hàng thành viên\nĐ\nĐ\nĐ\nS\nS\nS\nGiá trị đơn hàng ≥ 500.000 đồng\nĐ\nĐ\nS\nĐ\nĐ\nS\nGiao hàng nhanh\nĐ\nS\n–\nĐ\nS\n–\nHành động\nMiễn phí giao hàng\nCó\nCó\nKhông\nCó\nCó\nKhông\nPhụ phí giao nhanh 30.000 đồng\nCó\nKhông\n–\nCó\nKhông\n–\nĐ = Đúng, S = Sai. Ký hiệu “–” ở điều kiện nghĩa là không quan tâm; ở hành động nghĩa là không áp\ndụng.",
-          "images": [],
+          "question": "Một cửa hàng trực tuyến áp dụng quy tắc giao hàng như bảng quyết định sau. Kết quả mong đợi cho\ntest case sau là gì? — Khách hàng thành viên: Sai; Giá trị đơn hàng ≥ 500.000 đồng: Sai; Giao hàng\nnhanh: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” ở điều kiện nghĩa là không quan tâm; ở hành động nghĩa là không áp dụng.)",
+          "questionVi": "Một cửa hàng trực tuyến áp dụng quy tắc giao hàng như bảng quyết định sau. Kết quả mong đợi cho\ntest case sau là gì? — Khách hàng thành viên: Sai; Giá trị đơn hàng ≥ 500.000 đồng: Sai; Giao hàng\nnhanh: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” ở điều kiện nghĩa là không quan tâm; ở hành động nghĩa là không áp dụng.)",
+          "images": [
+            "/images/ai/ai2_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Phụ phí giao nhanh 30.000 đồng",
@@ -2134,9 +2144,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một đơn hàng trực tuyến có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Mới).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nMới\nThanh toán\nĐã thanh toán\nMới\nHủy\nĐã hủy\nĐã thanh toán\nGiao cho vận chuyển\nĐang giao\nĐã thanh toán\nHủy\nĐã hoàn tiền\nĐang giao\nGiao thành công\nHoàn thành\nĐang giao\nGiao thất bại\nĐã thanh toán\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một đơn hàng trực tuyến có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Mới).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nMới\nThanh toán\nĐã thanh toán\nMới\nHủy\nĐã hủy\nĐã thanh toán\nGiao cho vận chuyển\nĐang giao\nĐã thanh toán\nHủy\nĐã hoàn tiền\nĐang giao\nGiao thành công\nHoàn thành\nĐang giao\nGiao thất bại\nĐã thanh toán\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một đơn hàng trực tuyến có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Mới).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một đơn hàng trực tuyến có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Mới).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai2_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Sự kiện “Giao cho vận chuyển” khi đang ở trạng thái “Đã thanh toán”",
@@ -2332,9 +2344,11 @@
           "originalLabel": "Câu 29",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một rạp chiếu phim tính giá vé theo bảng quyết định sau. Kết quả mong đợi cho test case sau là gì? —\nSinh viên: Đúng; Suất chiếu trước 17 giờ: Sai; Ngày cuối tuần: Sai.\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nSinh viên\nĐ\nĐ\nĐ\nS\nS\nS\nSuất chiếu trước 17 giờ\nĐ\nS\nS\nĐ\nĐ\nS\nNgày cuối tuần\n–\nS\nĐ\nS\nĐ\n–\nHành động\nGiảm 30%\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nGiảm 10%\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một rạp chiếu phim tính giá vé theo bảng quyết định sau. Kết quả mong đợi cho test case sau là gì? —\nSinh viên: Đúng; Suất chiếu trước 17 giờ: Sai; Ngày cuối tuần: Sai.\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nSinh viên\nĐ\nĐ\nĐ\nS\nS\nS\nSuất chiếu trước 17 giờ\nĐ\nS\nS\nĐ\nĐ\nS\nNgày cuối tuần\n–\nS\nĐ\nS\nĐ\n–\nHành động\nGiảm 30%\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nGiảm 10%\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một rạp chiếu phim tính giá vé theo bảng quyết định sau. Kết quả mong đợi cho test case sau là gì? —\nSinh viên: Đúng; Suất chiếu trước 17 giờ: Sai; Ngày cuối tuần: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một rạp chiếu phim tính giá vé theo bảng quyết định sau. Kết quả mong đợi cho test case sau là gì? —\nSinh viên: Đúng; Suất chiếu trước 17 giờ: Sai; Ngày cuối tuần: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai2_q29.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Giảm 10%",
@@ -2464,9 +2478,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nĐăng nhập\nThấp (3)\nTC5\nTC2\nTạo khách hàng\nThấp (3)\n—\nTC3\nÁp mã giảm giá\nCao (1)\nTC6\nTC4\nXuất hóa đơn\nThấp (3)\n—\nTC5\nThêm vào giỏ hàng\nThấp (3)\nTC3\nTC6\nThanh toán\nTrung bình (2)\n—\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nĐăng nhập\nThấp (3)\nTC5\nTC2\nTạo khách hàng\nThấp (3)\n—\nTC3\nÁp mã giảm giá\nCao (1)\nTC6\nTC4\nXuất hóa đơn\nThấp (3)\n—\nTC5\nThêm vào giỏ hàng\nThấp (3)\nTC3\nTC6\nThanh toán\nTrung bình (2)\n—\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai2_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC3 → TC6 → TC1 → TC2 → TC4 → TC5",
@@ -2732,7 +2748,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 4,
       "category": "ai",
       "questions": [
         {
@@ -3437,9 +3453,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Đúng.\nR1\nR2\nR3\nR4\nĐiều kiện\nTài xế dưới 25 tuổi\nĐ\nĐ\nS\nS\nCó tai nạn trong 3 năm qua\nĐ\nS\nĐ\nS\nHành động\nPhụ phí 20%\nKhông\nCó\nKhông\nKhông\nPhụ phí 15%\nKhông\nKhông\nCó\nKhông\nTừ chối bảo hiểm\nCó\nKhông\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Đúng.\nR1\nR2\nR3\nR4\nĐiều kiện\nTài xế dưới 25 tuổi\nĐ\nĐ\nS\nS\nCó tai nạn trong 3 năm qua\nĐ\nS\nĐ\nS\nHành động\nPhụ phí 20%\nKhông\nCó\nKhông\nKhông\nPhụ phí 15%\nKhông\nKhông\nCó\nKhông\nTừ chối bảo hiểm\nCó\nKhông\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Đúng.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Đúng.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai3_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Không thực hiện hành động nào",
@@ -3470,9 +3488,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Test case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Test case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Test case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Test case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai3_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Sự kiện “Hết hạn khóa” khi đang ở trạng thái “Tạm khóa”",
@@ -3668,9 +3688,11 @@
           "originalLabel": "Câu 29",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Yêu cầu xóa → Hết 30 ngày. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển đổi\nhợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Yêu cầu xóa → Hết 30 ngày. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển đổi\nhợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Yêu cầu xóa → Hết 30 ngày. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển đổi\nhợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Yêu cầu xóa → Hết 30 ngày. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển đổi\nhợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai3_q29.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "50%",
@@ -3800,9 +3822,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nBáo cáo doanh thu\nCao (1)\nTC3\nTC2\nĐăng nhập\nThấp (3)\n—\nTC3\nTìm kiếm sản phẩm\nCao (1)\n—\nTC4\nHủy đơn hàng\nTrung bình (2)\nTC5\nTC5\nÁp mã giảm giá\nThấp (3)\nTC1\nTC6\nTrả hàng\nCao (1)\nTC3\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nBáo cáo doanh thu\nCao (1)\nTC3\nTC2\nĐăng nhập\nThấp (3)\n—\nTC3\nTìm kiếm sản phẩm\nCao (1)\n—\nTC4\nHủy đơn hàng\nTrung bình (2)\nTC5\nTC5\nÁp mã giảm giá\nThấp (3)\nTC1\nTC6\nTrả hàng\nCao (1)\nTC3\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai3_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC1 → TC3 → TC6 → TC4 → TC2 → TC5",
@@ -4068,7 +4092,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 3,
       "category": "ai",
       "questions": [
         {
@@ -4773,9 +4797,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một hệ thống đăng nhập xử lý yêu cầu theo bảng quyết định sau. Kết quả mong đợi cho test case sau là\ngì? — Tên đăng nhập hợp lệ: Đúng; Mật khẩu đúng: Sai; Tài khoản đang bị khóa: Sai.\nR1\nR2\nR3\nR4\nĐiều kiện\nTên đăng nhập hợp lệ\nĐ\nĐ\nĐ\nS\nMật khẩu đúng\nĐ\n–\nS\n–\nTài khoản đang bị khóa\nS\nĐ\nS\n–\nHành động\nCho phép đăng nhập\nCó\nKhông\nKhông\nKhông\nHiển thị thông báo tài khoản bị khóa\nKhông\nCó\nKhông\nKhông\nHiển thị lỗi thông tin đăng nhập\nKhông\nKhông\nCó\nCó\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một hệ thống đăng nhập xử lý yêu cầu theo bảng quyết định sau. Kết quả mong đợi cho test case sau là\ngì? — Tên đăng nhập hợp lệ: Đúng; Mật khẩu đúng: Sai; Tài khoản đang bị khóa: Sai.\nR1\nR2\nR3\nR4\nĐiều kiện\nTên đăng nhập hợp lệ\nĐ\nĐ\nĐ\nS\nMật khẩu đúng\nĐ\n–\nS\n–\nTài khoản đang bị khóa\nS\nĐ\nS\n–\nHành động\nCho phép đăng nhập\nCó\nKhông\nKhông\nKhông\nHiển thị thông báo tài khoản bị khóa\nKhông\nCó\nKhông\nKhông\nHiển thị lỗi thông tin đăng nhập\nKhông\nKhông\nCó\nCó\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một hệ thống đăng nhập xử lý yêu cầu theo bảng quyết định sau. Kết quả mong đợi cho test case sau là\ngì? — Tên đăng nhập hợp lệ: Đúng; Mật khẩu đúng: Sai; Tài khoản đang bị khóa: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một hệ thống đăng nhập xử lý yêu cầu theo bảng quyết định sau. Kết quả mong đợi cho test case sau là\ngì? — Tên đăng nhập hợp lệ: Đúng; Mật khẩu đúng: Sai; Tài khoản đang bị khóa: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai4_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Cho phép đăng nhập",
@@ -4806,9 +4832,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã sai → Nhập\nmã sai → Quản trị viên mở chặn → Nhập mã sai → Nhập mã đúng. Test case này đạt bao nhiêu phần\ntrăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nĐã khóa\nNhập mã đúng\nĐã mở khóa\nĐã khóa\nNhập mã sai\nCảnh báo\nCảnh báo\nNhập mã đúng\nĐã mở khóa\nCảnh báo\nNhập mã sai\nBị chặn\nBị chặn\nQuản trị viên mở chặn\nĐã khóa\nĐã mở khóa\nĐóng cửa\nĐã khóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã sai → Nhập\nmã sai → Quản trị viên mở chặn → Nhập mã sai → Nhập mã đúng. Test case này đạt bao nhiêu phần\ntrăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nĐã khóa\nNhập mã đúng\nĐã mở khóa\nĐã khóa\nNhập mã sai\nCảnh báo\nCảnh báo\nNhập mã đúng\nĐã mở khóa\nCảnh báo\nNhập mã sai\nBị chặn\nBị chặn\nQuản trị viên mở chặn\nĐã khóa\nĐã mở khóa\nĐóng cửa\nĐã khóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã sai → Nhập\nmã sai → Quản trị viên mở chặn → Nhập mã sai → Nhập mã đúng. Test case này đạt bao nhiêu phần\ntrăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã sai → Nhập\nmã sai → Quản trị viên mở chặn → Nhập mã sai → Nhập mã đúng. Test case này đạt bao nhiêu phần\ntrăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai4_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "100%",
@@ -5136,9 +5164,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nThanh toán\nThấp (3)\n—\nTC2\nTạo khách hàng\nThấp (3)\nTC6\nTC3\nThêm vào giỏ hàng\nTrung bình (2)\n—\nTC4\nBáo cáo doanh thu\nTrung bình (2)\n—\nTC5\nTrả hàng\nTrung bình (2)\nTC3\nTC6\nĐăng nhập\nCao (1)\nTC1\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nThanh toán\nThấp (3)\n—\nTC2\nTạo khách hàng\nThấp (3)\nTC6\nTC3\nThêm vào giỏ hàng\nTrung bình (2)\n—\nTC4\nBáo cáo doanh thu\nTrung bình (2)\n—\nTC5\nTrả hàng\nTrung bình (2)\nTC3\nTC6\nĐăng nhập\nCao (1)\nTC1\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai4_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC6 → TC3 → TC4 → TC5 → TC1 → TC2",
@@ -5404,7 +5434,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 4,
       "category": "ai",
       "questions": [
         {
@@ -6109,9 +6139,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Thu nhập ổn định: Sai; Có lịch sử nợ xấu: Sai; Có tài sản bảo đảm: Đúng.\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nThu nhập ổn định\nĐ\nĐ\nĐ\nS\nS\nS\nCó lịch sử nợ xấu\nS\nĐ\nĐ\nS\nS\nĐ\nCó tài sản bảo đảm\n–\nĐ\nS\nĐ\nS\n–\nHành động\nDuyệt khoản vay\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nYêu cầu thẩm định thêm\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Thu nhập ổn định: Sai; Có lịch sử nợ xấu: Sai; Có tài sản bảo đảm: Đúng.\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nThu nhập ổn định\nĐ\nĐ\nĐ\nS\nS\nS\nCó lịch sử nợ xấu\nS\nĐ\nĐ\nS\nS\nĐ\nCó tài sản bảo đảm\n–\nĐ\nS\nĐ\nS\n–\nHành động\nDuyệt khoản vay\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nYêu cầu thẩm định thêm\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Thu nhập ổn định: Sai; Có lịch sử nợ xấu: Sai; Có tài sản bảo đảm: Đúng.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Thu nhập ổn định: Sai; Có lịch sử nợ xấu: Sai; Có tài sản bảo đảm: Đúng.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai5_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Duyệt khoản vay",
@@ -6142,9 +6174,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã đúng →\nĐóng cửa → Nhập mã đúng → Đóng cửa. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển\nđổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nĐã khóa\nNhập mã đúng\nĐã mở khóa\nĐã khóa\nNhập mã sai\nCảnh báo\nCảnh báo\nNhập mã đúng\nĐã mở khóa\nCảnh báo\nNhập mã sai\nBị chặn\nBị chặn\nQuản trị viên mở chặn\nĐã khóa\nĐã mở khóa\nĐóng cửa\nĐã khóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã đúng →\nĐóng cửa → Nhập mã đúng → Đóng cửa. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển\nđổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nĐã khóa\nNhập mã đúng\nĐã mở khóa\nĐã khóa\nNhập mã sai\nCảnh báo\nCảnh báo\nNhập mã đúng\nĐã mở khóa\nCảnh báo\nNhập mã sai\nBị chặn\nBị chặn\nQuản trị viên mở chặn\nĐã khóa\nĐã mở khóa\nĐóng cửa\nĐã khóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã đúng →\nĐóng cửa → Nhập mã đúng → Đóng cửa. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển\nđổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã đúng →\nĐóng cửa → Nhập mã đúng → Đóng cửa. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển\nđổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai5_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "17%",
@@ -6472,9 +6506,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nBáo cáo doanh thu\nThấp (3)\nTC2\nTC2\nTrả hàng\nCao (1)\n—\nTC3\nĐăng nhập\nThấp (3)\n—\nTC4\nHủy đơn hàng\nThấp (3)\nTC3\nTC5\nÁp mã giảm giá\nTrung bình (2)\nTC3\nTC6\nThêm vào giỏ hàng\nCao (1)\nTC3\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nBáo cáo doanh thu\nThấp (3)\nTC2\nTC2\nTrả hàng\nCao (1)\n—\nTC3\nĐăng nhập\nThấp (3)\n—\nTC4\nHủy đơn hàng\nThấp (3)\nTC3\nTC5\nÁp mã giảm giá\nTrung bình (2)\nTC3\nTC6\nThêm vào giỏ hàng\nCao (1)\nTC3\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai5_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC2 → TC6 → TC3 → TC1 → TC5 → TC4",
@@ -6538,9 +6574,11 @@
           "originalLabel": "Câu 35",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Đánh giá rủi ro định lượng cho ra kết quả trong bảng ở hình. Mức rủi ro được tính bằng khả năng xảy\nra × mức độ ảnh hưởng. Theo chiến lược kiểm thử dựa vào rủi ro, rủi ro nào nên được kiểm thử ĐẦU\nTIÊN?\nMã\nRủi ro sản phẩm\nKhả năng xảy ra (1–5)\nMức độ ảnh hưởng (1–5)\nR1\nKhông gửi được email xác nhận\n3\n3\nR2\nBáo cáo xuất chậm\n3\n2\nR3\nMất dữ liệu khi mất kết nối\n4\n1\nR4\nSai định dạng ngày trên hóa đơn\n2\n5",
-          "questionVi": "Đánh giá rủi ro định lượng cho ra kết quả trong bảng ở hình. Mức rủi ro được tính bằng khả năng xảy\nra × mức độ ảnh hưởng. Theo chiến lược kiểm thử dựa vào rủi ro, rủi ro nào nên được kiểm thử ĐẦU\nTIÊN?\nMã\nRủi ro sản phẩm\nKhả năng xảy ra (1–5)\nMức độ ảnh hưởng (1–5)\nR1\nKhông gửi được email xác nhận\n3\n3\nR2\nBáo cáo xuất chậm\n3\n2\nR3\nMất dữ liệu khi mất kết nối\n4\n1\nR4\nSai định dạng ngày trên hóa đơn\n2\n5",
-          "images": [],
+          "question": "Đánh giá rủi ro định lượng cho ra kết quả trong bảng ở hình. Mức rủi ro được tính bằng khả năng xảy\nra × mức độ ảnh hưởng. Theo chiến lược kiểm thử dựa vào rủi ro, rủi ro nào nên được kiểm thử ĐẦU\nTIÊN?",
+          "questionVi": "Đánh giá rủi ro định lượng cho ra kết quả trong bảng ở hình. Mức rủi ro được tính bằng khả năng xảy\nra × mức độ ảnh hưởng. Theo chiến lược kiểm thử dựa vào rủi ro, rủi ro nào nên được kiểm thử ĐẦU\nTIÊN?",
+          "images": [
+            "/images/ai/ai5_q35.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "R1 – Không gửi được email xác nhận",
@@ -6740,7 +6778,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 4,
       "category": "ai",
       "questions": [
         {
@@ -7445,9 +7483,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Đúng; Có tai nạn trong 3 năm qua: Sai.\nR1\nR2\nR3\nR4\nĐiều kiện\nTài xế dưới 25 tuổi\nĐ\nĐ\nS\nS\nCó tai nạn trong 3 năm qua\nĐ\nS\nĐ\nS\nHành động\nPhụ phí 20%\nKhông\nCó\nKhông\nKhông\nPhụ phí 15%\nKhông\nKhông\nCó\nKhông\nTừ chối bảo hiểm\nCó\nKhông\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Đúng; Có tai nạn trong 3 năm qua: Sai.\nR1\nR2\nR3\nR4\nĐiều kiện\nTài xế dưới 25 tuổi\nĐ\nĐ\nS\nS\nCó tai nạn trong 3 năm qua\nĐ\nS\nĐ\nS\nHành động\nPhụ phí 20%\nKhông\nCó\nKhông\nKhông\nPhụ phí 15%\nKhông\nKhông\nCó\nKhông\nTừ chối bảo hiểm\nCó\nKhông\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Đúng; Có tai nạn trong 3 năm qua: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Đúng; Có tai nạn trong 3 năm qua: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai6_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Từ chối bảo hiểm",
@@ -7478,9 +7518,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa → Hủy yêu cầu xóa. Test case này đạt\nbao nhiêu phần trăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa → Hủy yêu cầu xóa. Test case này đạt\nbao nhiêu phần trăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa → Hủy yêu cầu xóa. Test case này đạt\nbao nhiêu phần trăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa → Hủy yêu cầu xóa. Test case này đạt\nbao nhiêu phần trăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai6_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "83%",
@@ -7676,9 +7718,11 @@
           "originalLabel": "Câu 29",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Các test case hiện có đã bao\nphủ mọi cột của bảng, NGOẠI TRỪ cột R2. Test case bổ sung nào sau đây giúp đạt 100% độ bao phủ\nbảng quyết định?\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nThu nhập ổn định\nĐ\nĐ\nĐ\nS\nS\nS\nCó lịch sử nợ xấu\nS\nĐ\nĐ\nS\nS\nĐ\nCó tài sản bảo đảm\n–\nĐ\nS\nĐ\nS\n–\nHành động\nDuyệt khoản vay\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nYêu cầu thẩm định thêm\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Các test case hiện có đã bao\nphủ mọi cột của bảng, NGOẠI TRỪ cột R2. Test case bổ sung nào sau đây giúp đạt 100% độ bao phủ\nbảng quyết định?\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nThu nhập ổn định\nĐ\nĐ\nĐ\nS\nS\nS\nCó lịch sử nợ xấu\nS\nĐ\nĐ\nS\nS\nĐ\nCó tài sản bảo đảm\n–\nĐ\nS\nĐ\nS\n–\nHành động\nDuyệt khoản vay\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nYêu cầu thẩm định thêm\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Các test case hiện có đã bao\nphủ mọi cột của bảng, NGOẠI TRỪ cột R2. Test case bổ sung nào sau đây giúp đạt 100% độ bao phủ\nbảng quyết định?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Các test case hiện có đã bao\nphủ mọi cột của bảng, NGOẠI TRỪ cột R2. Test case bổ sung nào sau đây giúp đạt 100% độ bao phủ\nbảng quyết định?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai6_q29.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Thu nhập ổn định: Sai; Có lịch sử nợ xấu: Sai; Có tài sản bảo đảm: Sai",
@@ -7808,9 +7852,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nBáo cáo doanh thu\nThấp (3)\nTC3\nTC2\nĐổi mật khẩu\nTrung bình (2)\nTC3\nTC3\nTìm kiếm sản phẩm\nCao (1)\n—\nTC4\nHủy đơn hàng\nThấp (3)\n—\nTC5\nTạo đơn hàng\nThấp (3)\nTC4\nTC6\nÁp mã giảm giá\nCao (1)\nTC2\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nBáo cáo doanh thu\nThấp (3)\nTC3\nTC2\nĐổi mật khẩu\nTrung bình (2)\nTC3\nTC3\nTìm kiếm sản phẩm\nCao (1)\n—\nTC4\nHủy đơn hàng\nThấp (3)\n—\nTC5\nTạo đơn hàng\nThấp (3)\nTC4\nTC6\nÁp mã giảm giá\nCao (1)\nTC2\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai6_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC3 → TC6 → TC2 → TC1 → TC4 → TC5",
@@ -8076,7 +8122,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 4,
       "category": "ai",
       "questions": [
         {
@@ -8781,9 +8827,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một cửa hàng trực tuyến áp dụng quy tắc giao hàng như bảng quyết định sau. Các test case hiện có đã\nbao phủ mọi cột của bảng, NGOẠI TRỪ cột R2. Test case bổ sung nào sau đây giúp đạt 100% độ bao\nphủ bảng quyết định?\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nKhách hàng thành viên\nĐ\nĐ\nĐ\nS\nS\nS\nGiá trị đơn hàng ≥ 500.000 đồng\nĐ\nĐ\nS\nĐ\nĐ\nS\nGiao hàng nhanh\nĐ\nS\n–\nĐ\nS\n–\nHành động\nMiễn phí giao hàng\nCó\nCó\nKhông\nCó\nCó\nKhông\nPhụ phí giao nhanh 30.000 đồng\nCó\nKhông\n–\nCó\nKhông\n–\nĐ = Đúng, S = Sai. Ký hiệu “–” ở điều kiện nghĩa là không quan tâm; ở hành động nghĩa là không áp\ndụng.",
-          "questionVi": "Một cửa hàng trực tuyến áp dụng quy tắc giao hàng như bảng quyết định sau. Các test case hiện có đã\nbao phủ mọi cột của bảng, NGOẠI TRỪ cột R2. Test case bổ sung nào sau đây giúp đạt 100% độ bao\nphủ bảng quyết định?\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nKhách hàng thành viên\nĐ\nĐ\nĐ\nS\nS\nS\nGiá trị đơn hàng ≥ 500.000 đồng\nĐ\nĐ\nS\nĐ\nĐ\nS\nGiao hàng nhanh\nĐ\nS\n–\nĐ\nS\n–\nHành động\nMiễn phí giao hàng\nCó\nCó\nKhông\nCó\nCó\nKhông\nPhụ phí giao nhanh 30.000 đồng\nCó\nKhông\n–\nCó\nKhông\n–\nĐ = Đúng, S = Sai. Ký hiệu “–” ở điều kiện nghĩa là không quan tâm; ở hành động nghĩa là không áp\ndụng.",
-          "images": [],
+          "question": "Một cửa hàng trực tuyến áp dụng quy tắc giao hàng như bảng quyết định sau. Các test case hiện có đã\nbao phủ mọi cột của bảng, NGOẠI TRỪ cột R2. Test case bổ sung nào sau đây giúp đạt 100% độ bao\nphủ bảng quyết định?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” ở điều kiện nghĩa là không quan tâm; ở hành động nghĩa là không áp dụng.)",
+          "questionVi": "Một cửa hàng trực tuyến áp dụng quy tắc giao hàng như bảng quyết định sau. Các test case hiện có đã\nbao phủ mọi cột của bảng, NGOẠI TRỪ cột R2. Test case bổ sung nào sau đây giúp đạt 100% độ bao\nphủ bảng quyết định?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” ở điều kiện nghĩa là không quan tâm; ở hành động nghĩa là không áp dụng.)",
+          "images": [
+            "/images/ai/ai7_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Khách hàng thành viên: Sai; Giá trị đơn hàng ≥ 500.000 đồng: Đúng; Giao hàng nhanh: Đúng",
@@ -8814,9 +8862,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một đơn hàng trực tuyến có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Mới).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nMới\nThanh toán\nĐã thanh toán\nMới\nHủy\nĐã hủy\nĐã thanh toán\nGiao cho vận chuyển\nĐang giao\nĐã thanh toán\nHủy\nĐã hoàn tiền\nĐang giao\nGiao thành công\nHoàn thành\nĐang giao\nGiao thất bại\nĐã thanh toán\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một đơn hàng trực tuyến có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Mới).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nMới\nThanh toán\nĐã thanh toán\nMới\nHủy\nĐã hủy\nĐã thanh toán\nGiao cho vận chuyển\nĐang giao\nĐã thanh toán\nHủy\nĐã hoàn tiền\nĐang giao\nGiao thành công\nHoàn thành\nĐang giao\nGiao thất bại\nĐã thanh toán\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một đơn hàng trực tuyến có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Mới).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một đơn hàng trực tuyến có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Mới).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai7_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Sự kiện “Giao cho vận chuyển” khi đang ở trạng thái “Đã thanh toán”",
@@ -9012,9 +9062,11 @@
           "originalLabel": "Câu 29",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một trình phát nhạc có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Dừng). Một\ntest case bắt đầu từ trạng thái “Dừng” và thực hiện chuỗi sự kiện: Phát → Dừng → Phát → Tạm dừng.\nTest case này đạt bao nhiêu phần trăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nDừng\nPhát\nĐang phát\nĐang phát\nTạm dừng\nTạm dừng\nTạm dừng\nPhát\nĐang phát\nĐang phát\nDừng\nDừng\nTạm dừng\nDừng\nDừng\nĐang phát\nHết bài\nDừng\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một trình phát nhạc có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Dừng). Một\ntest case bắt đầu từ trạng thái “Dừng” và thực hiện chuỗi sự kiện: Phát → Dừng → Phát → Tạm dừng.\nTest case này đạt bao nhiêu phần trăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nDừng\nPhát\nĐang phát\nĐang phát\nTạm dừng\nTạm dừng\nTạm dừng\nPhát\nĐang phát\nĐang phát\nDừng\nDừng\nTạm dừng\nDừng\nDừng\nĐang phát\nHết bài\nDừng\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một trình phát nhạc có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Dừng). Một\ntest case bắt đầu từ trạng thái “Dừng” và thực hiện chuỗi sự kiện: Phát → Dừng → Phát → Tạm dừng.\nTest case này đạt bao nhiêu phần trăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một trình phát nhạc có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Dừng). Một\ntest case bắt đầu từ trạng thái “Dừng” và thực hiện chuỗi sự kiện: Phát → Dừng → Phát → Tạm dừng.\nTest case này đạt bao nhiêu phần trăm độ bao phủ chuyển đổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai7_q29.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "50%",
@@ -9144,9 +9196,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nBáo cáo doanh thu\nTrung bình (2)\n—\nTC2\nXuất hóa đơn\nTrung bình (2)\n—\nTC3\nÁp mã giảm giá\nTrung bình (2)\nTC6\nTC4\nĐổi mật khẩu\nCao (1)\n—\nTC5\nĐăng nhập\nTrung bình (2)\n—\nTC6\nThêm vào giỏ hàng\nThấp (3)\nTC1\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nBáo cáo doanh thu\nTrung bình (2)\n—\nTC2\nXuất hóa đơn\nTrung bình (2)\n—\nTC3\nÁp mã giảm giá\nTrung bình (2)\nTC6\nTC4\nĐổi mật khẩu\nCao (1)\n—\nTC5\nĐăng nhập\nTrung bình (2)\n—\nTC6\nThêm vào giỏ hàng\nThấp (3)\nTC1\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai7_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC4 → TC1 → TC2 → TC3 → TC5 → TC6",
@@ -9412,7 +9466,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 3,
       "category": "ai",
       "questions": [
         {
@@ -10117,9 +10171,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một rạp chiếu phim tính giá vé theo bảng quyết định sau. Nếu trước khi rút gọn, bảng quyết định được\nlập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và cần bao nhiêu test\ncase tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nSinh viên\nĐ\nĐ\nĐ\nS\nS\nS\nSuất chiếu trước 17 giờ\nĐ\nS\nS\nĐ\nĐ\nS\nNgày cuối tuần\n–\nS\nĐ\nS\nĐ\n–\nHành động\nGiảm 30%\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nGiảm 10%\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một rạp chiếu phim tính giá vé theo bảng quyết định sau. Nếu trước khi rút gọn, bảng quyết định được\nlập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và cần bao nhiêu test\ncase tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nSinh viên\nĐ\nĐ\nĐ\nS\nS\nS\nSuất chiếu trước 17 giờ\nĐ\nS\nS\nĐ\nĐ\nS\nNgày cuối tuần\n–\nS\nĐ\nS\nĐ\n–\nHành động\nGiảm 30%\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nGiảm 10%\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một rạp chiếu phim tính giá vé theo bảng quyết định sau. Nếu trước khi rút gọn, bảng quyết định được\nlập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và cần bao nhiêu test\ncase tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một rạp chiếu phim tính giá vé theo bảng quyết định sau. Nếu trước khi rút gọn, bảng quyết định được\nlập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và cần bao nhiêu test\ncase tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai8_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "8 cột; 3 test case",
@@ -10150,9 +10206,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa. Test case này đạt bao nhiêu phần trăm\nđộ bao phủ chuyển đổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa. Test case này đạt bao nhiêu phần trăm\nđộ bao phủ chuyển đổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChưa kích hoạt\nXác nhận email\nHoạt động\nHoạt động\nVi phạm chính sách\nTạm khóa\nTạm khóa\nHết hạn khóa\nHoạt động\nHoạt động\nYêu cầu xóa\nChờ xóa\nChờ xóa\nHủy yêu cầu xóa\nHoạt động\nChờ xóa\nHết 30 ngày\nĐã xóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa. Test case này đạt bao nhiêu phần trăm\nđộ bao phủ chuyển đổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một tài khoản người dùng có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chưa\nkích hoạt). Một test case bắt đầu từ trạng thái “Chưa kích hoạt” và thực hiện chuỗi sự kiện: Xác nhận\nemail → Vi phạm chính sách → Hết hạn khóa → Yêu cầu xóa. Test case này đạt bao nhiêu phần trăm\nđộ bao phủ chuyển đổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai8_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "83%",
@@ -10480,9 +10538,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nThanh toán\nThấp (3)\n—\nTC2\nTrả hàng\nCao (1)\nTC6\nTC3\nĐăng nhập\nCao (1)\nTC6\nTC4\nÁp mã giảm giá\nThấp (3)\nTC6\nTC5\nTìm kiếm sản phẩm\nTrung bình (2)\n—\nTC6\nĐổi mật khẩu\nThấp (3)\n—\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nThanh toán\nThấp (3)\n—\nTC2\nTrả hàng\nCao (1)\nTC6\nTC3\nĐăng nhập\nCao (1)\nTC6\nTC4\nÁp mã giảm giá\nThấp (3)\nTC6\nTC5\nTìm kiếm sản phẩm\nTrung bình (2)\n—\nTC6\nĐổi mật khẩu\nThấp (3)\n—\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai8_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC5 → TC1 → TC6 → TC2 → TC3 → TC4",
@@ -10748,7 +10808,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 3,
       "category": "ai",
       "questions": [
         {
@@ -11453,9 +11513,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một hệ thống đăng nhập xử lý yêu cầu theo bảng quyết định sau. Nếu trước khi rút gọn, bảng quyết\nđịnh được lập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và cần bao\nnhiêu test case tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\nR1\nR2\nR3\nR4\nĐiều kiện\nTên đăng nhập hợp lệ\nĐ\nĐ\nĐ\nS\nMật khẩu đúng\nĐ\n–\nS\n–\nTài khoản đang bị khóa\nS\nĐ\nS\n–\nHành động\nCho phép đăng nhập\nCó\nKhông\nKhông\nKhông\nHiển thị thông báo tài khoản bị khóa\nKhông\nCó\nKhông\nKhông\nHiển thị lỗi thông tin đăng nhập\nKhông\nKhông\nCó\nCó\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một hệ thống đăng nhập xử lý yêu cầu theo bảng quyết định sau. Nếu trước khi rút gọn, bảng quyết\nđịnh được lập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và cần bao\nnhiêu test case tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\nR1\nR2\nR3\nR4\nĐiều kiện\nTên đăng nhập hợp lệ\nĐ\nĐ\nĐ\nS\nMật khẩu đúng\nĐ\n–\nS\n–\nTài khoản đang bị khóa\nS\nĐ\nS\n–\nHành động\nCho phép đăng nhập\nCó\nKhông\nKhông\nKhông\nHiển thị thông báo tài khoản bị khóa\nKhông\nCó\nKhông\nKhông\nHiển thị lỗi thông tin đăng nhập\nKhông\nKhông\nCó\nCó\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một hệ thống đăng nhập xử lý yêu cầu theo bảng quyết định sau. Nếu trước khi rút gọn, bảng quyết\nđịnh được lập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và cần bao\nnhiêu test case tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một hệ thống đăng nhập xử lý yêu cầu theo bảng quyết định sau. Nếu trước khi rút gọn, bảng quyết\nđịnh được lập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và cần bao\nnhiêu test case tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai9_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "8 cột; 8 test case",
@@ -11486,9 +11548,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một máy bán nước tự động có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chờ).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChờ\nNhét tiền\nĐã nhận tiền\nĐã nhận tiền\nNhét tiền\nĐã nhận tiền\nĐã nhận tiền\nHủy\nChờ\nĐã nhận tiền\nChọn đồ uống\nĐang xuất hàng\nĐang xuất hàng\nLấy hàng\nChờ\nChờ\nBảo trì\nBảo trì\nBảo trì\nKết thúc bảo trì\nChờ\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một máy bán nước tự động có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chờ).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nChờ\nNhét tiền\nĐã nhận tiền\nĐã nhận tiền\nNhét tiền\nĐã nhận tiền\nĐã nhận tiền\nHủy\nChờ\nĐã nhận tiền\nChọn đồ uống\nĐang xuất hàng\nĐang xuất hàng\nLấy hàng\nChờ\nChờ\nBảo trì\nBảo trì\nBảo trì\nKết thúc bảo trì\nChờ\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một máy bán nước tự động có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chờ).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một máy bán nước tự động có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Chờ).\nTest case nào sau đây kiểm thử một chuyển đổi KHÔNG HỢP LỆ?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai9_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Sự kiện “Kết thúc bảo trì” khi đang ở trạng thái “Bảo trì”",
@@ -11816,9 +11880,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nTạo khách hàng\nThấp (3)\nTC4\nTC2\nTạo đơn hàng\nTrung bình (2)\n—\nTC3\nThanh toán\nThấp (3)\n—\nTC4\nĐổi mật khẩu\nThấp (3)\nTC2\nTC5\nĐăng nhập\nCao (1)\nTC2\nTC6\nÁp mã giảm giá\nCao (1)\nTC2\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nTạo khách hàng\nThấp (3)\nTC4\nTC2\nTạo đơn hàng\nTrung bình (2)\n—\nTC3\nThanh toán\nThấp (3)\n—\nTC4\nĐổi mật khẩu\nThấp (3)\nTC2\nTC5\nĐăng nhập\nCao (1)\nTC2\nTC6\nÁp mã giảm giá\nCao (1)\nTC2\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai9_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC5 → TC6 → TC2 → TC1 → TC3 → TC4",
@@ -12084,7 +12150,7 @@
       "questionCount": 40,
       "regularCount": 40,
       "supplementaryCount": 0,
-      "imageCount": 0,
+      "imageCount": 4,
       "category": "ai",
       "questions": [
         {
@@ -12789,9 +12855,11 @@
           "originalLabel": "Câu 22",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Nếu trước khi rút gọn, bảng\nquyết định được lập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và\ncần bao nhiêu test case tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nThu nhập ổn định\nĐ\nĐ\nĐ\nS\nS\nS\nCó lịch sử nợ xấu\nS\nĐ\nĐ\nS\nS\nĐ\nCó tài sản bảo đảm\n–\nĐ\nS\nĐ\nS\n–\nHành động\nDuyệt khoản vay\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nYêu cầu thẩm định thêm\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Nếu trước khi rút gọn, bảng\nquyết định được lập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và\ncần bao nhiêu test case tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\nR1\nR2\nR3\nR4\nR5\nR6\nĐiều kiện\nThu nhập ổn định\nĐ\nĐ\nĐ\nS\nS\nS\nCó lịch sử nợ xấu\nS\nĐ\nĐ\nS\nS\nĐ\nCó tài sản bảo đảm\n–\nĐ\nS\nĐ\nS\n–\nHành động\nDuyệt khoản vay\nCó\nKhông\nKhông\nKhông\nKhông\nKhông\nYêu cầu thẩm định thêm\nKhông\nCó\nKhông\nCó\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Nếu trước khi rút gọn, bảng\nquyết định được lập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và\ncần bao nhiêu test case tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một ngân hàng xét duyệt khoản vay tiêu dùng theo bảng quyết định sau. Nếu trước khi rút gọn, bảng\nquyết định được lập ĐẦY ĐỦ cho 3 điều kiện Boolean này, bảng sẽ có bao nhiêu cột (quy tắc)? Và\ncần bao nhiêu test case tối thiểu để bao phủ toàn bộ các cột của bảng ĐÃ RÚT GỌN như trong hình?\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai10_q22.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "8 cột; 3 test case",
@@ -12822,9 +12890,11 @@
           "originalLabel": "Câu 23",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã đúng →\nĐóng cửa → Nhập mã sai → Nhập mã sai. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển\nđổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nĐã khóa\nNhập mã đúng\nĐã mở khóa\nĐã khóa\nNhập mã sai\nCảnh báo\nCảnh báo\nNhập mã đúng\nĐã mở khóa\nCảnh báo\nNhập mã sai\nBị chặn\nBị chặn\nQuản trị viên mở chặn\nĐã khóa\nĐã mở khóa\nĐóng cửa\nĐã khóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "questionVi": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã đúng →\nĐóng cửa → Nhập mã sai → Nhập mã sai. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển\nđổi hợp lệ (0-switch)?\nTrạng thái hiện tại\nSự kiện\nTrạng thái kế tiếp\nĐã khóa\nNhập mã đúng\nĐã mở khóa\nĐã khóa\nNhập mã sai\nCảnh báo\nCảnh báo\nNhập mã đúng\nĐã mở khóa\nCảnh báo\nNhập mã sai\nBị chặn\nBị chặn\nQuản trị viên mở chặn\nĐã khóa\nĐã mở khóa\nĐóng cửa\nĐã khóa\nMọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.",
-          "images": [],
+          "question": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã đúng →\nĐóng cửa → Nhập mã sai → Nhập mã sai. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển\nđổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "questionVi": "Một cửa khóa thông minh có mô hình chuyển đổi trạng thái như bảng sau (trạng thái ban đầu: Đã\nkhóa). Một test case bắt đầu từ trạng thái “Đã khóa” và thực hiện chuỗi sự kiện: Nhập mã đúng →\nĐóng cửa → Nhập mã sai → Nhập mã sai. Test case này đạt bao nhiêu phần trăm độ bao phủ chuyển\nđổi hợp lệ (0-switch)?\n\n(Ghi chú: Mọi tổ hợp trạng thái – sự kiện không có trong bảng là chuyển đổi không hợp lệ.)",
+          "images": [
+            "/images/ai/ai10_q23.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "100%",
@@ -13020,9 +13090,11 @@
           "originalLabel": "Câu 29",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Sai.\nR1\nR2\nR3\nR4\nĐiều kiện\nTài xế dưới 25 tuổi\nĐ\nĐ\nS\nS\nCó tai nạn trong 3 năm qua\nĐ\nS\nĐ\nS\nHành động\nPhụ phí 20%\nKhông\nCó\nKhông\nKhông\nPhụ phí 15%\nKhông\nKhông\nCó\nKhông\nTừ chối bảo hiểm\nCó\nKhông\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "questionVi": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Sai.\nR1\nR2\nR3\nR4\nĐiều kiện\nTài xế dưới 25 tuổi\nĐ\nĐ\nS\nS\nCó tai nạn trong 3 năm qua\nĐ\nS\nĐ\nS\nHành động\nPhụ phí 20%\nKhông\nCó\nKhông\nKhông\nPhụ phí 15%\nKhông\nKhông\nCó\nKhông\nTừ chối bảo hiểm\nCó\nKhông\nKhông\nKhông\nĐ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).",
-          "images": [],
+          "question": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "questionVi": "Một hệ thống bảo hiểm xe quyết định mức phí theo bảng quyết định sau. Kết quả mong đợi cho test\ncase sau là gì? — Tài xế dưới 25 tuổi: Sai; Có tai nạn trong 3 năm qua: Sai.\n\n(Ghi chú: Đ = Đúng, S = Sai. Ký hiệu “–” nghĩa là không quan tâm (giá trị nào cũng được).)",
+          "images": [
+            "/images/ai/ai10_q29.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "Phụ phí 20%, Phụ phí 15%, Từ chối bảo hiểm",
@@ -13152,9 +13224,11 @@
           "originalLabel": "Câu 33",
           "isSupplementary": false,
           "isV4": true,
-          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nXuất hóa đơn\nThấp (3)\nTC6\nTC2\nBáo cáo doanh thu\nTrung bình (2)\nTC1\nTC3\nTạo khách hàng\nTrung bình (2)\nTC1\nTC4\nThanh toán\nTrung bình (2)\nTC1\nTC5\nTrả hàng\nThấp (3)\n—\nTC6\nThêm vào giỏ hàng\nTrung bình (2)\n—\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\nTest case\nMô tả\nMức ưu tiên\nPhụ thuộc vào\nTC1\nXuất hóa đơn\nThấp (3)\nTC6\nTC2\nBáo cáo doanh thu\nTrung bình (2)\nTC1\nTC3\nTạo khách hàng\nTrung bình (2)\nTC1\nTC4\nThanh toán\nTrung bình (2)\nTC1\nTC5\nTrả hàng\nThấp (3)\n—\nTC6\nThêm vào giỏ hàng\nTrung bình (2)\n—\n1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.",
-          "images": [],
+          "question": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "questionVi": "Bảng trong hình liệt kê các test case, mức ưu tiên và các phụ thuộc logic của chúng. Lịch thực thi nào\nsau đây tuân thủ các phụ thuộc VÀ thực thi các test có mức ưu tiên cao sớm nhất có thể?\n\n(Ghi chú: 1 = ưu tiên cao nhất. Một test chỉ có thể chạy sau khi các test mà nó phụ thuộc đã chạy.)",
+          "images": [
+            "/images/ai/ai10_q33.png"
+          ],
           "imagesVi": [],
           "options": {
             "a": "TC6 → TC2 → TC1 → TC3 → TC4 → TC5",

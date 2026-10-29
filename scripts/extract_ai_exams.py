@@ -31,17 +31,10 @@ def patch_fonts(doc):
 
 def clean_spacing(s: str) -> str:
     s = unicodedata.normalize('NFC', s)
-    # Fix any remaining broken combining diacritics or irregular spaces
     s = re.sub(r'[ \t\r\f\v]+', ' ', s)
-    # Join soft hyphen or lines inside words
     s = re.sub(r'(\w+)-\n(\w+)', r'\1\2', s)
-    # Collapse multiple newlines
     lines = [line.strip() for line in s.split('\n')]
-    # Remove empty lines while preserving structural breaks if needed
-    cleaned_lines = []
-    for line in lines:
-        if line:
-            cleaned_lines.append(line)
+    cleaned_lines = [line for line in lines if line]
     return '\n'.join(cleaned_lines).strip()
 
 def clean_single_line(s: str) -> str:
@@ -49,36 +42,129 @@ def clean_single_line(s: str) -> str:
     s = re.sub(r'\s+', ' ', s)
     return s.strip()
 
+def clean_stem_tables(raw_stem: str) -> str:
+    text = raw_stem.strip()
+    
+    # Pattern 1: Decision table (R1\nR2\nR3)
+    if re.search(r'R1\s*\n\s*R2', text, re.IGNORECASE):
+        parts = re.split(r'R1\s*\n\s*R2', text, flags=re.IGNORECASE)
+        prompt = parts[0].strip()
+        note = ''
+        note_match = re.search(r'(Đ\s*=\s*Đúng.*)', parts[1], re.DOTALL | re.IGNORECASE) or \
+                     re.search(r'(Ký hiệu\s*[“\"].*)', parts[1], re.DOTALL | re.IGNORECASE)
+        if note_match:
+            note = re.sub(r'\s+', ' ', note_match.group(1).strip())
+        return f"{prompt}\n\n(Ghi chú: {note})" if note else prompt
+
+    # Pattern 2: State transition table (Trạng thái hiện tại\nSự kiện)
+    if re.search(r'Trạng thái hiện tại\s*\n\s*Sự kiện', text, re.IGNORECASE):
+        parts = re.split(r'Trạng thái hiện tại\s*\n\s*Sự kiện', text, flags=re.IGNORECASE)
+        prompt = parts[0].strip()
+        note = ''
+        note_match = re.search(r'(Mọi tổ hợp trạng thái.*)', parts[1], re.DOTALL | re.IGNORECASE)
+        if note_match:
+            note = re.sub(r'\s+', ' ', note_match.group(1).strip())
+        return f"{prompt}\n\n(Ghi chú: {note})" if note else prompt
+
+    # Pattern 3: Test case priority table (Test case\nMô tả)
+    if re.search(r'Test case\s*\n\s*Mô tả', text, re.IGNORECASE):
+        parts = re.split(r'Test case\s*\n\s*Mô tả', text, flags=re.IGNORECASE)
+        prompt = parts[0].strip()
+        note = ''
+        note_match = re.search(r'(1\s*=\s*ưu tiên cao nhất.*)', parts[1], re.DOTALL | re.IGNORECASE) or \
+                     re.search(r'(Một test chỉ có thể chạy.*)', parts[1], re.DOTALL | re.IGNORECASE)
+        if note_match:
+            note = re.sub(r'\s+', ' ', note_match.group(1).strip())
+        return f"{prompt}\n\n(Ghi chú: {note})" if note else prompt
+
+    # Pattern 4: Risk matrix (Mã\nRủi ro sản phẩm)
+    if re.search(r'Mã\s*\n\s*Rủi ro sản phẩm', text, re.IGNORECASE):
+        parts = re.split(r'Mã\s*\n\s*Rủi ro sản phẩm', text, flags=re.IGNORECASE)
+        prompt = parts[0].strip()
+        return prompt
+
+    return text
+
 def extract_all():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     pdf_dir = os.path.join(base_dir, 'public', 'pdfs', 'ai')
+    img_pub_dir = os.path.join(base_dir, 'public', 'images', 'ai')
+    img_dist_dir = os.path.join(base_dir, 'dist', 'images', 'ai')
+    os.makedirs(img_pub_dir, exist_ok=True)
+    os.makedirs(img_dist_dir, exist_ok=True)
+    
     files = sorted(glob.glob(os.path.join(pdf_dir, '*.pdf')))
-    
-    if not files:
-        # Fallback to download path
-        files = sorted(glob.glob('/Volumes/Download/files (1)/*.pdf'))
-    
     print(f"Found {len(files)} AI PDF files.")
     
     exams = []
     chapter_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+    total_images_count = 0
     
     for exam_idx, file_path in enumerate(files, 1):
         filename = os.path.basename(file_path)
         doc = pymupdf.open(file_path)
         patch_fonts(doc)
-        full_text = '\n'.join(unicodedata.normalize('NFC', page.get_text()) for page in doc)
         
+        # 1. Identify and crop tables from Part 1
+        p2_page = 12
+        for p_num in range(len(doc)):
+            if 'PHẦN 2' in doc[p_num].get_text():
+                p2_page = p_num
+                break
+                
+        table_crops = {}
+        for p_num in range(p2_page):
+            page = doc[p_num]
+            tabs = page.find_tables()
+            for t in tabs:
+                bbox = t.bbox
+                blocks = page.get_text('blocks')
+                candidates = []
+                for b in blocks:
+                    m = re.search(r'Câu\s+(\d+)', b[4])
+                    if m and b[3] <= bbox[1] + 15:
+                        candidates.append((int(m.group(1)), b[3]))
+                q_num = None
+                if candidates:
+                    candidates.sort(key=lambda x: x[1])
+                    q_num = candidates[-1][0]
+                elif p_num > 0:
+                    prev_blocks = doc[p_num-1].get_text('blocks')
+                    prev_cands = []
+                    for b in prev_blocks:
+                        m = re.search(r'Câu\s+(\d+)', b[4])
+                        if m:
+                            prev_cands.append((int(m.group(1)), b[3]))
+                    if prev_cands:
+                        prev_cands.sort(key=lambda x: x[1])
+                        q_num = prev_cands[-1][0]
+                        
+                if q_num:
+                    clip_rect = pymupdf.Rect(
+                        max(0, bbox[0] - 1),
+                        max(0, bbox[1] - 1),
+                        min(page.rect.width, bbox[2] + 1),
+                        min(page.rect.height, bbox[3] + 1)
+                    )
+                    pix = page.get_pixmap(clip=clip_rect, dpi=250)
+                    img_filename = f"ai{exam_idx}_q{q_num}.png"
+                    pix.save(os.path.join(img_pub_dir, img_filename))
+                    pix.save(os.path.join(img_dist_dir, img_filename))
+                    table_crops[q_num] = f"/images/ai/{img_filename}"
+        
+        # 2. Extract full text of Part 2
+        full_text = '\n'.join(unicodedata.normalize('NFC', page.get_text()) for page in doc)
         p2_idx = full_text.find('PHẦN 2')
         p2_text = full_text[p2_idx:] if p2_idx != -1 else full_text
         
         matches = list(re.finditer(r'(?:^|\n)Câu\s+(\d+)\b', p2_text))
-        print(f"[{exam_idx}/10] Parsing {filename} ({len(matches)} questions)...")
+        print(f"[{exam_idx}/10] Parsing {filename} ({len(matches)} questions, {len(table_crops)} tables)...")
         
         questions = []
         exam_id = 100 + exam_idx
         exam_title = f"Đề luyện thi ISTQB CTFL v4.0 (AI Mock) – Đề Số {exam_idx}"
         short_title = f"AI Đề {exam_idx}"
+        exam_img_count = 0
         
         for i, m in enumerate(matches):
             q_num = int(m.group(1))
@@ -119,6 +205,14 @@ def extract_all():
             raw_stem = q_and_opts[:opt_splits[0].start()].strip()
             stem = clean_spacing(raw_stem)
             
+            # Check if this question has an extracted table image
+            q_images = []
+            if q_num in table_crops:
+                q_images = [table_crops[q_num]]
+                exam_img_count += 1
+                total_images_count += 1
+                stem = clean_stem_tables(stem)
+            
             options = {}
             for oi in range(4):
                 key = opt_splits[oi].group(1).lower()
@@ -139,7 +233,7 @@ def extract_all():
                 "isV4": True,
                 "question": stem,
                 "questionVi": stem,
-                "images": [],
+                "images": q_images,
                 "imagesVi": [],
                 "options": options,
                 "optionsVi": options,
@@ -162,7 +256,7 @@ def extract_all():
             "questionCount": len(questions),
             "regularCount": len(questions),
             "supplementaryCount": 0,
-            "imageCount": 0,
+            "imageCount": exam_img_count,
             "category": "ai",
             "questions": questions
         }
@@ -181,7 +275,7 @@ def extract_all():
             "category": "ai",
             "totalExams": len(exams),
             "totalQuestions": total_q,
-            "totalImages": 0,
+            "totalImages": total_images_count,
             "totalViImages": 0,
             "standardQuestionCount": 40,
             "passPercentage": 65,
@@ -193,11 +287,15 @@ def extract_all():
     }
     
     out_path = os.path.join(base_dir, 'public', 'data', 'aiExamsData.json')
+    dist_out_path = os.path.join(base_dir, 'dist', 'data', 'aiExamsData.json')
+    
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(dataset, f, ensure_ascii=False, indent=2)
+    with open(dist_out_path, 'w', encoding='utf-8') as f:
+        json.dump(dataset, f, ensure_ascii=False, indent=2)
     
-    print(f"Successfully generated {out_path} with {len(exams)} exams, {total_q} questions!")
+    print(f"\nSuccessfully generated {out_path} and synced to dist with {len(exams)} exams, {total_q} questions, {total_images_count} table images!")
     print("Chapter breakdown:", chapter_counts)
 
 if __name__ == '__main__':
