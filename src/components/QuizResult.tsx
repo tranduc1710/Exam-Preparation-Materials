@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { AttemptRecord, LanguageMode, OptionKey, Question } from '../types';
 import { CHAPTER_SHORT_NAMES, formatTime, getQuestionById } from '../utils/quizHelper';
+import { isContentBilingual, renderHighlightedText } from '../utils/textHelper';
 
 interface QuizResultProps {
   attempt: AttemptRecord;
@@ -358,18 +359,20 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                   <div className="space-y-2">
                     {(languageMode === 'en' || languageMode === 'bilingual') && (
                       <div className="text-slate-900 font-medium text-base leading-relaxed whitespace-pre-line">
-                        {q.question}
+                        {renderHighlightedText(q.question)}
                       </div>
                     )}
-                    {(languageMode === 'vi' || languageMode === 'bilingual') && q.questionVi && (
-                      <div
-                        className={
-                          languageMode === 'bilingual'
-                            ? 'text-indigo-950 bg-indigo-50/60 border-l-4 border-indigo-500 pl-3.5 py-2 rounded-r-xl text-sm sm:text-base font-medium leading-relaxed whitespace-pre-line'
-                            : 'text-slate-900 font-medium text-base leading-relaxed whitespace-pre-line'
-                        }
-                      >
-                        {q.questionVi}
+                    {languageMode === 'vi' && (
+                      <div className="text-slate-900 font-medium text-base leading-relaxed whitespace-pre-line">
+                        {renderHighlightedText(q.questionVi || q.question)}
+                      </div>
+                    )}
+                    {languageMode === 'bilingual' && isContentBilingual(q.question, q.questionVi) && (
+                      <div className="text-indigo-950 bg-indigo-50/60 border-l-4 border-indigo-500 pl-3.5 py-2 rounded-r-xl text-sm sm:text-base font-medium leading-relaxed whitespace-pre-line">
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-1">
+                          Dịch nghĩa chuyên ngành ISTQB:
+                        </div>
+                        {renderHighlightedText(q.questionVi)}
                       </div>
                     )}
                   </div>
@@ -471,14 +474,11 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                             {(languageMode === 'en' || languageMode === 'bilingual') && (
                               <div className="leading-relaxed whitespace-pre-line">{optEn}</div>
                             )}
-                            {(languageMode === 'vi' || languageMode === 'bilingual') && optVi && (
-                              <div
-                                className={
-                                  languageMode === 'bilingual'
-                                    ? 'text-xs sm:text-sm text-indigo-900/85 italic leading-relaxed whitespace-pre-line'
-                                    : 'leading-relaxed whitespace-pre-line'
-                                }
-                              >
+                            {languageMode === 'vi' && (
+                              <div className="leading-relaxed whitespace-pre-line">{optVi || optEn}</div>
+                            )}
+                            {languageMode === 'bilingual' && isContentBilingual(optEn, optVi) && (
+                              <div className="text-xs sm:text-sm text-indigo-900/85 italic leading-relaxed whitespace-pre-line">
                                 {optVi}
                               </div>
                             )}

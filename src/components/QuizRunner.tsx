@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Clock,
   Flag,
@@ -18,9 +18,15 @@ import {
   ArrowLeft,
   Keyboard,
   Languages,
+  Maximize,
+  Minimize,
+  Type,
+  Ban,
+  Layers,
 } from 'lucide-react';
 import { LanguageMode, OptionKey, Question, QuizConfig } from '../types';
 import { CHAPTER_SHORT_NAMES, formatTime } from '../utils/quizHelper';
+import { isContentBilingual, renderHighlightedText } from '../utils/textHelper';
 
 interface QuizRunnerProps {
   config: QuizConfig;
@@ -58,6 +64,14 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
 
+  // Advanced UI upgrades state
+  const [eliminatedMap, setEliminatedMap] = useState<Record<string, OptionKey[]>>({});
+  const [textSize, setTextSize] = useState<'sm' | 'base' | 'lg'>('base');
+  const [navFilter, setNavFilter] = useState<'all' | 'unanswered' | 'flagged'>('all');
+  const [groupByChapter, setGroupByChapter] = useState<boolean>(true);
+  const [autoRevealPractice, setAutoRevealPractice] = useState<boolean>(true);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
   const totalSecondsLimit = durationMinutes > 0 ? durationMinutes * 60 : 0;
   const remainingSeconds =
     totalSecondsLimit > 0 ? Math.max(0, totalSecondsLimit - elapsedSeconds) : 0;
@@ -67,11 +81,29 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const isFlagged = flaggedSet.has(currentQ.id);
   const selectedAns = userAnswers[currentQ.id];
   const isRevealed =
-    mode === 'practice' && (Boolean(selectedAns) || revealedSet.has(currentQ.id));
+    mode === 'practice' &&
+    (Boolean(selectedAns && autoRevealPractice) || revealedSet.has(currentQ.id));
 
   const handleComplete = useCallback(() => {
     onFinish(userAnswers, Array.from(flaggedSet), elapsedSeconds);
   }, [onFinish, userAnswers, flaggedSet, elapsedSeconds]);
+
+  // Fullscreen tracker
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  };
 
   // Timer tick
   useEffect(() => {
@@ -94,6 +126,14 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const handleSelectOption = useCallback(
     (opt: OptionKey) => {
       if (isPaused) return;
+      // If selected option was marked eliminated, un-eliminate it
+      setEliminatedMap((prev) => {
+        const list = prev[currentQ.id] || [];
+        if (list.includes(opt)) {
+          return { ...prev, [currentQ.id]: list.filter((k) => k !== opt) };
+        }
+        return prev;
+      });
       setUserAnswers((prev) => ({
         ...prev,
         [currentQ.id]: opt,
@@ -101,6 +141,17 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
     },
     [currentQ.id, isPaused]
   );
+
+  const toggleEliminate = (optKey: OptionKey, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setEliminatedMap((prev) => {
+      const list = prev[currentQ.id] || [];
+      const next = list.includes(optKey)
+        ? list.filter((k) => k !== optKey)
+        : [...list, optKey];
+      return { ...prev, [currentQ.id]: next };
+    });
+  };
 
   const toggleFlag = useCallback((qId: string) => {
     setFlaggedSet((prev) => {
@@ -153,6 +204,56 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const isLowTime = totalSecondsLimit > 0 && remainingSeconds <= 300;
   const requiredPassCount = Math.ceil(questions.length * 0.65);
 
+  // Group questions by chapter for sidebar
+  const groupedByChapter = useMemo(() => {
+    const map: Record<number, number[]> = {};
+    questions.forEach((q, idx) => {
+      const ch = q.chapter || 1;
+      if (!map[ch]) map[ch] = [];
+      map[ch].push(idx);
+    });
+    return map;
+  }, [questions]);
+
+  // Check if current question has a distinct bilingual translation
+  const isQStemBilingual =
+    languageMode === 'bilingual' && isContentBilingual(currentQ.question, currentQ.questionVi);
+
+  const renderPaletteButton = (idx: number) => {
+    const q = questions[idx];
+    const ans = userAnswers[q.id];
+    const flagged = flaggedSet.has(q.id);
+    const isCurrent = idx === currentIndex;
+
+    let btnClass = 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
+
+    if (mode === 'practice' && ans) {
+      if (ans === q.correctAnswer) {
+        btnClass = 'bg-emerald-600 text-white border-emerald-600';
+      } else {
+        btnClass = 'bg-rose-600 text-white border-rose-600';
+      }
+    } else if (ans) {
+      btnClass = 'bg-indigo-600 text-white border-indigo-600';
+    }
+
+    return (
+      <button
+        key={q.id}
+        type="button"
+        onClick={() => setCurrentIndex(idx)}
+        className={`relative h-9 rounded-lg border text-xs font-bold transition flex items-center justify-center cursor-pointer ${btnClass} ${
+          isCurrent ? 'ring-2 ring-offset-1 ring-indigo-600 shadow-xs' : ''
+        }`}
+      >
+        {idx + 1}
+        {flagged && (
+          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-white shadow-2xs" />
+        )}
+      </button>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top Sticky Exam Bar */}
@@ -188,6 +289,24 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Font Size Scaler */}
+            <div className="hidden sm:flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">
+              <Type className="w-3.5 h-3.5 text-slate-400 ml-1.5 mr-1" />
+              {(['sm', 'base', 'lg'] as const).map((sz) => (
+                <button
+                  key={sz}
+                  type="button"
+                  onClick={() => setTextSize(sz)}
+                  title={`Cỡ chữ: ${sz === 'sm' ? 'Nhỏ' : sz === 'lg' ? 'Lớn' : 'Vừa'}`}
+                  className={`px-2 py-1 rounded-lg transition cursor-pointer ${
+                    textSize === sz ? 'bg-white text-indigo-700 shadow-2xs' : 'hover:text-slate-900'
+                  }`}
+                >
+                  {sz === 'sm' ? 'A-' : sz === 'lg' ? 'A+' : 'A'}
+                </button>
+              ))}
+            </div>
+
             {/* Language Switcher Pill */}
             <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
               <Languages className="w-3.5 h-3.5 text-slate-500 ml-1.5 mr-1 hidden sm:inline" />
@@ -210,6 +329,16 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                 </button>
               ))}
             </div>
+
+            {/* Fullscreen Mode Toggle */}
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              title={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình (Tập trung thi)'}
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer hidden md:flex items-center justify-center border border-slate-200"
+            >
+              {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+            </button>
 
             {/* Timer Box */}
             <div
@@ -337,30 +466,43 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
 
               {/* Question Body */}
               <div className="p-5 sm:p-7 space-y-6">
-                {/* Question Stem according to LanguageMode */}
-                <div className="space-y-2.5">
-                  {(languageMode === 'en' || languageMode === 'bilingual') && (
-                    <div className="text-slate-900 text-base sm:text-lg font-medium leading-relaxed whitespace-pre-line">
-                      {currentQ.question}
+                {/* Question Stem according to LanguageMode (Eliminating redundant duplicates!) */}
+                <div className="space-y-3">
+                  {/* Primary Question text (EN or VI) */}
+                  <div
+                    className={`text-slate-900 font-medium ${
+                      textSize === 'sm'
+                        ? 'text-sm sm:text-base leading-relaxed'
+                        : textSize === 'lg'
+                        ? 'text-lg sm:text-xl leading-relaxed'
+                        : 'text-base sm:text-lg leading-relaxed'
+                    } whitespace-pre-line`}
+                  >
+                    {renderHighlightedText(
+                      languageMode === 'vi' && currentQ.questionVi
+                        ? currentQ.questionVi
+                        : currentQ.question
+                    )}
+                  </div>
+
+                  {/* Secondary Translation Box (ONLY when bilingual AND Vietnamese is actually different from English) */}
+                  {isQStemBilingual && (
+                    <div
+                      className={`text-indigo-950 bg-indigo-50/70 border-l-4 border-indigo-500 pl-4 py-2.5 rounded-r-xl ${
+                        textSize === 'sm'
+                          ? 'text-xs sm:text-sm leading-relaxed'
+                          : textSize === 'lg'
+                          ? 'text-base sm:text-lg leading-relaxed'
+                          : 'text-sm sm:text-base leading-relaxed'
+                      } font-medium whitespace-pre-line shadow-2xs`}
+                    >
+                      <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-indigo-700 mb-1">
+                        <Languages className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Dịch nghĩa chuyên ngành ISTQB (Tiếng Việt):</span>
+                      </div>
+                      {renderHighlightedText(currentQ.questionVi || '')}
                     </div>
                   )}
-                  {(languageMode === 'vi' || languageMode === 'bilingual') &&
-                    currentQ.questionVi && (
-                      <div
-                        className={
-                          languageMode === 'bilingual'
-                            ? 'text-indigo-950 bg-indigo-50/60 border-l-4 border-indigo-500 pl-3.5 py-2 rounded-r-xl text-sm sm:text-base font-medium leading-relaxed whitespace-pre-line'
-                            : 'text-slate-900 text-base sm:text-lg font-medium leading-relaxed whitespace-pre-line'
-                        }
-                      >
-                        {languageMode === 'bilingual' && (
-                          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 block mb-0.5">
-                            Dịch nghĩa chuyên ngành ISTQB:
-                          </span>
-                        )}
-                        {currentQ.questionVi}
-                      </div>
-                    )}
                 </div>
 
                 {/* Question Figures / Diagrams */}
@@ -427,13 +569,22 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                   </div>
                 )}
 
-                {/* Options List */}
+                {/* Options List with Strikethrough / Elimination Tool */}
                 <div className="space-y-3">
+                  <div className="flex items-center justify-between text-xs text-slate-500 pb-0.5">
+                    <span className="font-semibold text-slate-700">Chọn 1 đáp án đúng nhất:</span>
+                    <span className="italic hidden sm:inline text-slate-400">
+                      Mẹo: Nhấn nút 🚫 hoặc click chuột phải để gạch bỏ loại trừ đáp án sai
+                    </span>
+                  </div>
+
                   {OPTION_KEYS.map((optKey) => {
                     const optEn = currentQ.options[optKey];
                     const optVi = currentQ.optionsVi?.[optKey];
+                    const isOptBilingual = isContentBilingual(optEn, optVi);
                     const isSelected = selectedAns === optKey;
                     const isCorrect = currentQ.correctAnswer === optKey;
+                    const isEliminated = (eliminatedMap[currentQ.id] || []).includes(optKey);
 
                     let cardStyle =
                       'border-slate-200 bg-white hover:border-indigo-300 hover:bg-slate-50/70 text-slate-800';
@@ -453,43 +604,91 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                       cardStyle =
                         'border-indigo-600 bg-indigo-50/60 text-indigo-950 ring-1 ring-indigo-600';
                       badgeStyle = 'bg-indigo-600 text-white border-indigo-600';
+                    } else if (isEliminated) {
+                      cardStyle =
+                        'border-slate-200 bg-slate-100/70 text-slate-400 opacity-50';
+                      badgeStyle = 'bg-slate-200 text-slate-400 border-slate-300 line-through';
                     }
 
+                    const mainText = languageMode === 'vi' && optVi ? optVi : optEn;
+
                     return (
-                      <button
+                      <div
                         key={optKey}
-                        type="button"
                         onClick={() => handleSelectOption(optKey)}
-                        className={`w-full text-left p-4 rounded-xl border transition-all flex items-start gap-3.5 cursor-pointer ${cardStyle}`}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          toggleEliminate(optKey);
+                        }}
+                        className={`w-full text-left p-3.5 sm:p-4 rounded-xl border transition-all flex items-start gap-3.5 cursor-pointer group select-none ${cardStyle}`}
                       >
                         <span
                           className={`w-8 h-8 rounded-lg border font-bold text-sm uppercase flex items-center justify-center shrink-0 mt-0.5 transition-colors ${badgeStyle}`}
                         >
                           {optKey}
                         </span>
+
                         <div className="flex-1 space-y-1">
-                          {(languageMode === 'en' || languageMode === 'bilingual') && (
-                            <div className="text-sm sm:text-base leading-relaxed whitespace-pre-line">{optEn}</div>
-                          )}
-                          {(languageMode === 'vi' || languageMode === 'bilingual') && optVi && (
+                          {/* Main option text */}
+                          <div
+                            className={`${
+                              textSize === 'sm'
+                                ? 'text-xs sm:text-sm'
+                                : textSize === 'lg'
+                                ? 'text-base sm:text-lg'
+                                : 'text-sm sm:text-base'
+                            } leading-relaxed whitespace-pre-line font-medium ${
+                              isEliminated ? 'line-through text-slate-400' : ''
+                            }`}
+                          >
+                            {mainText}
+                          </div>
+
+                          {/* Secondary Translation (ONLY when bilingual AND English != Vietnamese) */}
+                          {languageMode === 'bilingual' && isOptBilingual && optVi && (
                             <div
-                              className={
-                                languageMode === 'bilingual'
-                                  ? 'text-xs sm:text-sm text-indigo-900/85 italic leading-relaxed whitespace-pre-line'
-                                  : 'text-sm sm:text-base leading-relaxed whitespace-pre-line'
-                              }
+                              className={`${
+                                textSize === 'sm'
+                                  ? 'text-[11px] sm:text-xs'
+                                  : textSize === 'lg'
+                                  ? 'text-sm sm:text-base'
+                                  : 'text-xs sm:text-sm'
+                              } text-indigo-900/80 italic leading-relaxed whitespace-pre-line ${
+                                isEliminated ? 'line-through text-slate-400' : ''
+                              }`}
                             >
                               {optVi}
                             </div>
                           )}
                         </div>
-                        {isRevealed && isCorrect && (
-                          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-1" />
-                        )}
-                        {isRevealed && isSelected && !isCorrect && (
-                          <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-1" />
-                        )}
-                      </button>
+
+                        {/* Strikethrough / Elimination Action Button */}
+                        <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+                          <button
+                            type="button"
+                            onClick={(e) => toggleEliminate(optKey, e)}
+                            title={
+                              isEliminated
+                                ? 'Khôi phục phương án này'
+                                : 'Loại trừ phương án này (Gạch bỏ)'
+                            }
+                            className={`p-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                              isEliminated
+                                ? 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                                : 'text-slate-300 hover:text-rose-500 hover:bg-rose-50 opacity-40 group-hover:opacity-100'
+                            }`}
+                          >
+                            <Ban className="w-4 h-4" />
+                          </button>
+
+                          {isRevealed && isCorrect && (
+                            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                          )}
+                          {isRevealed && isSelected && !isCorrect && (
+                            <XCircle className="w-5 h-5 text-rose-600" />
+                          )}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
@@ -571,7 +770,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
 
                 <div className="hidden md:flex items-center gap-1.5 text-xs text-slate-400">
                   <Keyboard className="w-4 h-4" />
-                  <span>Phím tắt: A/B/C/D hoặc 1-4 để chọn • ←/→ chuyển câu • F gắn cờ</span>
+                  <span>Phím tắt: A/B/C/D hoặc 1-4 • ←/→ chuyển câu • F gắn cờ</span>
                 </div>
 
                 {currentIndex < questions.length - 1 ? (
@@ -600,7 +799,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
           )}
         </div>
 
-        {/* Right Sidebar: Question Palette */}
+        {/* Right Sidebar: Question Palette & Navigator */}
         <aside className="lg:col-span-4 xl:col-span-3 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs sticky top-22 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-slate-900 text-sm">Bảng câu hỏi</h2>
@@ -609,64 +808,132 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
             </span>
           </div>
 
-          {/* Legend */}
-          <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 pb-2 border-b border-slate-100">
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-xs bg-indigo-600 inline-block" />
-              <span>Đã chọn ({answeredCount})</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-xs bg-slate-100 border border-slate-300 inline-block" />
-              <span>Chưa làm ({unansweredCount})</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-xs bg-amber-400 inline-block" />
-              <span>Gắn cờ ({flaggedSet.size})</span>
-            </div>
-            {mode === 'practice' && (
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-emerald-500 inline-block" />
-                <span>Đúng / Sai</span>
-              </div>
-            )}
+          {/* Quick Filter Tabs */}
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold border border-slate-200/80">
+            <button
+              type="button"
+              onClick={() => setNavFilter('all')}
+              className={`flex-1 py-1 px-1.5 rounded-lg text-center transition cursor-pointer text-[11px] sm:text-xs ${
+                navFilter === 'all'
+                  ? 'bg-white text-indigo-700 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Tất cả ({questions.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setNavFilter('unanswered')}
+              className={`flex-1 py-1 px-1.5 rounded-lg text-center transition cursor-pointer text-[11px] sm:text-xs ${
+                navFilter === 'unanswered'
+                  ? 'bg-white text-indigo-700 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Chưa làm ({unansweredCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setNavFilter('flagged')}
+              className={`flex-1 py-1 px-1.5 rounded-lg text-center transition cursor-pointer text-[11px] sm:text-xs ${
+                navFilter === 'flagged'
+                  ? 'bg-white text-amber-700 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Gắn cờ ({flaggedSet.size})
+            </button>
           </div>
 
-          {/* Question Grid */}
-          <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2 max-h-96 overflow-y-auto pr-1">
-            {questions.map((q, idx) => {
-              const ans = userAnswers[q.id];
-              const flagged = flaggedSet.has(q.id);
-              const isCurrent = idx === currentIndex;
+          {/* Pass Target Progress Indicator */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5 text-xs">
+            <div className="flex items-center justify-between font-semibold">
+              <span className="text-slate-600">Tiến độ thi:</span>
+              <span className="text-slate-900 font-bold">{answeredCount}/{questions.length} câu</span>
+            </div>
+            <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+              <div
+                className={`h-full transition-all duration-300 ${
+                  answeredCount >= requiredPassCount ? 'bg-emerald-500' : 'bg-indigo-600'
+                }`}
+                style={{ width: `${(answeredCount / questions.length) * 100}%` }}
+              />
+            </div>
+            <div className="text-[11px] text-slate-500 flex items-center justify-between">
+              <span>Đạt chuẩn: ≥ {requiredPassCount} câu (65%)</span>
+              {answeredCount >= requiredPassCount ? (
+                <span className="text-emerald-700 font-bold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Đủ chỉ tiêu
+                </span>
+              ) : (
+                <span className="text-indigo-600 font-semibold">
+                  Cần thêm {requiredPassCount - answeredCount} câu
+                </span>
+              )}
+            </div>
+          </div>
 
-              let btnClass =
-                'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
+          {/* Grouping by Chapter Toggle */}
+          <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+            <span className="font-medium">Chế độ xem bảng:</span>
+            <button
+              type="button"
+              onClick={() => setGroupByChapter((g) => !g)}
+              className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>{groupByChapter ? 'Theo 6 chương' : 'Lưới liên tục'}</span>
+            </button>
+          </div>
 
-              if (mode === 'practice' && ans) {
-                if (ans === q.correctAnswer) {
-                  btnClass = 'bg-emerald-600 text-white border-emerald-600';
-                } else {
-                  btnClass = 'bg-rose-600 text-white border-rose-600';
-                }
-              } else if (ans) {
-                btnClass = 'bg-indigo-600 text-white border-indigo-600';
-              }
-
-              return (
-                <button
-                  key={q.id}
-                  type="button"
-                  onClick={() => setCurrentIndex(idx)}
-                  className={`relative h-9 rounded-lg border text-xs font-bold transition flex items-center justify-center cursor-pointer ${btnClass} ${
-                    isCurrent ? 'ring-2 ring-offset-1 ring-indigo-600' : ''
+          {/* Practice Auto-Reveal Toggle */}
+          {mode === 'practice' && (
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/60 text-xs">
+              <span className="text-indigo-900 font-semibold flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Tự hiện giải thích khi chọn:</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setAutoRevealPractice((v) => !v)}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                  autoRevealPractice ? 'bg-indigo-600' : 'bg-slate-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                    autoRevealPractice ? 'translate-x-4' : 'translate-x-0'
                   }`}
-                >
-                  {idx + 1}
-                  {flagged && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-white" />
-                  )}
-                </button>
-              );
-            })}
+                />
+              </button>
+            </div>
+          )}
+
+          {/* Question Navigator Buttons */}
+          <div className="max-h-96 overflow-y-auto pr-1 space-y-3">
+            {groupByChapter && navFilter === 'all' ? (
+              Object.entries(groupedByChapter).map(([chNum, qIndices]) => (
+                <div key={chNum} className="space-y-1.5">
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between pt-1 border-t border-slate-100 first:border-0 first:pt-0">
+                    <span className="truncate">{CHAPTER_SHORT_NAMES[Number(chNum)] || `Chương ${chNum}`}</span>
+                    <span className="text-slate-400 font-normal shrink-0">{qIndices.length} câu</span>
+                  </div>
+                  <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-1.5">
+                    {qIndices.map((idx) => renderPaletteButton(idx))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-1.5">
+                {questions.map((q, idx) => {
+                  const ans = userAnswers[q.id];
+                  const flagged = flaggedSet.has(q.id);
+                  if (navFilter === 'unanswered' && ans) return null;
+                  if (navFilter === 'flagged' && !flagged) return null;
+                  return renderPaletteButton(idx);
+                })}
+              </div>
+            )}
           </div>
 
           <button
