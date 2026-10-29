@@ -1,5 +1,6 @@
 import React from 'react';
 import { Question } from '../types';
+import { Code, Copy, Check, Bug } from 'lucide-react';
 
 /**
  * Checks if the Vietnamese content is meaningfully different from the English text.
@@ -13,9 +14,373 @@ export function isContentBilingual(en?: string, vi?: string): boolean {
 }
 
 /**
- * Highlights ISTQB trap words, keywords, and critical constraints in question stems.
+ * Auto-indents pseudo-code according to nesting level (IF ... THEN, ELSE, END IF).
  */
-export function renderHighlightedText(text: string): React.ReactNode {
+export function autoIndentCode(codeStr: string): string {
+  const lines = codeStr.split('\n').map(l => l.trim()).filter(Boolean);
+  let indent = 0;
+  const result: string[] = [];
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    // Dedent before line if line is ELSE or END IF or END WHILE or END FOR
+    if (/^(ELSE|END IF|END WHILE|END FOR|END)\b/i.test(line)) {
+      indent = Math.max(0, indent - 1);
+    }
+
+    const padded = '  '.repeat(indent) + line;
+    result.push(padded);
+
+    // Indent after line if line starts with IF ... THEN, or is ELSE, or starts with WHILE/FOR
+    if (/^(IF\b.*THEN|ELSE|WHILE\b|FOR\b)/i.test(line)) {
+      indent++;
+    }
+  }
+  return result.join('\n');
+}
+
+/**
+ * Formats a single code line with syntax coloring for keywords, functions, values, and operators.
+ */
+function formatCodeLine(line: string): React.ReactNode {
+  if (!line.trim()) return <span>&nbsp;</span>;
+
+  const leadingSpacesCount = line.search(/\S|$/);
+  const leadingSpaces = line.slice(0, leadingSpacesCount);
+  const content = line.slice(leadingSpacesCount);
+
+  const tokenRegex =
+    /(\b(?:IF|THEN|ELSE|END IF|WHILE|END WHILE|FOR|END FOR|DO)\b|\b(?:READ|PRINT|WRITE)\b|\b(?:turnOnFan|turnOnHeater|writeLog|logGuest|alert)\b|\b(?:TRUE|FALSE)\b|"[^"]*"|\b\d+\b|[><=*\-+:]+|[(),]|[\w]+|\s+)/g;
+
+  const matches = content.match(tokenRegex) || [content];
+
+  return (
+    <span>
+      {leadingSpaces && <span>{leadingSpaces}</span>}
+      {matches.map((token, idx) => {
+        if (/^(?:IF|THEN|ELSE|END IF|WHILE|END WHILE|FOR|END FOR|DO)$/.test(token)) {
+          return (
+            <span key={idx} className="text-purple-400 font-bold">
+              {token}
+            </span>
+          );
+        }
+        if (/^(?:READ|PRINT|WRITE)$/.test(token)) {
+          return (
+            <span key={idx} className="text-amber-300 font-bold tracking-wide">
+              {token}
+            </span>
+          );
+        }
+        if (/^(?:turnOnFan|turnOnHeater|writeLog|logGuest|alert)$/.test(token)) {
+          return (
+            <span key={idx} className="text-emerald-400 font-semibold">
+              {token}
+            </span>
+          );
+        }
+        if (/^(?:TRUE|FALSE)$/.test(token)) {
+          return (
+            <span key={idx} className="text-rose-400 font-bold">
+              {token}
+            </span>
+          );
+        }
+        if (/^"[^"]*"$/.test(token)) {
+          return (
+            <span key={idx} className="text-emerald-300 font-medium">
+              {token}
+            </span>
+          );
+        }
+        if (/^\d+$/.test(token)) {
+          return (
+            <span key={idx} className="text-yellow-200 font-semibold">
+              {token}
+            </span>
+          );
+        }
+        if (/^[><=*\-+:]+$/.test(token)) {
+          return (
+            <span key={idx} className="text-pink-400 font-bold px-0.5">
+              {token}
+            </span>
+          );
+        }
+        if (/^[(),]$/.test(token)) {
+          return (
+            <span key={idx} className="text-slate-400">
+              {token}
+            </span>
+          );
+        }
+        if (/^\w+$/.test(token)) {
+          return (
+            <span key={idx} className="text-sky-200">
+              {token}
+            </span>
+          );
+        }
+        return <span key={idx}>{token}</span>;
+      })}
+    </span>
+  );
+}
+
+/**
+ * Beautiful framed container for code and pseudo-code blocks with line numbering & copy function.
+ */
+export function CodeBlockFrame({
+  code,
+  title = 'Đoạn mã giả (Pseudo-code)',
+  language = 'ISTQB CTFL v4.0'
+}: {
+  code: string;
+  title?: string;
+  language?: string;
+}) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(code).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }).catch(() => {});
+    }
+  };
+
+  const indentedCode = autoIndentCode(code);
+  const lines = indentedCode.split('\n');
+
+  return (
+    <div className="my-3.5 rounded-xl border border-slate-700/80 bg-slate-900 shadow-md overflow-hidden text-left font-mono select-text not-italic whitespace-normal">
+      {/* Top Header Bar */}
+      <div className="flex items-center justify-between px-3.5 py-2 bg-slate-800/90 border-b border-slate-700/80 select-none">
+        <div className="flex items-center gap-2">
+          {/* macOS window control dots */}
+          <div className="flex items-center gap-1.5 mr-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block"></span>
+          </div>
+          <Code className="w-4 h-4 text-emerald-400" />
+          <span className="text-xs font-semibold text-slate-200 tracking-wide">
+            {title}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-medium text-slate-400 bg-slate-700/60 px-2 py-0.5 rounded border border-slate-600/50">
+            {language}
+          </span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-1 text-[11px] font-medium text-slate-300 hover:text-white bg-slate-700/60 hover:bg-slate-700 px-2 py-0.5 rounded transition-colors cursor-pointer"
+            title="Sao chép mã"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3 h-3 text-emerald-400" />
+                <span className="text-emerald-400 font-semibold">Đã chép</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3 h-3 text-slate-400" />
+                <span>Sao chép</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Code body with line numbering */}
+      <div className="p-3 sm:p-4 overflow-x-auto text-xs sm:text-sm leading-relaxed bg-slate-950/70 font-mono">
+        <table className="w-full border-collapse">
+          <tbody>
+            {lines.map((line, idx) => (
+              <tr key={idx} className="hover:bg-slate-800/30 transition-colors">
+                <td className="pr-3.5 py-0.5 text-right text-slate-500 select-none font-mono text-[11px] sm:text-xs w-7 sm:w-8 border-r border-slate-800">
+                  {idx + 1}
+                </td>
+                <td className="pl-3.5 py-0.5 text-slate-100 whitespace-pre font-mono">
+                  {formatCodeLine(line)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Beautiful framed card for Defect / Bug reports in questions.
+ */
+export function DefectReportFrame({ rawText }: { rawText: string }) {
+  const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+  const fields = lines.map(line => {
+    const colonIdx = line.indexOf(':');
+    if (colonIdx === -1) return { key: '', value: line };
+    return {
+      key: line.slice(0, colonIdx).trim(),
+      value: line.slice(colonIdx + 1).trim()
+    };
+  });
+
+  return (
+    <div className="my-3.5 rounded-xl border border-rose-300 bg-rose-50/40 shadow-sm overflow-hidden text-left select-text whitespace-normal">
+      <div className="flex items-center justify-between px-3.5 py-2 bg-gradient-to-r from-rose-100 via-rose-50 to-amber-50 border-b border-rose-200 select-none">
+        <div className="flex items-center gap-2">
+          <Bug className="w-4 h-4 text-rose-600" />
+          <span className="text-xs font-bold text-rose-950 uppercase tracking-wider">
+            Báo cáo khiếm khuyết (Defect Report)
+          </span>
+        </div>
+        <span className="text-[11px] font-semibold text-rose-700 bg-white/80 px-2 py-0.5 rounded-full border border-rose-200">
+          Vòng đời quản lý lỗi
+        </span>
+      </div>
+      <div className="p-3.5 space-y-2 text-xs sm:text-sm">
+        {fields.map((f, i) => (
+          <div key={i} className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+            <span className="font-bold text-slate-700 sm:w-44 shrink-0">
+              {f.key ? `${f.key}:` : ''}
+            </span>
+            <span
+              className={`font-medium ${
+                f.key.includes('Mã')
+                  ? 'font-mono font-bold text-indigo-700 bg-indigo-100/80 px-2 py-0.5 rounded border border-indigo-200 inline-block w-fit'
+                  : f.key.includes('nghiêm trọng')
+                  ? 'font-bold text-rose-700 bg-rose-100/70 px-2 py-0.5 rounded inline-block w-fit'
+                  : f.key.includes('Trạng thái')
+                  ? 'font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300 inline-block w-fit'
+                  : 'text-slate-900'
+              }`}
+            >
+              {f.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function isBugReportLine(line: string): boolean {
+  const t = line.trim();
+  return /^(Mã|Tiêu đề|Phiên bản|Các bước|Mô tả|Kết quả thực tế|Kết quả mong đợi|Mức độ nghiêm trọng|Trạng thái|Ưu tiên):\s*/i.test(t);
+}
+
+function isCodeLine(line: string): boolean {
+  const t = line.trim();
+  if (!t) return false;
+  return (
+    /^(READ|WRITE|PRINT|IF\b|ELSE\b|END IF\b|WHILE\b|END WHILE\b|FOR\b|END FOR\b|DO\b)/i.test(t) ||
+    /^(price|total|count|sum|res|result|status|check)\s*=/i.test(t) ||
+    /^[a-zA-Z0-9_]+\s*\([^)]*\)\s*$/i.test(t) ||
+    /^(turnOnFan|turnOnHeater|writeLog|logGuest|alert)\b/i.test(t)
+  );
+}
+
+interface QuestionBlock {
+  type: 'text' | 'code' | 'bug';
+  content: string;
+}
+
+/**
+ * Splits raw question text into regular text paragraphs and code/defect blocks.
+ */
+function parseQuestionBlocks(text: string): QuestionBlock[] {
+  if (!text) return [];
+
+  // Check for markdown code fences ```
+  if (text.includes('```')) {
+    const parts = text.split(/(```[\s\S]*?```)/g);
+    const result: QuestionBlock[] = [];
+    for (const part of parts) {
+      if (part.startsWith('```') && part.endsWith('```')) {
+        const inner = part.slice(3, -3).replace(/^[a-zA-Z0-9_-]*\n/, '');
+        result.push({ type: 'code', content: inner.trim() });
+      } else if (part.trim()) {
+        result.push({ type: 'text', content: part.trim() });
+      }
+    }
+    return result;
+  }
+
+  const lines = text.split('\n');
+  const blocks: QuestionBlock[] = [];
+  let currentLines: string[] = [];
+  let currentType: 'text' | 'code' | 'bug' = 'text';
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const isCode = isCodeLine(line);
+    const isBug = isBugReportLine(line);
+
+    if (currentType === 'text') {
+      if (isCode) {
+        let count = 0;
+        for (let j = i; j < lines.length; j++) {
+          if (isCodeLine(lines[j])) count++;
+          else break;
+        }
+        if (count >= 2) {
+          if (currentLines.length > 0) {
+            const trimmed = currentLines.join('\n').replace(/\n+$/, '');
+            if (trimmed) blocks.push({ type: 'text', content: trimmed });
+            currentLines = [];
+          }
+          currentType = 'code';
+        }
+      } else if (isBug) {
+        let count = 0;
+        for (let j = i; j < lines.length; j++) {
+          if (isBugReportLine(lines[j])) count++;
+          else break;
+        }
+        if (count >= 3) {
+          if (currentLines.length > 0) {
+            const trimmed = currentLines.join('\n').replace(/\n+$/, '');
+            if (trimmed) blocks.push({ type: 'text', content: trimmed });
+            currentLines = [];
+          }
+          currentType = 'bug';
+        }
+      }
+    } else if (currentType === 'code') {
+      if (!isCode && line.trim() !== '') {
+        const trimmed = currentLines.join('\n').trim();
+        if (trimmed) blocks.push({ type: 'code', content: trimmed });
+        currentLines = [];
+        currentType = 'text';
+      }
+    } else if (currentType === 'bug') {
+      if (!isBug && line.trim() !== '') {
+        const trimmed = currentLines.join('\n').trim();
+        if (trimmed) blocks.push({ type: 'bug', content: trimmed });
+        currentLines = [];
+        currentType = 'text';
+      }
+    }
+
+    currentLines.push(line);
+  }
+
+  if (currentLines.length > 0) {
+    const trimmed = currentLines.join('\n').trim();
+    if (trimmed) blocks.push({ type: currentType, content: trimmed });
+  }
+
+  return blocks;
+}
+
+/**
+ * Highlights ISTQB trap words, keywords, and critical constraints in question text.
+ */
+function renderTextKeywords(text: string): React.ReactNode {
   if (!text) return null;
   const parts = text.split(
     /(\b(?:RÕ NHẤT|KHÔNG ĐÚNG|ĐÚNG NHẤT|NGOẠI TRỪ|KHÔNG PHẢI|CHÍNH|ĐẦU TIÊN|TỐI THIỂU|TỐI ĐA|QUAN TRỌNG NHẤT|ƯU TIÊN NHẤT|MOST|LEAST|NOT|BEST|EXCEPT|MAIN|PRIMARY|FIRST|ALWAYS|NEVER|TRUE|FALSE)\b)/g
@@ -38,6 +403,38 @@ export function renderHighlightedText(text: string): React.ReactNode {
     }
     return part;
   });
+}
+
+/**
+ * High-level question stem renderer that parses code blocks, bug reports, and keywords.
+ */
+export function renderHighlightedText(text: string): React.ReactNode {
+  if (!text) return null;
+
+  const blocks = parseQuestionBlocks(text);
+
+  if (blocks.length === 0) return null;
+  if (blocks.length === 1 && blocks[0].type === 'text') {
+    return renderTextKeywords(blocks[0].content);
+  }
+
+  return (
+    <>
+      {blocks.map((block, idx) => {
+        if (block.type === 'code') {
+          return <CodeBlockFrame key={idx} code={block.content} />;
+        }
+        if (block.type === 'bug') {
+          return <DefectReportFrame key={idx} rawText={block.content} />;
+        }
+        return (
+          <React.Fragment key={idx}>
+            {renderTextKeywords(block.content)}
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
 }
 
 /**
