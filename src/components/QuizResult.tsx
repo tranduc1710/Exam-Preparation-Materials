@@ -314,6 +314,15 @@ export const QuizResult: React.FC<QuizResultProps> = ({
                     <span className="px-2.5 py-1 rounded-lg bg-slate-200/80 text-slate-700 font-medium text-xs">
                       {q.examTitle} • {q.label}
                     </span>
+                    {q.category === 'ai' ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-xs">
+                        🤖 Đề do AI Tạo
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold text-xs">
+                        🏛️ Đề Chuẩn Quốc Tế
+                      </span>
+                    )}
                     <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-medium text-xs">
                       {CHAPTER_SHORT_NAMES[q.chapter]}
                     </span>

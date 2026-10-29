@@ -104,7 +104,15 @@ const ViewLoading: React.FC = () => (
   </div>
 );
 
-type ActiveTab = 'official' | 'ai' | 'chapters' | 'bank' | 'glossary' | 'history';
+type ActiveTab =
+  | 'official'
+  | 'ai'
+  | 'chapters-official'
+  | 'chapters-ai'
+  | 'chapters'
+  | 'bank'
+  | 'glossary'
+  | 'history';
 
 const LANG_STORAGE_KEY = 'istqb_ctfl_lang_v1';
 
@@ -460,10 +468,10 @@ export function App() {
     setExposureMap(loadQuestionExposureMap());
     const chMeta = getExamsDataset().metadata.chapters.find((c) => c.chapter === chapterNum);
     setViewingAttempt(null);
-    const catLabel = category === 'ai' ? ' (Đề do AI Tạo)' : ' (Đề Chuẩn Quốc Tế)';
+    const catLabel = category === 'ai' ? ' (Bộ Đề do AI Tạo)' : ' (Bộ Đề Chuẩn Quốc Tế)';
     setActiveQuiz({
       title: `${chMeta ? chMeta.title : `Chương ${chapterNum}`}${catLabel}`,
-      subtitle: `Trọn bộ ${qs.length} câu hỏi thuộc Chương ${chapterNum} (${catLabel.trim()})`,
+      subtitle: `Trọn bộ ${qs.length} câu hỏi thuộc Chương ${chapterNum} (${catLabel.trim()} • 100% không trộn đề)`,
       mode: forcedMode,
       durationMinutes: forcedMode === 'exam' ? durationMinutes : 0,
       questions: qs,
@@ -483,7 +491,7 @@ export function App() {
     const catLabel = category === 'ai' ? ' (Bộ Đề do AI Tạo)' : ' (Bộ Đề Chuẩn QT)';
     setActiveQuiz({
       title: `Bộ câu hỏi tình huống mới CTFL v4.0${catLabel}`,
-      subtitle: `${qs.length} câu hỏi cập nhật theo Syllabus ISTQB CTFL v4.0`,
+      subtitle: `${qs.length} câu hỏi cập nhật theo Syllabus ISTQB CTFL v4.0 (${catLabel.trim()} • 100% không trộn đề)`,
       mode: forcedMode,
       durationMinutes: forcedMode === 'exam' ? durationMinutes : 0,
       questions: qs,
@@ -664,6 +672,268 @@ export function App() {
       questions: shuffleQuestions ? shuffleArray(list) : list,
       sourceType,
     });
+  };
+
+  const renderChapterPracticeView = (category: ExamCategory) => {
+    const isAi = category === 'ai';
+    const totalQuestions = isAi ? getAllQuestions('ai').length : getAllQuestions('official').length;
+    const catTitle = isAi ? 'Bộ Đề do AI Tạo' : 'Bộ Đề Chuẩn Quốc Tế';
+    const catShort = isAi ? 'Đề AI' : 'Đề Quốc Tế';
+    const wrongScoped = wrongQuestionsPool.filter((q) => q.category === category);
+    const bookmarkedScoped = bookmarkedQuestions.filter((q) => q.category === category);
+    const v4Scoped = getAllQuestions(category).filter((q) => q.isV4);
+
+    return (
+      <div className="space-y-8">
+        {/* Track Header & Switcher Banner */}
+        <div
+          className={`rounded-2xl border p-5 sm:p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5 ${
+            isAi
+              ? 'bg-gradient-to-r from-teal-50 via-emerald-50 to-cyan-50 border-emerald-200'
+              : 'bg-gradient-to-r from-indigo-50 via-sky-50 to-blue-50 border-indigo-200'
+          }`}
+        >
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                  isAi ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white'
+                }`}
+              >
+                {isAi ? <Sparkles className="w-3.5 h-3.5" /> : <Award className="w-3.5 h-3.5" />}
+                <span>Phân hệ: {catTitle}</span>
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                  isAi ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'
+                }`}
+              >
+                <CheckCircle2 className="w-3 h-3" /> 100% {catShort} ({totalQuestions} câu)
+              </span>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[11px] font-bold">
+                Tách riêng biệt • Tuyệt đối không trộn đề
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Luyện Tập Theo Chương – {catTitle} ({totalQuestions} câu)
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
+              {isAi
+                ? 'Toàn bộ 400 câu hỏi thi thử thế hệ mới do AI biên soạn bám sát cấu trúc đề thi thật ISTQB CTFL v4.0.1 (chuẩn 40 câu/đề có bảng, sơ đồ và kỹ thuật kiểm thử chi tiết). Tuyệt đối không lẫn câu hỏi từ đề chuẩn Quốc tế.'
+                : 'Toàn bộ 344 câu hỏi được trích xuất từ 10 bộ đề thi chuẩn Quốc tế (Sample Exam A, B, C... của ISTQB & các tổ chức khảo thí), phân loại chuẩn theo 6 chương Syllabus CTFL v4.0. Tuyệt đối không lẫn câu hỏi từ đề AI.'}
+            </p>
+          </div>
+
+          {/* Quick Segmented Switcher */}
+          <div className="bg-white/90 backdrop-blur-xs p-1.5 rounded-2xl flex items-center gap-1.5 border border-slate-200 shadow-xs shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('chapters-official');
+                setChapterCollection('official');
+              }}
+              className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 ${
+                !isAi
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <Award className="w-4 h-4" />
+              <span>Chương: Đề Quốc Tế ({getAllQuestions('official').length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('chapters-ai');
+                setChapterCollection('ai');
+              }}
+              className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 ${
+                isAi
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Chương: Đề do AI ({getAllQuestions('ai').length})</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Special Personal Review Decks for this collection */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Wrong Questions Deck */}
+          <div className="bg-white rounded-2xl border border-rose-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-bold text-xs">
+                <AlertTriangle className="w-3.5 h-3.5" /> Kho câu làm sai ({catShort})
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">
+                Ôn Lại Câu Đã Trả Lời Sai ({wrongPoolScoped.length} câu)
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Tập hợp các câu bạn làm sai thuộc <strong>{catTitle}</strong>. Khi bạn trả lời đúng lại trong các lần thi/luyện, câu hỏi sẽ được gỡ khỏi danh sách này.
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={wrongPoolScoped.length === 0}
+              onClick={() =>
+                startCustomList(
+                  wrongPoolScoped,
+                  `Luyện Lại Câu Từng Làm Sai – ${catTitle}`,
+                  `${wrongPoolScoped.length} câu hỏi cần khắc phục (${catShort})`,
+                  'wrong',
+                  'practice'
+                )
+              }
+              className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:pointer-events-none text-white font-semibold text-sm transition cursor-pointer"
+            >
+              {wrongPoolScoped.length > 0
+                ? `Luyện lại ${wrongPoolScoped.length} câu sai (${catShort})`
+                : `Chưa có câu sai nào trong ${catShort}`}
+            </button>
+          </div>
+
+          {/* Bookmarked Questions Deck */}
+          <div className="bg-white rounded-2xl border border-indigo-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs">
+                <Bookmark className="w-3.5 h-3.5" /> Câu đã lưu ({catShort})
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">
+                Kho Câu Hỏi Đã Lưu ({bookmarkedScoped.length} câu)
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Tập hợp các câu hỏi hay hoặc khó trong <strong>{catTitle}</strong> mà bạn đã bấm nút "Lưu câu hỏi" khi làm đề hoặc tra cứu.
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={bookmarkedScoped.length === 0}
+              onClick={() =>
+                startCustomList(
+                  bookmarkedScoped,
+                  `Ôn Tập Câu Hỏi Đã Lưu – ${catTitle}`,
+                  `${bookmarkedScoped.length} câu hỏi đã đánh dấu (${catShort})`,
+                  'bookmarked',
+                  'practice'
+                )
+              }
+              className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none text-white font-semibold text-sm transition cursor-pointer"
+            >
+              {bookmarkedScoped.length > 0
+                ? `Ôn tập ${bookmarkedScoped.length} câu đã lưu (${catShort})`
+                : `Chưa có câu nào được lưu trong ${catShort}`}
+            </button>
+          </div>
+
+          {/* CTFL v4.0 New Topics Deck */}
+          <div className="bg-white rounded-2xl border border-violet-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-50 text-violet-700 font-bold text-xs">
+                <Sparkles className="w-3.5 h-3.5" /> Chuyên đề mới CTFL v4.0 ({catShort})
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">
+                Câu Hỏi Mới CTFL v4.0 ({v4Scoped.length} câu)
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {isAi
+                  ? 'Trọn bộ 400 câu hỏi thi thử thế hệ mới do AI biên soạn bám sát toàn diện chuẩn Syllabus v4.0.1.'
+                  : 'Tổng hợp 26 câu hỏi tình huống mới cập nhật theo Syllabus v4.0 trong bộ 10 đề thi chuẩn Quốc tế.'}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => startV4Practice('practice', category)}
+                className="flex-1 py-2.5 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs sm:text-sm transition cursor-pointer"
+              >
+                Luyện tập ({v4Scoped.length} câu)
+              </button>
+              <button
+                type="button"
+                onClick={() => startV4Practice('exam', category)}
+                className="py-2.5 px-3 rounded-xl border border-violet-300 text-violet-700 hover:bg-violet-50 font-semibold text-xs sm:text-sm transition cursor-pointer"
+              >
+                Thi tính giờ
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 6 Syllabus Chapters */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Layers className="w-5 h-5 text-indigo-600" />
+              <span>Luyện Tập Từng Chương – {catTitle} (Chương 1 → Chương 6)</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Chọn chương để luyện tập không giới hạn thời gian (kèm giải thích chi tiết & mẹo ghi nhớ) hoặc kiểm tra tính giờ:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {getExamsDataset().metadata.chapters.map((ch) => {
+              const chPool = getAllQuestions(category).filter((q) => q.chapter === ch.chapter);
+              return (
+                <div
+                  key={ch.chapter}
+                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-indigo-300 transition"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-bold text-xs">
+                        Chương {ch.chapter}
+                      </span>
+                      <span className="text-xs text-slate-500 font-medium">
+                        Tỷ trọng thi: {ISTQB_CHAPTER_WEIGHTS[ch.chapter]} / 40 câu
+                      </span>
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900 leading-snug">
+                      {ch.title}
+                    </h3>
+                    <div className="flex items-center justify-between text-xs pt-1">
+                      <span
+                        className={`inline-flex items-center gap-1 font-semibold ${
+                          isAi ? 'text-emerald-700' : 'text-indigo-700'
+                        }`}
+                      >
+                        {isAi ? '🤖 Đề do AI Tạo' : '🏛️ Đề Chuẩn QT'}
+                      </span>
+                      <span className="font-bold text-slate-800 text-sm">
+                        {chPool.length} câu hỏi
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => startChapterPractice(ch.chapter, 'practice', category)}
+                      className={`flex-1 py-2 px-3 rounded-xl text-white font-semibold text-xs sm:text-sm transition cursor-pointer ${
+                        isAi
+                          ? 'bg-emerald-600 hover:bg-emerald-700'
+                          : 'bg-indigo-600 hover:bg-indigo-700'
+                      }`}
+                    >
+                      Luyện tập ({chPool.length} câu)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => startChapterPractice(ch.chapter, 'exam', category)}
+                      className="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm transition cursor-pointer"
+                    >
+                      Kiểm tra
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const handleFinishQuiz = (
@@ -945,8 +1215,16 @@ export function App() {
                   icon: Sparkles,
                 },
                 {
-                  id: 'chapters',
-                  label: 'Luyện Theo Chương',
+                  id: 'chapters-official',
+                  label: 'Chương: Đề Quốc Tế',
+                  countBadge: '344 câu',
+                  icon: Layers,
+                },
+                {
+                  id: 'chapters-ai',
+                  label: 'Chương: Đề do AI',
+                  countBadge: '400 câu',
+                  isNew: true,
                   icon: Layers,
                 },
                 {
@@ -966,12 +1244,29 @@ export function App() {
                 },
               ].map((tab) => {
                 const Icon = tab.icon;
-                const active = activeTab === tab.id;
+                const active =
+                  activeTab === tab.id ||
+                  (tab.id === 'chapters-official' &&
+                    activeTab === 'chapters' &&
+                    chapterCollection === 'official') ||
+                  (tab.id === 'chapters-ai' &&
+                    activeTab === 'chapters' &&
+                    chapterCollection === 'ai');
                 return (
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => setActiveTab(tab.id as ActiveTab)}
+                    onClick={() => {
+                      if (tab.id === 'chapters-official') {
+                        setActiveTab('chapters-official');
+                        setChapterCollection('official');
+                      } else if (tab.id === 'chapters-ai') {
+                        setActiveTab('chapters-ai');
+                        setChapterCollection('ai');
+                      } else {
+                        setActiveTab(tab.id as ActiveTab);
+                      }
+                    }}
                     className={`inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition cursor-pointer relative ${
                       active
                         ? 'bg-white text-slate-900 shadow-sm'
@@ -980,11 +1275,11 @@ export function App() {
                   >
                     <Icon
                       className={`w-4 h-4 ${
-                        tab.id === 'ai'
+                        tab.id === 'ai' || tab.id === 'chapters-ai'
                           ? active
                             ? 'text-emerald-600'
                             : 'text-emerald-300'
-                          : tab.id === 'official'
+                          : tab.id === 'official' || tab.id === 'chapters-official'
                           ? active
                             ? 'text-indigo-600'
                             : 'text-indigo-300'
@@ -996,10 +1291,10 @@ export function App() {
                       <span
                         className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${
                           active
-                            ? tab.id === 'ai'
+                            ? tab.id === 'ai' || tab.id === 'chapters-ai'
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-indigo-100 text-indigo-800'
-                            : tab.id === 'ai'
+                            : tab.id === 'ai' || tab.id === 'chapters-ai'
                             ? 'bg-emerald-500/30 text-emerald-200'
                             : 'bg-white/15 text-slate-200'
                         }`}
@@ -1044,7 +1339,11 @@ export function App() {
       {/* Main Content Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* Configuration Panel (Shown on Official, AI & Chapters tabs) */}
-        {(activeTab === 'official' || activeTab === 'ai' || activeTab === 'chapters') && (
+        {(activeTab === 'official' ||
+          activeTab === 'ai' ||
+          activeTab === 'chapters' ||
+          activeTab === 'chapters-official' ||
+          activeTab === 'chapters-ai') && (
           <section className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -1372,198 +1671,17 @@ export function App() {
           </div>
         )}
 
-        {/* TAB 2: PRACTICE BY CHAPTER, CTFL v4.0, WRONG ANSWERS & BOOKMARKS */}
-        {activeTab === 'chapters' && (
-          <div className="space-y-8">
-            {/* Special Personal Review Decks */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* Wrong Questions Deck */}
-              <div className="bg-white rounded-2xl border border-rose-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-bold text-xs">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Kho câu làm sai cần khắc phục
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Ôn Lại Các Câu Đã Trả Lời Sai ({wrongQuestionsPool.length} câu)
-                  </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    Hệ thống tự động lưu các câu bạn làm sai qua các lần thi. Khi bạn trả lời đúng lại, câu hỏi sẽ được gỡ khỏi danh sách này.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  disabled={wrongQuestionsPool.length === 0}
-                  onClick={() =>
-                    startCustomList(
-                      wrongQuestionsPool,
-                      'Luyện Tập Các Câu Từng Làm Sai',
-                      `${wrongQuestionsPool.length} câu hỏi cần ôn kỹ`,
-                      'wrong',
-                      'practice'
-                    )
-                  }
-                  className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:pointer-events-none text-white font-semibold text-sm transition cursor-pointer"
-                >
-                  {wrongQuestionsPool.length > 0
-                    ? `Luyện lại ${wrongQuestionsPool.length} câu sai ngay`
-                    : 'Chưa có câu làm sai nào'}
-                </button>
-              </div>
-
-              {/* Bookmarked Questions Deck */}
-              <div className="bg-white rounded-2xl border border-indigo-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs">
-                    <Bookmark className="w-3.5 h-3.5" /> Câu hỏi đã lưu / đánh dấu
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Kho Câu Hỏi Đã Lưu ({bookmarkedQuestions.length} câu)
-                  </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    Tập hợp các câu hỏi hay hoặc khó mà bạn đã bấm nút "Lưu câu hỏi" trong quá trình làm đề hoặc tra cứu.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  disabled={bookmarkedQuestions.length === 0}
-                  onClick={() =>
-                    startCustomList(
-                      bookmarkedQuestions,
-                      'Ôn Tập Các Câu Hỏi Đã Lưu',
-                      `${bookmarkedQuestions.length} câu hỏi đã đánh dấu`,
-                      'bookmarked',
-                      'practice'
-                    )
-                  }
-                  className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none text-white font-semibold text-sm transition cursor-pointer"
-                >
-                  {bookmarkedQuestions.length > 0
-                    ? `Ôn tập ${bookmarkedQuestions.length} câu đã lưu`
-                    : 'Chưa có câu hỏi nào được lưu'}
-                </button>
-              </div>
-
-              {/* CTFL v4.0 New Topics Deck */}
-              <div className="bg-white rounded-2xl border border-violet-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-50 text-violet-700 font-bold text-xs">
-                    <Sparkles className="w-3.5 h-3.5" /> Chuyên đề mới CTFL v4.0
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Câu Hỏi Mới CTFL v4.0 (
-                    {chapterCollection === 'official'
-                      ? `${getAllQuestions('official').filter((q) => q.isV4).length} câu Đề Gốc`
-                      : `${getAllQuestions('ai').filter((q) => q.isV4).length} câu Đề AI`}
-                    )
-                  </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    {chapterCollection === 'official'
-                      ? 'Tổng hợp 26 câu hỏi tình huống mới cập nhật theo Syllabus v4.0 trong bộ 10 đề thi chuẩn Quốc tế.'
-                      : 'Trọn bộ 400 câu hỏi thi thử thế hệ mới do AI biên soạn bám sát toàn diện chuẩn Syllabus v4.0.1.'}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => startV4Practice('practice', chapterCollection)}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs sm:text-sm transition cursor-pointer"
-                  >
-                    Luyện tập
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => startV4Practice('exam', chapterCollection)}
-                    className="py-2.5 px-3 rounded-xl border border-violet-300 text-violet-700 hover:bg-violet-50 font-semibold text-xs sm:text-sm transition cursor-pointer"
-                  >
-                    Thi tính giờ
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* 6 Syllabus Chapters */}
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900">
-                    Luyện Tập Theo Từng Chương Chuẩn ISTQB Syllabus (Chương 1 → Chương 6)
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Chọn phần làm bài: Bộ đề Chuẩn Quốc Tế hoặc Bộ đề do AI tạo (tách riêng biệt, không gộp lẫn nhau)
-                  </p>
-                </div>
-
-                {/* Collection filter tabs: ONLY 2 DEDICATED TRACKS */}
-                <div className="bg-slate-100 p-1 rounded-xl flex flex-wrap items-center gap-1 border border-slate-200">
-                  {[
-                    { id: 'official', label: `🏛️ Bộ Đề Chuẩn QT (${getAllQuestions('official').length} câu)` },
-                    { id: 'ai', label: `🤖 Bộ Đề do AI Tạo (${getAllQuestions('ai').length} câu)` },
-                  ].map((col) => (
-                    <button
-                      key={col.id}
-                      type="button"
-                      onClick={() => setChapterCollection(col.id as ExamCategory)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                        chapterCollection === col.id
-                          ? 'bg-white text-indigo-700 shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      {col.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {getExamsDataset().metadata.chapters.map((ch) => {
-                  const chPool = getAllQuestions(chapterCollection).filter((q) => q.chapter === ch.chapter);
-                  return (
-                    <div
-                      key={ch.chapter}
-                      className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4"
-                    >
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-bold text-xs">
-                            Chương {ch.chapter}
-                          </span>
-                          <span className="text-xs text-slate-500 font-medium">
-                            Tỷ trọng đề thi thật: {ISTQB_CHAPTER_WEIGHTS[ch.chapter]} / 40 câu
-                          </span>
-                        </div>
-                        <h3 className="text-base font-bold text-slate-900 leading-snug">
-                          {ch.title}
-                        </h3>
-                        <p className="text-xs text-slate-500">
-                          {chapterCollection === 'official' ? 'Bộ đề Chuẩn QT' : 'Bộ đề do AI tạo'}:{' '}
-                          <strong className="text-slate-800">{chPool.length} câu hỏi</strong>
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                        <button
-                          type="button"
-                          onClick={() => startChapterPractice(ch.chapter, 'practice', chapterCollection)}
-                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm transition cursor-pointer"
-                        >
-                          Luyện tập ({chPool.length} câu)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => startChapterPractice(ch.chapter, 'exam', chapterCollection)}
-                          className="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm transition cursor-pointer"
-                        >
-                          Kiểm tra
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* TAB 3 & 4: PRACTICE BY CHAPTER (STRICTLY SPLIT: OFFICIAL & AI) */}
+        {(activeTab === 'chapters-official' ||
+          activeTab === 'chapters-ai' ||
+          activeTab === 'chapters') &&
+          renderChapterPracticeView(
+            activeTab === 'chapters-ai'
+              ? 'ai'
+              : activeTab === 'chapters-official'
+              ? 'official'
+              : chapterCollection
+          )}
 
         {/* TAB 3: QUESTION BANK SEARCH */}
         {activeTab === 'bank' && (
