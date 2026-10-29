@@ -679,8 +679,13 @@ export function App() {
     const totalQuestions = isAi ? getAllQuestions('ai').length : getAllQuestions('official').length;
     const catTitle = isAi ? 'Bộ Đề do AI Tạo' : 'Bộ Đề Chuẩn Quốc Tế';
     const catShort = isAi ? 'Đề AI' : 'Đề Quốc Tế';
-    const wrongScoped = wrongQuestionsPool.filter((q) => q.category === category);
-    const bookmarkedScoped = bookmarkedQuestions.filter((q) => q.category === category);
+    const wrongPoolScoped = wrongIds
+      .map((id) => getQuestionById(id))
+      .filter((q): q is Question => Boolean(q && q.category === category));
+    const wrongScoped = wrongPoolScoped;
+    const bookmarkedScoped = bookmarks
+      .map((id) => getQuestionById(id))
+      .filter((q): q is Question => Boolean(q && q.category === category));
     const v4Scoped = getAllQuestions(category).filter((q) => q.isV4);
 
     return (
@@ -739,7 +744,7 @@ export function App() {
               }`}
             >
               <Award className="w-4 h-4" />
-              <span>Chương: Đề Quốc Tế ({getAllQuestions('official').length})</span>
+              <span>Luyện Tập Chương: Đề Quốc Tế ({getAllQuestions('official').length})</span>
             </button>
             <button
               type="button"
@@ -754,7 +759,7 @@ export function App() {
               }`}
             >
               <Sparkles className="w-4 h-4" />
-              <span>Chương: Đề do AI ({getAllQuestions('ai').length})</span>
+              <span>Luyện Tập Chương: Đề do AI ({getAllQuestions('ai').length})</span>
             </button>
           </div>
         </div>
@@ -1216,13 +1221,13 @@ export function App() {
                 },
                 {
                   id: 'chapters-official',
-                  label: 'Chương: Đề Quốc Tế',
+                  label: 'Luyện Tập Chương (Đề Quốc Tế)',
                   countBadge: '344 câu',
                   icon: Layers,
                 },
                 {
                   id: 'chapters-ai',
-                  label: 'Chương: Đề do AI',
+                  label: 'Luyện Tập Chương (Đề do AI)',
                   countBadge: '400 câu',
                   isNew: true,
                   icon: Layers,
